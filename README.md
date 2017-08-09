@@ -61,9 +61,9 @@ Then this deploys a new version of your code that will be served from `https://<
 
 ## Contributing
 
-We'd love that you contribute to the project. Before doing so please read our [Contributor guide](../CONTRIBUTING.md).
+We'd love that you contribute to the project. Before doing so please read our [Contributor guide](CONTRIBUTING.md).
 
 
 ## License
 
-© Google, 2011. Licensed under an [Apache-2](../LICENSE) license.
+© Google, 2011. Licensed under an [Apache-2](LICENSE) license.
