@@ -132,7 +132,6 @@ exports.sendFollowerNotification = functions.database.ref('/followers/{followedU
  */
 exports.blurOffensiveImages = functions.storage.object().onChange(event => {
   const object = event.data;
-  const file = gcs.bucket(object.bucket).file(object.name);
 
   // Exit if this is a move or deletion event.
   if (object.resourceState === 'not_exists') {
@@ -140,12 +139,19 @@ exports.blurOffensiveImages = functions.storage.object().onChange(event => {
     return;
   }
 
-  // Check the image content using the Cloud Vision API.
-  return vision.detectSafeSearch(file).then(data => {
-    const safeSearch = data[0];
-    console.log('SafeSearch results on image', safeSearch);
+  const image = {
+    source: {imageUri: `gs://${object.bucket}/${object.name}`}
+  };
 
-    if (safeSearch.adult || safeSearch.violence) {
+  // Check the image content using the Cloud Vision API.
+  return vision.safeSearchDetection(image).then(batchAnnotateImagesResponse => {
+    console.log('SafeSearch results on image', batchAnnotateImagesResponse);
+    const safeSearchResult = batchAnnotateImagesResponse[0].safeSearchAnnotation;
+
+    if (safeSearchResult.adult === 'LIKELY' ||
+      safeSearchResult.adult === 'VERY_LIKELY' ||
+      safeSearchResult.violence === 'LIKELY' ||
+      safeSearchResult.violence === 'VERY_LIKELY') {
       return blurImage(object.name, object.bucket, object.metadata).then(() => {
         const filePathSplit = object.name.split(path.sep);
         const uid = filePathSplit[0];
