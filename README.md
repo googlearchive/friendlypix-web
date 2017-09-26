@@ -5,23 +5,18 @@ Friendly Pix Web is a sample app demonstrating how to build a JavaScript/Web app
 Friendly Pix is a place where you can share photos, follow friends, comment on photos...
 
 
-## Initial setup, build tools and dependencies
+## Few words on dependencies
 
 Friendly Pix is built using Javascript, [Firebase](https://firebase.google.com/docs/web/setup) and jQuery. The Auth flow is built using [Firebase-UI](https://github.com/firebase/firebaseui-web). Javascript dependencies are managed using [bower](http://bower.io/) and Build/Deploy tools dependencies are managed using [npm](https://www.npmjs.com/). Also Friendly Pix is written in ES2015 so for wide browser support we'll transpile the code to ES5 using [BabelJs](http://babeljs.io). Additionally server-side micro-services are built on [Cloud Functions for Firebase](https://firebase.google.com/docs/functions).
-
-Install all Build/Deploy tools dependencies by running:
-
-```bash
-$ npm install
-```
 
 
 ## Create and configure your Firebase Project
 
+1. In a console run `npm install` to install all Build/Deploy tools dependencies.
 1. Create a Firebase project using the [Firebase Console](https://firebase.google.com/console).
 2. Enable **Google** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab.
 3. Enable **Facebook** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab. You'll need to provide your Facebook app's credentials. If you haven't yet you'll need to have created a Facebook app on [Facebook for Developers](https://developers.facebook.com)
-4. At the root of the site run `firebase use --add`. When prompted select the Firebase Project you have just created. This will make sure the Firebase CLI is configured to use your particular project.
+4. In a console run `firebase use --add` and, when prompted, select the Firebase Project you have just created. This will make sure the Firebase CLI is configured to use your particular project.
 
 
 ## Start a local development server
