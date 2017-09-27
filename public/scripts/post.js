@@ -376,8 +376,8 @@ friendlyPix.Post = class {
   static createCommentHtml(author, text) {
     return `
         <div class="fp-comment">
-            <a class="fp-author" href="/user/${author.uid}">${author.full_name || 'Anonymous'}</a>:
-            <span class="fp-text">${text}</span>
+            <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
+            <span class="fp-text">${$('<div>').text(text).html()}</span>
         </div>`;
   }
 
