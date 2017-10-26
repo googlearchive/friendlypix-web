@@ -10,3 +10,7 @@ GoogleService-Info.plist
 npm-debug.log
 public/libs
 public/scripts-es5
+bower_components/**
+node_modules/**
+.firebaserc
+firebase-debug.log
