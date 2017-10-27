@@ -34,7 +34,9 @@ ws. On Windows please run the following commands separately instead: `bower inst
 
 Then open [http://localhost:5000](http://localhost:5000)
 
-> Note: Cloud Functions cannot yet be ran locally. Deploy the app to deploy and enable the Cloud Functions.
+> Note 1: On new projects, the Realtime Database and Cloud Storage come with Security rules that prevent read and writes. Deploy the app once first to deploy the Storage and Database security rules on the project.
+
+> Note 2: Cloud Functions cannot yet be ran locally. Deploy the app once first to deploy and enable the Cloud Functions.
 
 
 ## Deploy the app
