@@ -47,12 +47,14 @@ friendlyPix.Auth = class {
       this.signedInUserAvatar = $('.fp-avatar', signedInUserContainer);
       this.signedInUsername = $('.fp-username', signedInUserContainer);
       this.signOutButton = $('.fp-sign-out');
+      this.deleteAccountButton = $('.fp-delete-account');
       this.signedOutOnlyElements = $('.fp-signed-out-only');
       this.signedInOnlyElements = $('.fp-signed-in-only');
       this.usernameLink = $('.fp-usernamelink');
 
       // Event bindings
       this.signOutButton.click(() => this.auth.signOut());
+      this.deleteAccountButton.click(() => this.deleteAccount());
       this.signedInOnlyElements.hide();
     });
 
@@ -87,6 +89,19 @@ friendlyPix.Auth = class {
       }
     });
   }
+
+  deleteAccount() {
+    this.auth.currentUser.delete().then(function() {
+      window.alert('Account deleted');
+    }).catch(function(error) {
+      if (error.code === 'auth/requires-recent-login') {
+        window.alert(
+          'You need to have recently signed-in to delete your account.\n' +
+            'Please sign-in and try again.');
+        this.auth.signOut();
+      }
+    });
+  };
 };
 
 friendlyPix.auth = new friendlyPix.Auth();
