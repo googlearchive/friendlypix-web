@@ -486,17 +486,17 @@ friendlyPix.Firebase = class {
           const updateData = {};
           let lastPostId = true;
 
-          // Add followed user's posts to the home feed.
+          // Add/remove followed user's posts to the home feed.
           data.forEach(post => {
             updateData[`/feed/${this.auth.currentUser.uid}/${post.key}`] = follow ? !!follow : null;
             lastPostId = post.key;
           });
 
-          // Add followed user to the 'following' list.
+          // Add/remove followed user to the 'following' list.
           updateData[`/people/${this.auth.currentUser.uid}/following/${followedUserId}`] =
               follow ? lastPostId : null;
 
-          // Add signed-in suer to the list of followers.
+          // Add/remove signed-in user to the list of followers.
           updateData[`/followers/${followedUserId}/${this.auth.currentUser.uid}`] =
               follow ? !!follow : null;
           return this.database.ref().update(updateData);
