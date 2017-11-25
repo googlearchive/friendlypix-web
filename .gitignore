@@ -14,3 +14,4 @@ bower_components/**
 node_modules/**
 .firebaserc
 firebase-debug.log
+functions/node_modules/**
