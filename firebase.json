@@ -6,6 +6,7 @@
     "rules": "storage.rules"
   },
   "hosting": {
+    "predeploy": "npm run build",
     "public": "public",
     "rewrites": [{
       "source": "**",
