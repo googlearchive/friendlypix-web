@@ -60,7 +60,8 @@ friendlyPix.Feed = class {
       const post = new friendlyPix.Post();
       this.posts.push(post);
       const postElement = post.fillPostData(postIds[i], postData.thumb_url || postData.url,
-          postData.text, postData.author, postData.timestamp, null, null, postData.full_url);
+          postData.text, postData.author, postData.timestamp, postData.thumb_storage_uri,
+          postData.full_storage_uri, postData.full_url);
       // If a post with similar ID is already in the feed we replace it instead of appending.
       const existingPostElement = $(`.fp-post-${postIds[i]}`, this.feedImageContainer);
       if (existingPostElement.length) {
