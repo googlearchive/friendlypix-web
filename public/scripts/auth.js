@@ -91,9 +91,9 @@ friendlyPix.Auth = class {
   }
 
   deleteAccount() {
-    this.auth.currentUser.delete().then(function() {
+    this.auth.currentUser.delete().then(() => {
       window.alert('Account deleted');
-    }).catch(function(error) {
+    }).catch(error => {
       if (error.code === 'auth/requires-recent-login') {
         window.alert(
           'You need to have recently signed-in to delete your account.\n' +
