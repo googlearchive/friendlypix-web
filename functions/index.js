@@ -30,3 +30,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendFollowerNot
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'blurOffensiveImages') {
   exports.blurOffensiveImages = require('./blurOffensiveImages').default;
 }
+
+/**
+ * When an account is deleted we delete all the user data in the store as well.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cleanupAccount') {
+  exports.cleanupAccount = require('./cleanupAccount').default;
+}
