@@ -333,9 +333,16 @@
 <!-- Firebase UI for Auth -->
 <script src="/libs/firebaseui/dist/firebaseui.js"></script>
 <script type="text/javascript">
+  var signInFlow = 'popup';
+  // For iOS full screen apps we use the redirect auth mode.
+  if (('standalone' in window.navigator)
+      && window.navigator.standalone){
+    signInFlow = 'redirect';
+  }
+
   // FirebaseUI config.
   var uiConfig = {
-    'signInFlow': 'popup',
+    'signInFlow': signInFlow,
     'signInOptions': [
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       firebase.auth.FacebookAuthProvider.PROVIDER_ID
