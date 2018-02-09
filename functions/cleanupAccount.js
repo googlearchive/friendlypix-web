@@ -22,8 +22,8 @@ try {admin.initializeApp(functions.config().firebase);} catch(e) {}
 /**
  * When a user is deleted we delete all its personal data.
  */
-exports.default = functions.auth.user().onDelete(event => {
-  const deletedUid = event.data.uid;
+exports.default = functions.auth.user().onDelete(user => {
+  const deletedUid = user.uid;
   const personalPaths = {};
   personalPaths[`/feed/${deletedUid}`] = null;
   personalPaths[`/followers/${deletedUid}`] = null;
