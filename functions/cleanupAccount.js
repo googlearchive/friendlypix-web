@@ -17,7 +17,9 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-try {admin.initializeApp(functions.config().firebase);} catch(e) {}
+try {
+  admin.initializeApp();
+} catch (e) {}
 
 /**
  * When a user is deleted we delete all its personal data.
@@ -32,12 +34,12 @@ exports.default = functions.auth.user().onDelete(user => {
   return admin.database().ref('/posts/').orderByChild('author/uid').equalTo(deletedUid).once('value').then(snap => {
     snap.forEach(post => {
       personalPaths[`/posts/${post.key}`] = null;
-    })
+    });
   }).then(() => {
     return admin.database().ref('/likes/').orderByChild(deletedUid).startAt(0).once('value').then(snap => {
       snap.forEach(post => {
         personalPaths[`/likes/${post.key}/${deletedUid}`] = null;
-      })
+      });
     });
   }).then(() => {
     return admin.database().ref('/').update(personalPaths);

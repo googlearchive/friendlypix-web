@@ -17,10 +17,13 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-try {admin.initializeApp(functions.config().firebase);} catch(e) {}
+try {
+  admin.initializeApp();
+} catch (e) {}
 const mkdirp = require('mkdirp-promise');
 const gcs = require('@google-cloud/storage')();
-const vision = require('@google-cloud/vision')();
+const Vision = require('@google-cloud/vision');
+const vision = new Vision();
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
@@ -39,11 +42,10 @@ exports.default = functions.storage.object().onFinalize(object => {
   return vision.safeSearchDetection(image).then(batchAnnotateImagesResponse => {
     console.log('SafeSearch results on image', batchAnnotateImagesResponse);
     const safeSearchResult = batchAnnotateImagesResponse[0].safeSearchAnnotation;
+    const Likelihood = Vision.types.Likelihood;
 
-    if (safeSearchResult.adult === 'LIKELY' ||
-      safeSearchResult.adult === 'VERY_LIKELY' ||
-      safeSearchResult.violence === 'LIKELY' ||
-      safeSearchResult.violence === 'VERY_LIKELY') {
+    if (Likelihood[safeSearchResult.adult] >= Likelihood.LIKELY ||
+        Likelihood[safeSearchResult.violence] >= Likelihood.LIKELY) {
       return blurImage(object.name, object.bucket, object.metadata).then(() => {
         const filePathSplit = object.name.split(path.sep);
         const uid = filePathSplit[0];
@@ -53,6 +55,7 @@ exports.default = functions.storage.object().onFinalize(object => {
         return refreshImages(uid, postId, size);
       });
     }
+    console.log('The image', object.name, 'has been detected as OK.');
   });
 });
 
