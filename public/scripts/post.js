@@ -54,7 +54,7 @@ friendlyPix.Post = class {
       // Clear listeners and previous post data.
       this.clear();
       if (!post) {
-        var data = {
+        const data = {
           message: 'This post does not exists.',
           timeout: 5000
         };
@@ -192,7 +192,7 @@ friendlyPix.Post = class {
     $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp));
     // Update the time counter every minutes.
     this.timers.push(setInterval(
-      () => $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp)), 60000));
+        () => $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp)), 60000));
   }
 
   /**
