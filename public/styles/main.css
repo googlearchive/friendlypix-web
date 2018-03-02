@@ -83,10 +83,11 @@ a {
   color: white;
   text-decoration: none;
 }
-.fp-logo .material-icons {
-  top: 4px;
-  font-size: 32px;
-  margin-right: -2px;
+.fp-logo img {
+  top: -4px;
+  height: 32px;
+  width: 32px;
+  margin-right: 2px;
   position: relative;
 }
 .fp-header .mdl-layout__header-row {
