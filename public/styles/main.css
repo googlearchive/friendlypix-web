@@ -573,26 +573,29 @@ a {
 .fp-post .fp-comment {
   position: relative;
 }
-.fp-post .fp-comments .fp-comment-owned:HOVER  .fp-delete-comment {
+.fp-post .fp-comments .fp-comment-owned:HOVER  .fp-edit-delete-comment-container {
   display: block;
 }
 .fp-post .fp-comment-deleted {
   font-style: italic;
   color: #aaa;
 }
-.fp-post .fp-delete-comment {
+.fp-post .fp-edit-delete-comment-container {
   display: none;
-  color: red;
-  cursor: pointer;
   position: absolute;
   top: 0;
   right: 0;
   font-size: 80%;
+  cursor: pointer;
   background-color: white;
   padding: 0 3px;
   border-radius: 2px;
 }
-.fp-post .fp-comments .fp-delete-comment:HOVER {
+.fp-post .fp-delete-comment {
+  color: red;
+}
+.fp-post .fp-comments .fp-delete-comment:HOVER,
+.fp-post .fp-comments .fp-edit-comment:HOVER {
   text-decoration: underline;
 }
 .fp-post .fp-first-comment {

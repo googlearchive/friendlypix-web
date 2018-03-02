@@ -407,7 +407,7 @@ friendlyPix.Firebase = class {
   addComment(postId, commentText) {
     const commentObject = {
       text: commentText,
-      timestamp: Date.now(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
       author: {
         uid: this.auth.currentUser.uid,
         full_name: this.auth.currentUser.displayName,
@@ -415,6 +415,23 @@ friendlyPix.Firebase = class {
       }
     };
     return this.database.ref(`comments/${postId}`).push(commentObject);
+  }
+
+  /**
+   * Deletes a comment.
+   */
+  deleteComment(postId, commentId) {
+    return this.database.ref(`/comments/${postId}/${commentId}`).remove();
+  }
+
+  /**
+   * Edit a comment.
+   */
+  editComment(postId, commentId, commentText) {
+    return this.database.ref(`/comments/${postId}/${commentId}`).update({
+      text: commentText,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
   }
 
   /**
