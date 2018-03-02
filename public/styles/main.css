@@ -570,6 +570,31 @@ a {
 .fp-post .fp-comments {
   padding: 0 10px 0 10px;
 }
+.fp-post .fp-comment {
+  position: relative;
+}
+.fp-post .fp-comments .fp-comment-owned:HOVER  .fp-delete-comment {
+  display: block;
+}
+.fp-post .fp-comment-deleted {
+  font-style: italic;
+  color: #aaa;
+}
+.fp-post .fp-delete-comment {
+  display: none;
+  color: red;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 80%;
+  background-color: white;
+  padding: 0 3px;
+  border-radius: 2px;
+}
+.fp-post .fp-comments .fp-delete-comment:HOVER {
+  text-decoration: underline;
+}
 .fp-post .fp-first-comment {
   padding: 10px 10px 0 10px;
 }

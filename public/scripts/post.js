@@ -86,12 +86,13 @@ friendlyPix.Post = class {
   /**
    * Displays the given list of `comments` in the post.
    */
-  displayComments(comments) {
+  displayComments(postId, comments) {
     const commentsIds = Object.keys(comments);
     for (let i = commentsIds.length - 1; i >= 0; i--) {
       $('.fp-comments', this.postElement).prepend(
-          friendlyPix.Post.createCommentHtml(comments[commentsIds[i]].author,
-              comments[commentsIds[i]].text));
+          this.createComment(comments[commentsIds[i]].author,
+              comments[commentsIds[i]].text, postId, commentsIds[i],
+              comments[commentsIds[i]].author.uid === friendlyPix.auth.userId));
     }
   }
 
@@ -99,7 +100,7 @@ friendlyPix.Post = class {
    * Shows the "show more comments" button and binds it the `nextPage` callback. If `nextPage` is
    * `null` then the button is hidden.
    */
-  displayNextPageButton(nextPage) {
+  displayNextPageButton(postId, nextPage) {
     const nextPageButton = $('.fp-morecomments', this.postElement);
     if (nextPage) {
       nextPageButton.show();
@@ -107,8 +108,8 @@ friendlyPix.Post = class {
       nextPageButton.prop('disabled', false);
       nextPageButton.click(() => nextPage().then(data => {
         nextPageButton.prop('disabled', true);
-        this.displayComments(data.entries);
-        this.displayNextPageButton(data.nextPage);
+        this.displayComments(postId, data.entries);
+        this.displayNextPageButton(postId, data.nextPage);
       }));
     } else {
       nextPageButton.hide();
@@ -160,7 +161,7 @@ friendlyPix.Post = class {
     this.theatre.css('display', 'flex');
     // Leave theatre mode if click or ESC key down.
     this.theatre.off('click');
-    this.theatre.click(() => this.leaveTheatreMode())
+    this.theatre.click(() => this.leaveTheatreMode());
     $(document).off('keydown');
     $(document).keydown(e => {
       if (e.which === 27) {
@@ -201,22 +202,24 @@ friendlyPix.Post = class {
    */
   _setupComments(postId, author, imageText) {
     const post = this.postElement;
+    const _this = this;
 
     // Creates the initial comment with the post's text.
     $('.fp-first-comment', post).empty();
-    $('.fp-first-comment', post).append(friendlyPix.Post.createCommentHtml(author, imageText));
+    $('.fp-first-comment', post).append(this.createComment(author, imageText));
 
     // Load first page of comments and listen to new comments.
     $('.fp-comments', post).empty();
     friendlyPix.firebase.getComments(postId).then(data => {
-      this.displayComments(data.entries);
-      this.displayNextPageButton(data.nextPage);
+      this.displayComments(postId, data.entries);
+      this.displayNextPageButton(postId, data.nextPage);
 
       // Display any new comments.
       const commentIds = Object.keys(data.entries);
       friendlyPix.firebase.subscribeToComments(postId, (commentId, commentData) => {
         $('.fp-comments', post).append(
-          friendlyPix.Post.createCommentHtml(commentData.author, commentData.text));
+            _this.createComment(commentData.author, commentData.text, postId, commentId,
+                commentData.author.uid === friendlyPix.auth.userId));
       }, commentIds ? commentIds[commentIds.length - 1] : 0);
     });
 
@@ -373,12 +376,23 @@ friendlyPix.Post = class {
   /**
    * Returns the HTML for a post's comment.
    */
-  static createCommentHtml(author, text) {
-    return `
-        <div class="fp-comment">
+  createComment(author, text, postId, commentId, isOwner = false) {
+    const element = $(`
+        <div class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
             <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
             <span class="fp-text">${$('<div>').text(text).html()}</span>
-        </div>`;
+            <div class="fp-delete-comment">DELETE</div>
+        </div>`);
+    const database = this.database;
+    $('.fp-delete-comment', element).click(() => {
+      if (window.confirm('Delete the comment?')) {
+        database.ref(`/comments/${postId}/${commentId}`).remove().then(() => {
+          element.text('this comment has been deleted');
+          element.addClass('fp-comment-deleted');
+        });
+      }
+    });
+    return element;
   }
 
   /**
@@ -395,7 +409,7 @@ friendlyPix.Post = class {
     millis = (millis - mins) / 60;
     const hrs = millis % 24;
     const days = (millis - hrs) / 24;
-    var timeSinceCreation = [days, hrs, mins, secs, ms];
+    const timeSinceCreation = [days, hrs, mins, secs, ms];
 
     let timeText = 'Now';
     if (timeSinceCreation[0] !== 0) {
