@@ -109,6 +109,11 @@ a {
     top: 2.5px;
     font-size: 23px;
   }
+  .fp-titlebar .fp-logo img {
+    top: -3px;
+    height: 30px;
+    width: 30px;
+  }
 }
 @media screen and (max-width: 479px) {
   .fp-titlebar h3 {
@@ -246,7 +251,7 @@ a {
 @media screen and (max-width: 479px) {
   .mdl-layout__drawer-button {
     display: block;
-    top: 3px;
+    top: 0;
   }
 }
 
@@ -587,9 +592,9 @@ a {
   right: 0;
   font-size: 80%;
   cursor: pointer;
-  background-color: white;
   padding: 0 3px;
   border-radius: 2px;
+  background-color: #aaa;
 }
 .fp-post .fp-delete-comment {
   color: red;
