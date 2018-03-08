@@ -41,6 +41,8 @@ exports.default = functions.auth.user().onDelete(event => {
     });
   }).then(() => {
     return admin.database().ref('/').update(personalPaths);
+  }).then(() => {
+    return admin.storage().bucket().deleteFiles({prefix: `${deletedUid}/`});
   });
 
   // TODO: delete all comments where:
