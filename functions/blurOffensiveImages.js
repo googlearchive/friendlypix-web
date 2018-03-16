@@ -96,13 +96,8 @@ function refreshImages(uid, postId, size) {
   let app;
   try {
     // Create a Firebase app that will honor security rules for a specific user.
-    const config = {
-      credential: functions.config().firebase.credential,
-      databaseURL: functions.config().firebase.databaseURL,
-      databaseAuthVariableOverride: {
-        uid: uid
-      }
-    };
+    const config = JSON.parse(process.env.FIREBASE_CONFIG);
+    config.databaseAuthVariableOverride = {uid: uid};
     app = admin.initializeApp(config, uid);
   } catch (e) {
     if (e.code !== 'app/duplicate-app') {
