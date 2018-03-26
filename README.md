@@ -42,19 +42,13 @@ Then open [http://localhost:5000](http://localhost:5000)
 
 ## Deploy the app
 
-Before deploying your code you need to build it for production. Run:
-
-```bash
-npm run build
-```
-
-This will install all runtime dependencies and transpile the Javascript code to ES5 and install Cloud Functions dependencies.
-Then run:
+To deploy the app run:
 
 ```bash
 firebase deploy
 ```
 
+Before deploying this will automatically install all runtime dependencies, transpile the Javascript code to ES5 and install Cloud Functions dependencies.
 Then this deploys a new version of your code that will be served from `https://<PROJECT_ID>.firebaseapp.com`
 
 
