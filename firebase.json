@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "predeploy": "npm --prefix functions install"
+  },
   "database": {
     "rules": "database-rules.json"
   },
