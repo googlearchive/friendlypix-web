@@ -51,6 +51,14 @@ firebase deploy
 Before deploying this will automatically install all runtime dependencies, transpile the Javascript code to ES5 and install Cloud Functions dependencies.
 Then this deploys a new version of your code that will be served from `https://<PROJECT_ID>.firebaseapp.com`
 
+## Mobile Apps
+
+The [Android](https://github.com/firebase/friendlypix-android) and [iOS](https://github.com/firebase/friendlypix-ios) versions of FriendlyPix need the Cloud Functions, the Realtime Database rules and the Cloud Storage rules to be deployed to work properly. To deploy these run:
+
+```bash
+firebase deploy --only functions,database,storage
+```
+
 
 ## Contributing
 
