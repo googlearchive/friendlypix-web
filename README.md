@@ -40,6 +40,11 @@ Then open [http://localhost:5000](http://localhost:5000)
 > Note 2: Cloud Functions cannot yet be ran locally. Deploy the app once first to deploy and enable the Cloud Functions.
 
 
+## Cloud Functions
+
+The required Cloud Functions can be found at [/functions](https://github.com/firebase/friendlypix-web/tree/master/functions).
+
+
 ## Deploy the app
 
 To deploy the app run:
