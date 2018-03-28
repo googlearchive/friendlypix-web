@@ -435,6 +435,15 @@ friendlyPix.Firebase = class {
   }
 
   /**
+   * Subscribe to a comment update.
+   */
+  subscribeToComment(postId, commentId, callback) {
+    const commentRef = this.database.ref(`/comments/${postId}/${commentId}`);
+    commentRef.on('value', callback);
+    this.firebaseRefs.push(commentRef);
+  }
+
+  /**
    * Uploads a new Picture to Cloud Storage and adds a new post referencing it.
    * This returns a Promise which completes with the new Post ID.
    */
@@ -447,9 +456,9 @@ friendlyPix.Firebase = class {
     const metadata = {
       contentType: pic.type
     };
-    var picUploadTask = picRef.put(pic, metadata).then(snapshot => {
+    const picUploadTask = picRef.put(pic, metadata).then(snapshot => {
       console.log('New pic uploaded. Size:', snapshot.totalBytes, 'bytes.');
-      var url = snapshot.metadata.downloadURLs[0];
+      const url = snapshot.metadata.downloadURLs[0];
       console.log('File available at', url);
       return url;
     }).catch(error => {
@@ -458,9 +467,9 @@ friendlyPix.Firebase = class {
 
     // Start the thumb file upload to Cloud Storage.
     const thumbRef = this.storage.ref(`${this.auth.currentUser.uid}/thumb/${newPostKey}/${fileName}`);
-    var tumbUploadTask = thumbRef.put(thumb, metadata).then(snapshot => {
+    const tumbUploadTask = thumbRef.put(thumb, metadata).then(snapshot => {
       console.log('New thumb uploaded. Size:', snapshot.totalBytes, 'bytes.');
-      var url = snapshot.metadata.downloadURLs[0];
+      const url = snapshot.metadata.downloadURLs[0];
       console.log('File available at', url);
       return url;
     }).catch(error => {

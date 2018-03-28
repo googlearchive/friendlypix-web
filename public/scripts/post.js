@@ -89,11 +89,31 @@ friendlyPix.Post = class {
   displayComments(postId, comments) {
     const commentsIds = Object.keys(comments);
     for (let i = commentsIds.length - 1; i >= 0; i--) {
-      $('.fp-comments', this.postElement).prepend(
-          this.createComment(comments[commentsIds[i]].author,
-              comments[commentsIds[i]].text, postId, commentsIds[i],
-              comments[commentsIds[i]].author.uid === friendlyPix.auth.userId));
+      this.displayComment(comments[commentsIds[i]], postId, commentsIds[i]);
     }
+  }
+
+  /**
+   * Displays a single comment or replace the existing one with new content.
+   */
+  displayComment(comment, postId, commentId, prepend = true) {
+    const newElement = this.createComment(comment.author, comment.text, postId,
+        commentId, comment.author.uid === friendlyPix.auth.userId);
+    if (prepend) {
+      $('.fp-comments', this.postElement).prepend(newElement);
+    } else {
+      $('.fp-comments', this.postElement).append(newElement);
+    }
+
+    // Subscribe to updates of the comment.
+    friendlyPix.firebase.subscribeToComment(postId, commentId, snap => {
+      const updatedComment = snap.val();
+      const updatedElement = this.createComment(updatedComment.author,
+          updatedComment.text, postId, commentId,
+          updatedComment.author.uid === friendlyPix.auth.userId);
+      const element = $('#comment-' + commentId);
+      element.replaceWith(updatedElement);
+    });
   }
 
   /**
@@ -202,7 +222,6 @@ friendlyPix.Post = class {
    */
   _setupComments(postId, author, imageText) {
     const post = this.postElement;
-    const _this = this;
 
     // Creates the initial comment with the post's text.
     $('.fp-first-comment', post).empty();
@@ -217,9 +236,7 @@ friendlyPix.Post = class {
       // Display any new comments.
       const commentIds = Object.keys(data.entries);
       friendlyPix.firebase.subscribeToComments(postId, (commentId, commentData) => {
-        $('.fp-comments', post).append(
-            _this.createComment(commentData.author, commentData.text, postId, commentId,
-                commentData.author.uid === friendlyPix.auth.userId));
+        this.displayComment(commentData, postId, commentId, false);
       }, commentIds ? commentIds[commentIds.length - 1] : 0);
     });
 
@@ -378,7 +395,7 @@ friendlyPix.Post = class {
    */
   createComment(author, text, postId, commentId, isOwner = false) {
     const element = $(`
-        <div class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
+        <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
           <span class="fp-text">${$('<div>').text(text).html()}</span>
           <div class="fp-edit-delete-comment-container">
