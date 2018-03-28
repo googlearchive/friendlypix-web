@@ -228,8 +228,8 @@ friendlyPix.Post = class {
     $('.fp-first-comment', post).append(this.createComment(author, imageText));
 
     // Load first page of comments and listen to new comments.
-    $('.fp-comments', post).empty();
     friendlyPix.firebase.getComments(postId).then(data => {
+      $('.fp-comments', post).empty();
       this.displayComments(postId, data.entries);
       this.displayNextPageButton(postId, data.nextPage);
 
