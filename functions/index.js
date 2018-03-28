@@ -37,3 +37,17 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'blurOffensiveIm
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cleanupAccount') {
   exports.cleanupAccount = require('./cleanupAccount').default;
 }
+
+/**
+ * Moderate comments text.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'moderateComments') {
+  exports.moderateComments = require('./moderateText').moderateComments;
+}
+
+/**
+ * Moderate posts text.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'moderatePosts') {
+  exports.moderatePosts = require('./moderateText').moderatePosts;
+}
