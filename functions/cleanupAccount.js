@@ -26,27 +26,56 @@ try {
  */
 exports.default = functions.auth.user().onDelete(user => {
   const deletedUid = user.uid;
+
+  // Gather all path containing user data to delete.
   const personalPaths = {};
+
+  // The personal feed.
   personalPaths[`/feed/${deletedUid}`] = null;
+
+  // The list of followers.
   personalPaths[`/followers/${deletedUid}`] = null;
+
+  // The profile.
   personalPaths[`/people/${deletedUid}`] = null;
 
-  return admin.database().ref('/posts/').orderByChild('author/uid').equalTo(deletedUid).once('value').then(snap => {
-    snap.forEach(post => {
-      personalPaths[`/posts/${post.key}`] = null;
-    });
-  }).then(() => {
-    return admin.database().ref('/likes/').orderByChild(deletedUid).startAt(0).once('value').then(snap => {
-      snap.forEach(post => {
-        personalPaths[`/likes/${post.key}/${deletedUid}`] = null;
+  // Find all posts to delete.
+  const findPosts = admin.database().ref('/posts/').orderByChild('author/uid').equalTo(deletedUid).once('value')
+      .then(snap => {
+        snap.forEach(post => {
+          personalPaths[`/posts/${post.key}`] = null;
+        });
       });
+
+  // Find all likes to delete.
+  const findLikes = admin.database().ref('/likes/').orderByChild(deletedUid).startAt(0).once('value')
+      .then(snap => {
+        snap.forEach(post => {
+          personalPaths[`/likes/${post.key}/${deletedUid}`] = null;
+        });
+      });
+
+  // Find all comments to delete.
+  const findComments = admin.database().ref('/comments/').once('value').then(commentsSnap => {
+    const allPostsPromises = [];
+    commentsSnap.forEach(commentList => {
+      const checkPostComments = commentList.ref.orderByChild('author/uid').equalTo(deletedUid).once('value');
+      checkPostComments.then(snap => {
+        if (snap.exists()) {
+          personalPaths[snap.ref] = null;
+        }
+      });
+      allPostsPromises.push(checkPostComments);
     });
-  }).then(() => {
-    return admin.database().ref('/').update(personalPaths);
-  }).then(() => {
-    return admin.storage().bucket().deleteFiles({prefix: `${deletedUid}/`});
+    return Promise.all(allPostsPromises);
   });
 
-  // TODO: delete all comments where:
-  // path === /comments/${postId}/${commentId} and author/uid === ${deletedUid}
+  // Delete all personal Database path.
+  const deleteDatabase = Promise.all([findPosts, findLikes, findComments])
+      .then(() => admin.database().ref('/').update(personalPaths));
+
+  // Delete all user's images stored in Storage.
+  const deleteStorage = admin.storage().bucket().deleteFiles({prefix: `${deletedUid}/`});
+
+  return Promise.all([deleteDatabase, deleteStorage]);
 });
