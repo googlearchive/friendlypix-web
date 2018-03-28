@@ -15,9 +15,10 @@ Friendly Pix is built using Javascript, [Firebase](https://firebase.google.com/d
 1. In a console run `npm install` to install all Build/Deploy tools dependencies.
 1. Create a Firebase project using the [Firebase Console](https://firebase.google.com/console).
 1. Visit the **Storage** section and enable storage by clicking the **Getting Started** button.
-2. Enable **Google** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab.
-3. Enable **Facebook** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab. You'll need to provide your Facebook app's credentials. If you haven't yet you'll need to have created a Facebook app on [Facebook for Developers](https://developers.facebook.com)
-4. In a console run `firebase use --add` and, when prompted, select the Firebase Project you have just created. This will make sure the Firebase CLI is configured to use your particular project.
+1. Enable **Google** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab.
+1. Enable **Facebook** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab. You'll need to provide your Facebook app's credentials. If you haven't yet you'll need to have created a Facebook app on [Facebook for Developers](https://developers.facebook.com)
+1. [Enable the Cloud Vision API](https://console.cloud.google.com/apis/api/vision.googleapis.com/overview?project=_) on your project and enable Billing.
+1. In a console run `firebase use --add` and, when prompted, select the Firebase Project you have just created. This will make sure the Firebase CLI is configured to use your particular project.
 
 
 ## Start a local development server
