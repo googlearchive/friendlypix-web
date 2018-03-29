@@ -18,7 +18,9 @@
 const functions = require('firebase-functions');
 const sanitizer = require('./sanitizer');
 const admin = require('firebase-admin');
-try {admin.initializeApp();} catch (e) {}
+try {
+  admin.initializeApp();
+} catch (e) {}
 
 /**
  * Moderates comments and posts text by lowering all uppercase messages and removing swearwords.
@@ -26,8 +28,8 @@ try {admin.initializeApp();} catch (e) {}
 exports.moderateComments = functions.database.ref('/comments/{postId}/{commentId}').onWrite(moderateText);
 exports.moderatePosts = functions.database.ref('/posts/{postId}').onWrite(moderateText);
 
-function moderateText(event) {
-  const snap = event.data;
+function moderateText(change) {
+  const snap = change.after;
   const comment = snap.val();
 
   if (comment && !comment.sanitized) {
@@ -39,7 +41,7 @@ function moderateText(event) {
 
     // Update the Firebase DB with checked message.
     console.log('Message has been moderated. Saving to DB: ', moderatedMessage);
-    return snap.adminRef.update({
+    return snap.ref.update({
       text: moderatedMessage,
       sanitized: true,
       moderated: comment.text !== moderatedMessage
