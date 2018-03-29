@@ -118,6 +118,7 @@
         </a>
         <li class="fp-sign-out mdl-menu__item fp-signed-in-only"><i class="material-icons">exit_to_app</i> Sign out</li>
         <li class="fp-delete-account mdl-menu__item fp-signed-in-only"><i class="material-icons">cancel</i> Delete account</li>
+        <li class="fp-update-privacy mdl-menu__item fp-signed-in-only privacy-dialog-link"><i class="material-icons">https</i> Privacy settings<li>
       </ul>
     </div>
 
@@ -154,8 +155,46 @@
       <hr class="fp-signed-in-only"/>
       <a class="fp-sign-out mdl-navigation__link fp-signed-in-only"><i class="material-icons">exit_to_app</i> Sign out</a>
       <a class="fp-delete-account mdl-navigation__link fp-signed-in-only"><i class="material-icons">cancel</i> Delete account</a>
+      <a class="fp-update-privacy mdl-navigation__link fp-signed-in-only privacy-dialog-link"><i class="material-icons">https</i> Privacy settings<a>
     </nav>
   </div>
+
+  <dialog id="privacy-dialog" class="mdl-dialog">
+    <h4 class="mdl-dialog__title">Let's protect your privacy!</h4>
+    <div class="mdl-dialog__content">
+      <p> What kind of data would you like Friendly Pix to save?</p>
+      <form class="col s12">
+        <p>
+          <input type="checkbox" name="allowProfile" id="allowProfile" value="savedAllowProfile"/>
+          <label for="allowProfile">
+            We save basic information required to authenticate users. Do you
+            want personal data like your name and picture to be available to
+            other FriendlyPix users so they can find and follow you? Without
+            this enabled, we disable other people from finding or following
+            you.
+          </label>
+        </p>
+        <p>
+          <input type="checkbox" name="allowContent" id="allowContent" value="savedAllowContent"/>
+          <label for="allowContent">
+            Do you want us to save images you upload and comments you make?
+            Without this you can still see everyone else's pics, but we'll
+            disable comments and uploads.
+          </label>
+        </p>
+        <p>
+          <input type="checkbox" name="allowFeed" id="allowFeed" value="savedAllowFeed"/>
+          <label for="allowFeed">
+            Do you want us to save the users you follow, and the pics you like?
+            Without this, we disable the personal feed, but you can look through
+            the universal feed in read-only mode.
+          </label>
+        </p>
+      </form>
+      <button class="mdl-button mdl-js-button mdl-button--raised privacy-close">Close</button>
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--amber-400 privacy-save">Submit</button>
+    </div>
+  </dialog>
 
   <main class="mdl-layout__content mdl-color--grey-100">
 
