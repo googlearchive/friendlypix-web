@@ -109,11 +109,16 @@ function refreshImages(uid, postId, size) {
     app = admin.app(uid);
   }
 
+  const deleteApp = () => app.delete().catch(() => null);
+
   const imageUrlRef = app.database().ref(`/posts/${postId}/${size}_url`);
   return imageUrlRef.once('value').then(snap => {
     const picUrl = snap.val();
     return imageUrlRef.set(`${picUrl}&blurred`).then(() => {
       console.log('Blurred image URL updated.');
+      return deleteApp().then(() => null);
     });
+  }).catch(err => {
+    return deleteApp().then(() => Promise.reject(err));
   });
 }
