@@ -14,9 +14,27 @@
       ".indexOn": "author/uid", // Allow searching for posts by authors. Useful for deletion.
       "$postId": {
         ".write": "!data.exists() || data.exists() && auth.uid === data.child('author').child('uid').val()", // Allow new writes and allow updates and deletes to own posts.
+        "text": {
+          ".validate": "newData.isString() && newData.val().length < 2000"
+        },
+        "timestamp": {
+          ".validate": "newData.val() === now"
+        },
+        "sanitized": {
+          ".validate": "false" // Only a cloud function (admin mode) can update this.
+        },
+        "moderated": {
+          ".validate": "false" // Only a cloud function (admin mode) can update this.
+        },
         "author": {
           "uid": {
             ".validate": "auth.uid === newData.val()"
+          },
+          "full_name": {
+            ".validate": "auth.token.name === newData.val()"
+          },
+          "profile_picture": {
+            ".validate": "newData.isString()"
           }
         }
       }
@@ -28,10 +46,34 @@
         ".validate": "root.child('posts').child($postId).exists()", // Check that the post exists
         "$commentId": {
           ".write": "!data.exists() || data.exists() && auth.uid === data.child('author').child('uid').val()",  // Can write new comments and edit/delete particular comment if you are the author.
+          "text": {
+            ".validate": "newData.isString() && newData.val().length < 2000"
+          },
+          "sanitized": {
+            ".validate": "false" // Only a cloud function (admin mode) can update this.
+          },
+          "moderated": {
+            ".validate": "false" // Only a cloud function (admin mode) can update this.
+          },
+          "timestamp": {
+            ".validate": "newData.val() === now"
+          },
           "author": {
             "uid": {
               ".validate": "auth.uid === newData.val()"
+            },
+            "full_name": {
+              ".validate": "auth.token.name === newData.val()"
+            },
+            "profile_picture": {
+              ".validate": "newData.isString()"
+            },
+            "$other": {
+              ".validate": false
             }
+          },
+          "$other": {
+            ".validate": false
           }
         }
       }
@@ -62,7 +104,7 @@
       "$uid": {
         ".write": "auth.uid === $uid",
         "full_name": {
-          ".validate": "newData.isString()"
+          ".validate": "auth.token.name === newData.val()"
         },
         "profile_picture": {
           ".validate": "newData.isString()"
