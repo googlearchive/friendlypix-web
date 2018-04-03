@@ -69,7 +69,7 @@
               ".validate": "auth.token.name === newData.val()"
             },
             "profile_picture": {
-              ".validate": "newData.isString()"
+              ".validate": "auth.token.picture === newData.val()"
             },
             "$other": {
               ".validate": false
@@ -113,7 +113,7 @@
           ".validate": "auth.token.name === newData.val()"
         },
         "profile_picture": {
-          ".validate": "newData.isString()"
+          ".validate": "auth.token.picture === newData.isString()"
         },
         "posts": {
           "$postId": {
