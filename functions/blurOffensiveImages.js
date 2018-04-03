@@ -17,10 +17,13 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-try {admin.initializeApp(functions.config().firebase);} catch(e) {}
+try {
+  admin.initializeApp();
+} catch (e) {}
 const mkdirp = require('mkdirp-promise');
 const gcs = require('@google-cloud/storage')();
-const vision = require('@google-cloud/vision')();
+const Vision = require('@google-cloud/vision');
+const vision = new Vision();
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
@@ -30,15 +33,7 @@ const fs = require('fs');
  * When an image is uploaded we check if it is flagged as Adult or Violence by the Cloud Vision
  * API and if it is we blur it using ImageMagick.
  */
-exports.default = functions.storage.object().onChange(event => {
-  const object = event.data;
-
-  // Exit if this is a move or deletion event.
-  if (object.resourceState === 'not_exists') {
-    console.log('This is a deletion event.');
-    return;
-  }
-
+exports.default = functions.storage.object().onFinalize(object => {
   const image = {
     source: {imageUri: `gs://${object.bucket}/${object.name}`}
   };
@@ -47,11 +42,10 @@ exports.default = functions.storage.object().onChange(event => {
   return vision.safeSearchDetection(image).then(batchAnnotateImagesResponse => {
     console.log('SafeSearch results on image', batchAnnotateImagesResponse);
     const safeSearchResult = batchAnnotateImagesResponse[0].safeSearchAnnotation;
+    const Likelihood = Vision.types.Likelihood;
 
-    if (safeSearchResult.adult === 'LIKELY' ||
-      safeSearchResult.adult === 'VERY_LIKELY' ||
-      safeSearchResult.violence === 'LIKELY' ||
-      safeSearchResult.violence === 'VERY_LIKELY') {
+    if (Likelihood[safeSearchResult.adult] >= Likelihood.LIKELY ||
+        Likelihood[safeSearchResult.violence] >= Likelihood.LIKELY) {
       return blurImage(object.name, object.bucket, object.metadata).then(() => {
         const filePathSplit = object.name.split(path.sep);
         const uid = filePathSplit[0];
@@ -61,6 +55,7 @@ exports.default = functions.storage.object().onChange(event => {
         return refreshImages(uid, postId, size);
       });
     }
+    console.log('The image', object.name, 'has been detected as OK.');
   });
 });
 
@@ -101,13 +96,8 @@ function refreshImages(uid, postId, size) {
   let app;
   try {
     // Create a Firebase app that will honor security rules for a specific user.
-    const config = {
-      credential: functions.config().firebase.credential,
-      databaseURL: functions.config().firebase.databaseURL,
-      databaseAuthVariableOverride: {
-        uid: uid
-      }
-    };
+    const config = JSON.parse(process.env.FIREBASE_CONFIG);
+    config.databaseAuthVariableOverride = {uid: uid};
     app = admin.initializeApp(config, uid);
   } catch (e) {
     if (e.code !== 'app/duplicate-app') {
@@ -119,11 +109,16 @@ function refreshImages(uid, postId, size) {
     app = admin.app(uid);
   }
 
+  const deleteApp = () => app.delete().catch(() => null);
+
   const imageUrlRef = app.database().ref(`/posts/${postId}/${size}_url`);
   return imageUrlRef.once('value').then(snap => {
     const picUrl = snap.val();
     return imageUrlRef.set(`${picUrl}&blurred`).then(() => {
       console.log('Blurred image URL updated.');
+      return deleteApp().then(() => null);
     });
+  }).catch(err => {
+    return deleteApp().then(() => Promise.reject(err));
   });
 }

@@ -45,6 +45,7 @@
     "comments": {
       ".read": true,
       "$postId": {
+        ".indexOn": "author/uid", // Allow searching for comments by authors. Useful for deletion.
         ".write": "!newData.exists() && auth.uid === root.child('posts').child($postId).child('author').child('uid').val() && !newData.parent().parent().child('posts').child($postId).exists()", // Allow deletes from the post owner
         ".validate": "root.child('posts').child($postId).exists()", // Check that the post exists
         "$commentId": {
