@@ -47,7 +47,7 @@ function sendEmail(snap, context) {
     const data = {
       from: `FriendlyPix Bot <bot@${functions.config().mailgun.domain}>`,
       to: 'friendlypix-team@google.com',
-      subject: `A ${commentId ? 'comment' : 'post'} has been flagged for inappropriate content.`,
+      subject: `A ${commentId ? 'comment' : 'post'} has been flagged for inappropriate content | ${commentId ? commentId : postId}`,
       text: 'Please Enable HTML Email viewing.',
       html: `Hey FriendlyPix Team,<br><br>
 
