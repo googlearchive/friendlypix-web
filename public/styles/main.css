@@ -466,7 +466,9 @@ a {
 }
 #page-user-info .fp-image .mdl-card {
   max-height: 150px;
-  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: black;
   background-position: 50% 50%;
   display: flex;
   justify-content: flex-end;
