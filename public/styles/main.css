@@ -578,8 +578,17 @@ a {
 .fp-post .fp-comment {
   position: relative;
 }
-.fp-post .fp-comments .fp-comment-owned:HOVER  .fp-edit-delete-comment-container {
+.fp-post .fp-comments .fp-comment:HOVER .fp-edit-delete-comment-container {
   display: block;
+}
+.fp-post .fp-first-comment .fp-edit-delete-comment-container {
+  display: none !important;
+}
+.fp-post .fp-edit-comment, .fp-post .fp-delete-comment {
+  display: none
+}
+.fp-post .fp-comment-owned .fp-edit-comment, .fp-post .fp-comment-owned .fp-delete-comment {
+  display: block
 }
 .fp-post .fp-comment-deleted {
   font-style: italic;
@@ -590,18 +599,10 @@ a {
   position: absolute;
   top: 0;
   right: 0;
-  font-size: 80%;
-  cursor: pointer;
-  padding: 0 6px;
-  border-radius: 4px;
-  background-color: #eee;
+  transform: scale(0.7)
 }
 .fp-post .fp-delete-comment {
   color: red;
-}
-.fp-post .fp-comments .fp-delete-comment:HOVER,
-.fp-post .fp-comments .fp-edit-comment:HOVER {
-  text-decoration: underline;
 }
 .fp-post .fp-first-comment {
   padding: 10px 10px 0 10px;
@@ -671,10 +672,7 @@ a {
   font-weight: normal;
 }
 .fp-delete-post {
-  float: right;
   color: red;
-  font-size: 12px;
-  margin-right: -5px;
   display: none;
 }
 

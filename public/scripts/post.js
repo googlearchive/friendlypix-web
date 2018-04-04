@@ -25,7 +25,7 @@ friendlyPix.Post = class {
    * Initializes the single post's UI.
    * @constructor
    */
-  constructor() {
+  constructor(postId) {
     // List of all times running on the page.
     this.timers = [];
 
@@ -37,7 +37,7 @@ friendlyPix.Post = class {
     $(document).ready(() => {
       this.postPage = $('#page-post');
       // Pointers to DOM elements.
-      this.postElement = $(friendlyPix.Post.createPostHtml());
+      this.postElement = $(friendlyPix.Post.createPostHtml(postId));
       friendlyPix.MaterialUtils.upgradeTextFields(this.postElement);
       this.toast = $('.mdl-js-snackbar');
       this.theatre = $('.fp-theatre');
@@ -104,6 +104,7 @@ friendlyPix.Post = class {
     } else {
       $('.fp-comments', this.postElement).append(newElement);
     }
+    friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
 
     // Subscribe to updates of the comment.
     friendlyPix.firebase.subscribeToComment(postId, commentId, snap => {
@@ -113,6 +114,7 @@ friendlyPix.Post = class {
           updatedComment.author.uid === friendlyPix.auth.userId);
       const element = $('#comment-' + commentId);
       element.replaceWith(updatedElement);
+      friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
     });
   }
 
@@ -143,6 +145,8 @@ friendlyPix.Post = class {
   fillPostData(postId, thumbUrl, imageText, author, timestamp, thumbStorageUri, picStorageUri, picUrl) {
     const post = this.postElement;
 
+    friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
+
     // Fills element's author profile.
     $('.fp-usernamelink', post).attr('href', `/user/${author.uid}`);
     $('.fp-avatar', post).css('background-image',
@@ -159,6 +163,7 @@ friendlyPix.Post = class {
 
     this._setupDate(postId, timestamp);
     this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
+    this._setupReportButton(postId);
     this._setupLikeCountAndStatus(postId);
     this._setupComments(postId, author, imageText);
     return post;
@@ -261,7 +266,52 @@ friendlyPix.Post = class {
   }
 
   /**
-   * Shows/Hode and binds actions to the Delete button.
+   * Binds the action to the report button.
+   * @private
+   */
+  _setupReportButton(postId) {
+    const post = this.postElement;
+
+    if (this.auth.currentUser) {
+      $('.fp-report-post', post).show();
+      $('.fp-report-post', post).off('click');
+      $('.fp-report-post', post).click(() => {
+        swal({
+          title: 'Are you sure?',
+          text: 'You are about to flag this post for inappropriate content! An administrator will review your claim.',
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Yes, report this post!',
+          closeOnConfirm: true,
+          showLoaderOnConfirm: true,
+          allowEscapeKey: true
+        }, () => {
+          $('.fp-report-post', post).prop('disabled', true);
+          friendlyPix.firebase.reportPost(postId).then(() => {
+            swal({
+              title: 'Reported!',
+              text: 'This post has been reported. Please allow some time before an admin reviews it.',
+              type: 'success',
+              timer: 2000
+            });
+            $('.fp-report-post', post).prop('disabled', false);
+          }).catch(error => {
+            swal.close();
+            $('.fp-report-post', post).prop('disabled', false);
+            const data = {
+              message: `There was an error reporting your post: ${error}`,
+              timeout: 5000
+            };
+            this.toast[0].MaterialSnackbar.showSnackbar(data);
+          });
+        });
+      });
+    }
+  }
+
+  /**
+   * Shows/Hide and binds actions to the Delete button.
    * @private
    */
   _setupDeleteButton(postId, author, picStorageUri, thumbStorageUri) {
@@ -273,7 +323,7 @@ friendlyPix.Post = class {
       $('.fp-delete-post', post).click(() => {
         swal({
           title: 'Are you sure?',
-          text: 'You will not be able to recover this post!',
+          text: 'You are about to delete this post. Once deleted, you will not be able to recover it!',
           type: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#DD6B55',
@@ -352,7 +402,7 @@ friendlyPix.Post = class {
   /**
    * Returns the HTML for a post's comment.
    */
-  static createPostHtml() {
+  static createPostHtml(postId = 0) {
     return `
         <div class="fp-post mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet
                     mdl-cell--8-col-desktop mdl-grid mdl-grid--no-spacing">
@@ -363,11 +413,15 @@ friendlyPix.Post = class {
                 <div class="fp-avatar"></div>
                 <div class="fp-username mdl-color-text--black"></div>
               </a>
-              <!-- Delete button -->
-              <button class="fp-delete-post mdl-button mdl-js-button">
-                Delete
-              </button>
               <a href="/post/" class="fp-time">now</a>
+              <!-- Drop Down Menu -->
+              <button class="fp-signed-in-only mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="fp-post-menu-${postId}">
+                <i class="material-icons">more_vert</i>
+              </button>
+              <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="fp-post-menu-${postId}">
+                <li class="mdl-menu__item fp-report-post"><i class="material-icons">report</i> Report</li>
+                <li class="mdl-menu__item fp-delete-post"><i class="material-icons">delete</i> Delete post</li>
+              </ul>
             </div>
             <div class="fp-image"></div>
             <div class="fp-likes">0 likes</div>
@@ -381,7 +435,7 @@ friendlyPix.Post = class {
               </span>
               <form class="fp-add-comment" action="#">
                 <div class="mdl-textfield mdl-js-textfield">
-                  <input class="mdl-textfield__input" type="text">
+                  <input class="mdl-textfield__input">
                   <label class="mdl-textfield__label">Comment...</label>
                 </div>
               </form>
@@ -398,15 +452,28 @@ friendlyPix.Post = class {
         <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
           <span class="fp-text">${$('<div>').text(text).html()}</span>
-          <div class="fp-edit-delete-comment-container">
-            <span class="fp-edit-comment">Edit</span> -
-            <span class="fp-delete-comment">DELETE</span>
-          </div>
+          <!-- Drop Down Menu -->
+          <button class="fp-edit-delete-comment-container fp-signed-in-only mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="fp-comment-menu-${commentId}">
+            <i class="material-icons">more_vert</i>
+          </button>
+          <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="fp-comment-menu-${commentId}">
+            <li class="mdl-menu__item fp-report-comment"><i class="material-icons">report</i> Report</li>
+            <li class="mdl-menu__item fp-edit-comment"><i class="material-icons">mode_edit</i> Edit</li>
+            <li class="mdl-menu__item fp-delete-comment"><i class="material-icons">delete</i> Delete post</li>
+          </ul>
         </div>`);
     $('.fp-delete-comment', element).click(() => {
       if (window.confirm('Delete the comment?')) {
         friendlyPix.firebase.deleteComment(postId, commentId).then(() => {
           element.text('this comment has been deleted');
+          element.addClass('fp-comment-deleted');
+        });
+      }
+    });
+    $('.fp-report-comment', element).click(() => {
+      if (window.confirm('Report this comment for inappropriate content?')) {
+        friendlyPix.firebase.reportComment(postId, commentId).then(() => {
+          element.text('this comment has been flagged for review.');
           element.addClass('fp-comment-deleted');
         });
       }

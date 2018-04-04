@@ -675,6 +675,20 @@ friendlyPix.Firebase = class {
   }
 
   /**
+   * Flags the posts for inappropriate content.
+   */
+  reportPost(postId) {
+    return this.database.ref(`/postFlags/${postId}/${this.auth.currentUser.uid}`).set(true);
+  }
+
+  /**
+   * Flags the comment for inappropriate content.
+   */
+  reportComment(postId, commentId) {
+    return this.database.ref(`/commentFlags/${postId}/${commentId}/${this.auth.currentUser.uid}`).set(true);
+  }
+
+  /**
    * Deletes the given postId entry from the user's home feed.
    */
   deleteFromFeed(uri, postId) {
