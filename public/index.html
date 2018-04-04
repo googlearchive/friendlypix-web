@@ -60,7 +60,6 @@
   <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
-
 <!-- Theatre mode viewer -->
 <div class="fp-theatre"><img class="fp-fullpic"></div>
 
@@ -160,39 +159,36 @@
   </div>
 
   <dialog id="privacy-dialog" class="mdl-dialog">
-    <h4 class="mdl-dialog__title">Let's protect your privacy!</h4>
+    <h4 class="mdl-dialog__title">Let's protect privacy!</h4>
     <div class="mdl-dialog__content">
-      <p> What kind of data would you like Friendly Pix to save?</p>
+      <p> Since FriendlyPix is a demo application, we know you already avoid
+        posting any personal data. But play long, so we can show you the kind of
+        data privacy protections you can implement with Firebase! What forms of
+        your data do you consent to Friendly Pix saving?</p>
       <form class="col s12">
         <p>
-          <input type="checkbox" name="allowProfile" id="allowProfile" value="savedAllowProfile"/>
-          <label for="allowProfile">
-            We save basic information required to authenticate users. Do you
-            want personal data like your name and picture to be available to
-            other FriendlyPix users so they can find and follow you? Without
-            this enabled, we disable other people from finding or following
-            you.
+          <input type="checkbox" name="allow-data" id="allow-data"/>
+          <label for="allow-data">
+            I agree to have my data processed in accordance with the privacy
+            policy. This is required to have a FriendlyPix account.
           </label>
         </p>
         <p>
-          <input type="checkbox" name="allowContent" id="allowContent" value="savedAllowContent"/>
-          <label for="allowContent">
-            Do you want us to save images you upload and comments you make?
-            Without this you can still see everyone else's pics, but we'll
-            disable comments and uploads.
+          <input type="checkbox" name="allow-content" id="allow-content"/>
+          <label for="allow-content">
+            Do you want us to save your photos? Without this enabled you view
+            other's photos and comments, but we'll disable photo uploads.
           </label>
         </p>
         <p>
-          <input type="checkbox" name="allowFeed" id="allowFeed" value="savedAllowFeed"/>
-          <label for="allowFeed">
-            Do you want us to save the users you follow, and the pics you like?
-            Without this, we disable the personal feed, but you can look through
-            the universal feed in read-only mode.
+          <input type="checkbox" name="allow-social" id="allow-social"/>
+          <label for="allow-social">
+            Do you want us to save users you follow, comments you make, and your
+            likes? Without this enabled, you can view the public feed in read-only mode.
           </label>
         </p>
       </form>
-      <button class="mdl-button mdl-js-button mdl-button--raised privacy-close">Close</button>
-      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--amber-400 privacy-save">Submit</button>
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--amber-400 privacy-save" disabled>Submit</button>
     </div>
   </dialog>
 
