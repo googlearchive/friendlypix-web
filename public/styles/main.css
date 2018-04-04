@@ -529,7 +529,9 @@ a {
 }
 .fp-post .fp-image {
   flex: 1;
-  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: black;
   background-position: 50% 50%;
   box-sizing: border-box;
   padding-top: 25%;
