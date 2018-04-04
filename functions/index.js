@@ -51,3 +51,17 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'moderateComment
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'moderatePosts') {
   exports.moderatePosts = require('./moderateText').moderatePosts;
 }
+
+/**
+ * Send email upon comment flag.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnCommentReport') {
+  exports.sendEmailOnCommentReport = require('./sendEmailOnReport').sendEmailOnCommentReport;
+}
+
+/**
+ * Send email upon post flag.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnPostReport') {
+  exports.sendEmailOnPostReport = require('./sendEmailOnReport').sendEmailOnPostReport;
+}
