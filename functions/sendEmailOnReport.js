@@ -55,8 +55,8 @@ function sendEmail(snap, context) {
              Make sure to review it asap:<br><br>
              
              Post URL on the Web: ${webURL}<br>
-             ${commentId ? '' : 'Post image thumbnail URL: ' + reportedData.thumb_url + '<br>'}
              ${commentId ? 'Comment' : 'Post'} console URL: ${commentId ? commentConsoleUrl : postConsoleURL}<br>
+             ${commentId ? '' : 'Post image thumbnail: <br><a href="' + reportedData.thumb_url + '"><img src="' + reportedData.thumb_url + '"></a><br>'}
              Text of the ${commentId ? 'comment' : 'post'} reported: <b>${reportedData.text}</b>`
     };
 
