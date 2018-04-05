@@ -342,6 +342,9 @@ a {
 .fp-follow, .fp-notifications {
   margin-top: 20px;
 }
+.fp-notifications {
+  margin-bottom: 10px;
+}
 .fp-name-follow-container {
   margin-left: 10%;
   display: flex;
@@ -429,14 +432,32 @@ a {
   .fp-user-following {
     margin: 35px 16px 0 16px;
   }
-  .fp-follow, .fp-notifications {
+  .fp-notifications {
     margin-top: 10px;
   }
+  .fp-follow {
+    margin-top: 5px;
+  }
   #page-user-info .fp-user-detail-container {
-    margin-top: 10px;
+    margin-top: 5px;
   }
   #page-user-info .fp-user-detail {
     font-size: 13px;
+  }
+  .mdl-switch {
+    height: 18px;
+  }
+  .mdl-switch__label {
+    font-size: 13px;
+  }
+  .mdl-switch__track {
+    height: 12px;
+    width: 32px;
+  }
+  .mdl-switch__thumb {
+    height: 16px;
+    width: 16px;
+    top: 3px;
   }
 }
 

@@ -162,6 +162,7 @@ friendlyPix.UserPage = class {
     // the "Notifications" checkbox.
     if (this.auth.currentUser && userId === this.auth.currentUser.uid) {
       this.followContainer.hide();
+      this.blockContainer.hide();
       friendlyPix.messaging.enableNotificationsContainer.show();
       friendlyPix.messaging.enableNotificationsCheckbox.prop('disabled', true);
       friendlyPix.MaterialUtils.refreshSwitchState(friendlyPix.messaging.enableNotificationsContainer);
@@ -170,6 +171,8 @@ friendlyPix.UserPage = class {
       friendlyPix.messaging.enableNotificationsContainer.hide();
       this.followContainer.show();
       this.followCheckbox.prop('disabled', true);
+      this.blockContainer.show();
+      this.blockContainer.prop('disabled', true);
       friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
       // Start live tracking the state of the "Follow" Checkbox.
       this.trackFollowStatus();
