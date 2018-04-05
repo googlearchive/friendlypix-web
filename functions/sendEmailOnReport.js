@@ -21,7 +21,12 @@ try {
   admin.initializeApp();
 } catch (e) {}
 const Mailgun = require('mailgun-js');
-const mailgun = new Mailgun({apiKey: functions.config().mailgun.key, domain: functions.config().mailgun.domain});
+let mailgun;
+try {
+  mailgun = new Mailgun({apiKey: functions.config().mailgun.key, domain: functions.config().mailgun.domain});
+} catch (e) {
+  console.error('You have not configured the Mailgun API Key and domain. Email sending is disabled.');
+}
 const projectID = process.env.GCLOUD_PROJECT;
 
 /**
@@ -36,7 +41,7 @@ function sendEmail(snap, context) {
   const uid = context.params.uid;
 
   const userURL = 'https://friendly-pix.com/user/' + uid;
-  const webURL = 'https://friendly-pix.com/post/' + postId;
+  const webURL = `https://friendly-pix.com/post/${postId}/admin`;
   const postConsoleURL = `https://console.firebase.google.com/project/${projectID}/database/${projectID}/data/posts/${postId}`;
   const commentConsoleUrl = `https://console.firebase.google.com/project/${projectID}/database/${projectID}/data/comments/${postId}/${commentId}`;
   const ref = commentId ? `/comments/${postId}/${commentId}` : `/posts/${postId}`;
@@ -47,27 +52,34 @@ function sendEmail(snap, context) {
     const data = {
       from: `FriendlyPix Bot <bot@${functions.config().mailgun.domain}>`,
       to: 'friendlypix-team@google.com',
-      subject: `A ${commentId ? 'comment' : 'post'} has been flagged for inappropriate content | ${commentId ? commentId : postId}`,
+      subject: `A ${commentId ? 'comment' : 'post'} has been flagged for inappropriate content - ${commentId ? commentId : postId}`,
       text: 'Please Enable HTML Email viewing.',
       html: `Hey FriendlyPix Team,<br><br>
 
-             The user <a href="${userURL}">${user.displayName} (${user.email})</a> has flagged a ${commentId ? 'comment' : 'post'} on FriendlyPix.
-             Make sure to review it asap:<br><br>
-             
-             Post URL on the Web: ${webURL}<br>
-             ${commentId ? 'Comment' : 'Post'} console URL: ${commentId ? commentConsoleUrl : postConsoleURL}<br>
-             ${commentId ? '' : 'Post image thumbnail: <br><a href="' + reportedData.thumb_url + '"><img src="' + reportedData.thumb_url + '"></a><br>'}
-             Text of the ${commentId ? 'comment' : 'post'} reported: <b>${reportedData.text}</b>`
+           The user <a href="${userURL}">${user.displayName} (${user.email})</a>
+           has flagged a ${commentId ? 'comment' : 'post'} on FriendlyPix.
+           Make sure to review it asap:<br><br>
+           
+           Post URL on the Web (admin page): ${webURL}<br>
+           ${commentId ? 'Comment' : 'Post'} console URL: ${commentId ? commentConsoleUrl : postConsoleURL}<br>
+           ${commentId ? '' : `Post image thumbnail: <br>
+               <a href="${reportedData.thumb_url}"><img src="${reportedData.thumb_url}"></a><br>`}
+           Text of the ${commentId ? 'comment' : 'post'} reported: <b>${reportedData.text}</b>`
     };
 
-    return new Promise((resolve, reject) => {
-      mailgun.messages().send(data, (error, body) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(body.message);
-        }
+    if (mailgun) {
+      return new Promise((resolve, reject) => {
+        mailgun.messages().send(data, (error, body) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(body.message);
+          }
+        });
       });
-    });
+    }
+    console.error('Some content was flagged for review but the notification email couldn\'t be sent because the ' +
+        'Mailgun API credentials were not setup. Flagged content details:', data);
+    return null;
   });
 }
