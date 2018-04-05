@@ -65,3 +65,17 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnComm
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnPostReport') {
   exports.sendEmailOnPostReport = require('./sendEmailOnReport').sendEmailOnPostReport;
 }
+
+/**
+ * Mark some users as admins.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'markAdmins') {
+  exports.markAdmins = require('./markAdmins').default;
+}
+
+/**
+ * Unmark some users as admins.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') {
+  exports.removeAdmins = require('./markAdmins').removeAdmins;
+}

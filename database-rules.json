@@ -1,5 +1,17 @@
 {
   "rules": {
+    // Admin access.
+    ".read": "auth.token.admin === true",
+    ".write": "auth.token.admin === true",
+    "admins": {
+      ".read": "false",  // Only a cloud function or admins can update this.
+      ".write": "false",  // Only a cloud function or admins can update this.
+      "$index": {
+        "email": {
+          ".validate": "newData.isString()"
+        }
+      }
+    },
     // User's personnal feeds.
     "feed": {
       "$uid": {

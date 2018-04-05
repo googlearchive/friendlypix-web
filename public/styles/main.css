@@ -686,6 +686,13 @@ a {
   display: none;
 }
 
+.fp-admin .fp-delete-post,
+.fp-owned-post .fp-delete-post,
+.fp-admin .fp-delete-comment,
+.fp-admin .fp-edit-comment {
+  display: block;
+}
+
 /* Splash Page */
 
 #page-splash {

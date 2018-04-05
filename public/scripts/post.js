@@ -109,11 +109,15 @@ friendlyPix.Post = class {
     // Subscribe to updates of the comment.
     friendlyPix.firebase.subscribeToComment(postId, commentId, snap => {
       const updatedComment = snap.val();
-      const updatedElement = this.createComment(updatedComment.author,
+      if (updatedComment) {
+        const updatedElement = this.createComment(updatedComment.author,
           updatedComment.text, postId, commentId,
           updatedComment.author.uid === friendlyPix.auth.userId);
-      const element = $('#comment-' + commentId);
-      element.replaceWith(updatedElement);
+        const element = $('#comment-' + commentId);
+        element.replaceWith(updatedElement);
+      } else {
+        $('#comment-' + commentId).remove();
+      }
       friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
     });
   }
@@ -317,45 +321,46 @@ friendlyPix.Post = class {
   _setupDeleteButton(postId, author, picStorageUri, thumbStorageUri) {
     const post = this.postElement;
 
-    if (this.auth.currentUser && this.auth.currentUser.uid === author.uid && picStorageUri) {
-      $('.fp-delete-post', post).show();
-      $('.fp-delete-post', post).off('click');
-      $('.fp-delete-post', post).click(() => {
-        swal({
-          title: 'Are you sure?',
-          text: 'You are about to delete this post. Once deleted, you will not be able to recover it!',
-          type: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes, delete it!',
-          closeOnConfirm: false,
-          showLoaderOnConfirm: true,
-          allowEscapeKey: true
-        }, () => {
-          $('.fp-delete-post', post).prop('disabled', true);
-          friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
-            swal({
-              title: 'Deleted!',
-              text: 'Your post has been deleted.',
-              type: 'success',
-              timer: 2000
-            });
-            $('.fp-delete-post', post).prop('disabled', false);
-            page(`/user/${this.auth.currentUser.uid}`);
-          }).catch(error => {
-            swal.close();
-            $('.fp-delete-post', post).prop('disabled', false);
-            const data = {
-              message: `There was an error deleting your post: ${error}`,
-              timeout: 5000
-            };
-            this.toast[0].MaterialSnackbar.showSnackbar(data);
+    if (this.auth.currentUser && this.auth.currentUser.uid === author.uid) {
+      post.addClass('fp-owned-post');
+    } else {
+      post.removeClass('fp-owned-post');
+    }
+
+    $('.fp-delete-post', post).off('click');
+    $('.fp-delete-post', post).click(() => {
+      swal({
+        title: 'Are you sure?',
+        text: 'You are about to delete this post. Once deleted, you will not be able to recover it!',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes, delete it!',
+        closeOnConfirm: false,
+        showLoaderOnConfirm: true,
+        allowEscapeKey: true
+      }, () => {
+        $('.fp-delete-post', post).prop('disabled', true);
+        friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
+          swal({
+            title: 'Deleted!',
+            text: 'Your post has been deleted.',
+            type: 'success',
+            timer: 2000
           });
+          $('.fp-delete-post', post).prop('disabled', false);
+          page(`/user/${this.auth.currentUser.uid}`);
+        }).catch(error => {
+          swal.close();
+          $('.fp-delete-post', post).prop('disabled', false);
+          const data = {
+            message: `There was an error deleting your post: ${error}`,
+            timeout: 5000
+          };
+          this.toast[0].MaterialSnackbar.showSnackbar(data);
         });
       });
-    } else {
-      $('.fp-delete-post', post).hide();
-    }
+    });
   }
 
   /**
@@ -459,7 +464,7 @@ friendlyPix.Post = class {
           <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="fp-comment-menu-${commentId}">
             <li class="mdl-menu__item fp-report-comment"><i class="material-icons">report</i> Report</li>
             <li class="mdl-menu__item fp-edit-comment"><i class="material-icons">mode_edit</i> Edit</li>
-            <li class="mdl-menu__item fp-delete-comment"><i class="material-icons">delete</i> Delete post</li>
+            <li class="mdl-menu__item fp-delete-comment"><i class="material-icons">delete</i> Delete comment</li>
           </ul>
         </div>`);
     $('.fp-delete-comment', element).click(() => {
