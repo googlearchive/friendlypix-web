@@ -335,9 +335,11 @@ a {
   width: 215px;
   box-sizing: border-box;
 }
-.fp-follow, .fp-notifications {
-  width: 220px;
+.fp-follow, .fp-notifications, .fp-block {
+  width: 100%;
   text-align: left;
+}
+.fp-follow, .fp-notifications {
   margin-top: 20px;
 }
 .fp-name-follow-container {

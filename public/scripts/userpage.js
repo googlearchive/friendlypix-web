@@ -42,6 +42,9 @@ friendlyPix.UserPage = class {
       this.noPosts = $('.fp-no-posts', this.userPage);
       this.followLabel = $('.mdl-switch__label', this.followContainer);
       this.followCheckbox = $('#follow');
+      this.blockContainer = $('.fp-block');
+      this.blockLabel = $('.mdl-switch__label', this.blockContainer);
+      this.blockCheckbox = $('#block');
       this.nbPostsContainer = $('.fp-user-nbposts', this.userPage);
       this.nbFollowers = $('.fp-user-nbfollowers', this.userPage);
       this.nbFollowing = $('.fp-user-nbfollowing', this.userPage);
@@ -53,7 +56,9 @@ friendlyPix.UserPage = class {
 
       // Event bindings.
       this.followCheckbox.change(() => this.onFollowChange());
+      this.blockCheckbox.change(() => this.onBlockChange());
       this.auth.onAuthStateChanged(() => this.trackFollowStatus());
+      this.auth.onAuthStateChanged(() => this.trackBlockStatus());
       this.nbFollowingContainer.click(() => this.displayFollowing());
       this.closeFollowingButton.click(() => {
         this.followingContainer.hide();
@@ -73,6 +78,16 @@ friendlyPix.UserPage = class {
   }
 
   /**
+   * Triggered when the user changes the "Block" checkbox.
+   */
+  onBlockChange() {
+    const checked = this.blockCheckbox.prop('checked');
+    this.blockCheckbox.prop('disabled', true);
+
+    friendlyPix.firebase.toggleBlockUser(this.userId, checked);
+  }
+
+  /**
    * Starts tracking the "Follow" checkbox status.
    */
   trackFollowStatus() {
@@ -82,6 +97,20 @@ friendlyPix.UserPage = class {
         this.followCheckbox.prop('disabled', false);
         this.followLabel.text(data.val() ? 'Following' : 'Follow');
         friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
+      });
+    }
+  }
+
+  /**
+   * Starts tracking the "Blocked" checkbox status.
+   */
+  trackBlockStatus() {
+    if (this.auth.currentUser) {
+      friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, data => {
+        this.blockCheckbox.prop('checked', data.val() !== null);
+        this.blockCheckbox.prop('disabled', false);
+        this.blockLabel.text(data.val() ? 'Blocked' : 'Block');
+        friendlyPix.MaterialUtils.refreshSwitchState(this.blockContainer);
       });
     }
   }
@@ -144,6 +173,8 @@ friendlyPix.UserPage = class {
       friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
       // Start live tracking the state of the "Follow" Checkbox.
       this.trackFollowStatus();
+      // Start live tracking the state of the "Block" Checkbox.
+      this.trackBlockStatus();
     }
 
     // Load user's profile.

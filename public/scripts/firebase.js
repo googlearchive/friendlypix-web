@@ -530,6 +530,18 @@ friendlyPix.Firebase = class {
   }
 
   /**
+   * Blocks/Unblocks a user and return a promise once that's done.
+   */
+  toggleBlockUser(followedUserId, block) {
+    // Add or remove posts to the user's home feed.
+    const update = {};
+    update[`/blocking/${this.auth.currentUser.uid}/${followedUserId}`] = block ? !!block : null;
+    update[`/blocked/${followedUserId}/${this.auth.currentUser.uid}`] = block ? !!block : null;
+
+    return this.database.ref().update(update);
+  }
+
+  /**
    * Listens to updates on the followed status of the given user.
    */
   registerToFollowStatusUpdate(userId, callback) {
@@ -537,6 +549,16 @@ friendlyPix.Firebase = class {
         this.database.ref(`/people/${this.auth.currentUser.uid}/following/${userId}`);
     followStatusRef.on('value', callback);
     this.firebaseRefs.push(followStatusRef);
+  }
+
+  /**
+   * Listens to updates on the blocked status of the given user.
+   */
+  registerToBlockedStatusUpdate(userId, callback) {
+    const blockStatusRef =
+        this.database.ref(`/blocking/${this.auth.currentUser.uid}/${userId}`);
+    blockStatusRef.on('value', callback);
+    this.firebaseRefs.push(blockStatusRef);
   }
 
   /**
