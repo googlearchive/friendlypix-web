@@ -79,3 +79,17 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'markAdmins') {
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') {
   exports.removeAdmins = require('./markAdmins').removeAdmins;
 }
+
+/**
+ * Update all public profiles upon call.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfiles') {
+  exports.updateAllProfiles = require('./publicProfiles').updateAllProfiles;
+}
+
+/**
+ * Update user's public profile when his account is created.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'createPublicProfile') {
+  exports.createPublicProfile = require('./publicProfiles').createPublicProfile;
+}

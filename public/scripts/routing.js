@@ -70,7 +70,6 @@ friendlyPix.Router = class {
   displayPage(attributes, context) {
     const onlyAuthed = attributes.onlyAuthed;
     const admin = attributes.admin;
-console.log('ADMIN', admin);
     if (admin) {
       friendlyPix.Router.enableAdminMode();
     } else {
