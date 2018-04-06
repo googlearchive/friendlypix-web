@@ -46,17 +46,14 @@ function updateAllProfiles(pageToken = undefined) {
   return admin.auth().listUsers(100, pageToken).then(result => {
     pageToken = result.pageToken;
     const updates = {};
-    // const updatesPromises = [];
 
     result.users.forEach(user => {
-      // updatesPromises.push(buildProfileUpdate(user).then(data => {
       const data = buildProfileUpdate(user);
       for (const key in data) {
         if (data.hasOwnProperty(key)) {
           updates[key] = data[key];
         }
       }
-      // }));
     });
     console.log('Update read for 100 users:', updates);
     return updates;
@@ -103,23 +100,4 @@ function buildProfileUpdate(user) {
   };
 
   return updateData;
-
-  // return admin.database().ref(`/posts/`).orderByChild('author/uid').equalTo(user.uid).once('value')
-  //   .then(snap => {
-  //     const updateData = {};
-  //     if (imageUrl) {
-  //       updateData[`/people/${user.uid}/profile_picture`] = imageUrl;
-  //     }
-  //     updateData[`/people/${user.uid}/full_name`] = displayName;
-  //     updateData[`/people/${user.uid}/_search_index`] = {
-  //       full_name: searchFullName,
-  //       reversed_full_name: searchReversedFullName
-  //     };
-  //     updateData[`/people/${user.uid}/posts`] = {};
-  //     snap.forEach(post => {
-  //       updateData[`/people/${user.uid}/posts`][post.key] = true;
-  //     });
-  //
-  //     return updateData;
-  //   });
 }
