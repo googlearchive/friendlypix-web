@@ -30,6 +30,21 @@ a {
 .mdl-card {
   display: block;
 }
+.fp-signed-in .fp-signed-out-only {
+  display: none !important;
+}
+.fp-signed-out .fp-signed-in-only {
+  display: none !important;
+}
+.fp-auth-state-unknown .fp-initially-hidden {
+  display: none;
+}
+.fp-admin-only {
+   display: none;
+ }
+.fp-admin .fp-admin-only {
+  display: block;
+}
 /* Theatre mode */
 .fp-theatre {
   display: none;
@@ -130,7 +145,6 @@ a {
 /* Signed-in user */
 
 .fp-signed-in-user-container {
-  display: none;
   margin-left: 10px;
 }
 .fp-avatar {
@@ -176,9 +190,6 @@ a {
 }
 .mdl-layout__drawer .fp-sign-in-button {
   margin: 10px 0 0 0;
-}
-.fp-sign-out {
-  display: none;
 }
 .fp-sign-in-button {
   margin-left: 10px;
@@ -845,10 +856,6 @@ a {
 }
 
 /* Misc */
-
-.fp-initially-hidden {
-  display: none;
-}
 .mdl-snackbar {
   z-index: 101;
 }
