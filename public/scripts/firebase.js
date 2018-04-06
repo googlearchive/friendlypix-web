@@ -160,23 +160,6 @@ friendlyPix.Firebase = class {
         friendlyPix.Firebase.USER_PAGE_POSTS_PAGE_SIZE, null, true);
   }
 
-  fetchPrivacySettings(uid) {
-    let privacySettings = this.savedPrivacySettings;
-    if (privacySettings == null) {
-      const uri = `/privacy/${uid}`;
-      this.database.ref(uri).once('value').then(function(snapshot) {
-        privacySettings = snapshot.val();
-        console.log("privacySettings", privacySettings);
-      });
-    }
-  }
-
-  savePrivacySettings(uid, settings) {
-    const uri = `/privacy/${uid}`;
-    console.log(`making database write to: ${uri}, with settings: ${settings}`);
-    this.database.ref(uri).set(settings);
-  }
-
   /**
    * Subscribes to receive updates to the given feed. The given `callback` function gets called
    * for each new entry on the given feed.

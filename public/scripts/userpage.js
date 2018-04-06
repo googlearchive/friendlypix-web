@@ -69,7 +69,7 @@ friendlyPix.UserPage = class {
       });
 
       // Event bindings for Privacy Consent Dialog
-      this.privacyDialogButton.click(() => this.showPrivacyModal());
+      this.privacyDialogButton.click(() => this.showPrivacyDialog());
       this.privacyDialogSave.click(() => this.savePrivacySettings());
       this.allowDataProcessing.change(() => {
         // The submit button for the privacy settings is disabled until
@@ -81,34 +81,61 @@ friendlyPix.UserPage = class {
     });
   }
 
-  showPrivacyModal() {
-    // temporary: userId is undefined when this evaluates
-    this.userId = "madeupid12345";
-
-    friendlyPix.firebase.fetchPrivacySettings(this.userId);
-
-    if (this.savedPrivacySettings == undefined) {
-      // temporary; the fetched privacy settings are undefined
-      this.savedPrivacySettings = {content: "on", data_processing: "on", social: "on"};
-      this.allowDataProcessing.val(this.savedPrivacySettings.data_processing)
-      this.allowContent.val(this.savedPrivacySettings.content)
-      this.allowSocial.val(this.savedPrivacySettings.social)
-    }
-    this.privacyDialog.get(0).showModal();
+  /**
+   * Sets initial state of Privacy Dialog.
+   */
+  showPrivacyDialog() {
+    const userPromise = new Promise(function(resolve, reject) {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          resolve(user.uid)
+        } else {
+          reject
+        }
+      });
+    }).then((uid) => {
+      this.userId = uid;
+      this.fetchPrivacySettings(uid)
+    }).then((uid) => {
+      this.privacyDialog.get(0).showModal();
+    })
   }
 
-  savePrivacySettings() {
-    const settings = {
-      "data_processing": this.allowDataProcessing.val(),
-      "content": this.allowContent.val(),
-      "social": this.allowSocial.val()
+  /**
+   * Fetches previously saved privacy settings if they exist and
+   * enables the Submit button if user has consented to data processing.
+   */
+  fetchPrivacySettings() {
+    if (this.savedPrivacySettings == null) {
+      const uri = `/privacy/${this.userId}`;
+      this.database.ref(uri).once('value').then(snapshot => {
+        this.savedPrivacySettings = snapshot.val();
+        if (this.savedPrivacySettings.data_processing) {
+          this.allowDataProcessing.prop('checked', true);
+          this.privacyDialogSave.removeAttr("disabled");
+        }
+        if (this.savedPrivacySettings.content) {
+          this.allowContent.prop("checked", true)
+        }
+        if (this.savedPrivacySettings.social) {
+          this.allowSocial.prop("checked", true)
+        }
+      })
     }
+  }
 
-    // temporary: the userId is undefined when this evaluates
-    this.userId = "madeupid12345";
-
-    friendlyPix.firebase.savePrivacySettings(this.userId, settings);
-    this.privacyDialog.get(0).close();
+  /**
+   * Saves new privacy settings and closes the privacy dialog.
+   */
+  savePrivacySettings() {
+    const uri = `/privacy/${this.userId}`;
+    this.database.ref(uri).set({
+      data_processing: this.allowDataProcessing.prop("checked"),
+      content: this.allowContent.prop("checked"),
+      social: this.allowSocial.prop("checked")
+    }).then(() => {
+      this.privacyDialog.get(0).close();
+    })
   }
 
   /**
