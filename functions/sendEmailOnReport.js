@@ -63,7 +63,7 @@ function sendEmail(snap, context) {
            Post URL on the Web (admin page): ${webURL}<br>
            ${commentId ? 'Comment' : 'Post'} console URL: ${commentId ? commentConsoleUrl : postConsoleURL}<br>
            ${commentId ? '' : `Post image thumbnail: <br>
-               <a href="${reportedData.thumb_url}"><img src="${reportedData.thumb_url}"></a><br>`}
+               <a href="${reportedData.thumb_url}"><img style="max-width: 400px" src="${reportedData.thumb_url}"></a><br>`}
            Text of the ${commentId ? 'comment' : 'post'} reported: <b>${reportedData.text}</b>`
     };
 
