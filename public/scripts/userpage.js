@@ -59,6 +59,8 @@ friendlyPix.UserPage = class {
       this.allowContent = $('#allow-content');
       this.allowSocial = $('#allow-social');
 
+      this.uploadButton = $('button#add');
+
       // Event bindings.
       this.followCheckbox.change(() => this.onFollowChange());
       this.auth.onAuthStateChanged(() => this.trackFollowStatus());
@@ -88,14 +90,14 @@ friendlyPix.UserPage = class {
     const userPromise = new Promise(function(resolve, reject) {
       firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
-          resolve(user.uid)
+          resolve(user.uid);
         } else {
-          reject
+          reject();
         }
       });
     }).then((uid) => {
       this.userId = uid;
-      this.fetchPrivacySettings(uid)
+      this.fetchPrivacySettings(uid);
     }).then((uid) => {
       this.privacyDialog.get(0).showModal();
     })
@@ -115,10 +117,13 @@ friendlyPix.UserPage = class {
           this.privacyDialogSave.removeAttr("disabled");
         }
         if (this.savedPrivacySettings.content) {
-          this.allowContent.prop("checked", true)
+          this.allowContent.prop("checked", true);
+        } else {
+          console.log("addButton: ", this.uploadButton);
+          this.uploadButton.prop("disabled", true);
         }
         if (this.savedPrivacySettings.social) {
-          this.allowSocial.prop("checked", true)
+          this.allowSocial.prop("checked", true);
         }
       })
     }
