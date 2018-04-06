@@ -366,7 +366,7 @@ friendlyPix.Firebase = class {
     }
 
     const updateData = {
-      profile_picture: imageUrl,
+      profile_picture: imageUrl || null,
       full_name: displayName,
       _search_index: {
         full_name: searchFullName,
@@ -410,8 +410,8 @@ friendlyPix.Firebase = class {
       timestamp: firebase.database.ServerValue.TIMESTAMP,
       author: {
         uid: this.auth.currentUser.uid,
-        full_name: this.auth.currentUser.displayName,
-        profile_picture: this.auth.currentUser.photoURL
+        full_name: this.auth.currentUser.displayName || 'Anonymous',
+        profile_picture: this.auth.currentUser.photoURL || null
       }
     };
     return this.database.ref(`comments/${postId}`).push(commentObject);
@@ -484,13 +484,14 @@ friendlyPix.Firebase = class {
         full_url: urls[0],
         thumb_url: urls[1],
         text: text,
+        client: 'web',
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         full_storage_uri: picRef.toString(),
         thumb_storage_uri: thumbRef.toString(),
         author: {
           uid: this.auth.currentUser.uid,
-          full_name: this.auth.currentUser.displayName,
-          profile_picture: this.auth.currentUser.photoURL
+          full_name: this.auth.currentUser.displayName || 'Anonymous',
+          profile_picture: this.auth.currentUser.photoURL || null
         }
       };
       update[`/people/${this.auth.currentUser.uid}/posts/${newPostKey}`] = true;
