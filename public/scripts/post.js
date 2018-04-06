@@ -146,7 +146,7 @@ friendlyPix.Post = class {
    * Fills the post's Card with the given details.
    * Also sets all auto updates and listeners on the UI elements of the post.
    */
-  fillPostData(postId, thumbUrl, imageText, author, timestamp, thumbStorageUri, picStorageUri, picUrl) {
+  fillPostData(postId, thumbUrl, imageText, author = {}, timestamp, thumbStorageUri, picStorageUri, picUrl) {
     const post = this.postElement;
 
     friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
@@ -318,7 +318,7 @@ friendlyPix.Post = class {
    * Shows/Hide and binds actions to the Delete button.
    * @private
    */
-  _setupDeleteButton(postId, author, picStorageUri, thumbStorageUri) {
+  _setupDeleteButton(postId, author = {}, picStorageUri, thumbStorageUri) {
     const post = this.postElement;
 
     if (this.auth.currentUser && this.auth.currentUser.uid === author.uid) {
@@ -452,7 +452,7 @@ friendlyPix.Post = class {
   /**
    * Returns the HTML for a post's comment.
    */
-  createComment(author, text, postId, commentId, isOwner = false) {
+  createComment(author = {}, text, postId, commentId, isOwner = false) {
     const element = $(`
         <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
