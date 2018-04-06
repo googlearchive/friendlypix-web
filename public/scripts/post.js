@@ -453,7 +453,8 @@ friendlyPix.Post = class {
    * Returns the HTML for a post's comment.
    */
   createComment(author = {}, text, postId, commentId, isOwner = false) {
-    const element = $(`
+    try {
+      const element = $(`
         <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
           <span class="fp-text">${$('<div>').text(text).html()}</span>
@@ -467,31 +468,35 @@ friendlyPix.Post = class {
             <li class="mdl-menu__item fp-delete-comment"><i class="material-icons">delete</i> Delete comment</li>
           </ul>
         </div>`);
-    $('.fp-delete-comment', element).click(() => {
-      if (window.confirm('Delete the comment?')) {
-        friendlyPix.firebase.deleteComment(postId, commentId).then(() => {
-          element.text('this comment has been deleted');
-          element.addClass('fp-comment-deleted');
-        });
-      }
-    });
-    $('.fp-report-comment', element).click(() => {
-      if (window.confirm('Report this comment for inappropriate content?')) {
-        friendlyPix.firebase.reportComment(postId, commentId).then(() => {
-          element.text('this comment has been flagged for review.');
-          element.addClass('fp-comment-deleted');
-        });
-      }
-    });
-    $('.fp-edit-comment', element).click(() => {
-      const newComment = window.prompt('Edit the comment?', text);
-      if (newComment !== null && newComment !== '') {
-        friendlyPix.firebase.editComment(postId, commentId, newComment).then(() => {
-          $('.fp-text', element).text(newComment);
-        });
-      }
-    });
-    return element;
+      $('.fp-delete-comment', element).click(() => {
+        if (window.confirm('Delete the comment?')) {
+          friendlyPix.firebase.deleteComment(postId, commentId).then(() => {
+            element.text('this comment has been deleted');
+            element.addClass('fp-comment-deleted');
+          });
+        }
+      });
+      $('.fp-report-comment', element).click(() => {
+        if (window.confirm('Report this comment for inappropriate content?')) {
+          friendlyPix.firebase.reportComment(postId, commentId).then(() => {
+            element.text('this comment has been flagged for review.');
+            element.addClass('fp-comment-deleted');
+          });
+        }
+      });
+      $('.fp-edit-comment', element).click(() => {
+        const newComment = window.prompt('Edit the comment?', text);
+        if (newComment !== null && newComment !== '') {
+          friendlyPix.firebase.editComment(postId, commentId, newComment).then(() => {
+            $('.fp-text', element).text(newComment);
+          });
+        }
+      });
+      return element;
+    } catch (e) {
+      console.error('Error while displaying comment', e);
+    }
+    return $('<div/>');
   }
 
   /**
