@@ -34,6 +34,9 @@
         "timestamp": {
           ".validate": "newData.val() === now"
         },
+        "client": {
+          ".validate": "newData.val() === 'web' || newData.val() === 'ios' || newData.val() === 'android'"
+        },
         "sanitized": {
           ".validate": "false" // Only a cloud function (admin mode) can update this.
         },
@@ -45,7 +48,7 @@
             ".validate": "auth.uid === newData.val()"
           },
           "full_name": {
-            ".validate": "auth.token.name === newData.val()"
+            ".validate": "auth.token.name === newData.val() || (auth.token.name === null && newData.val() === 'Anonymous')"
           },
           "profile_picture": {
             ".validate": "newData.isString()"
@@ -79,7 +82,7 @@
               ".validate": "auth.uid === newData.val()"
             },
             "full_name": {
-              ".validate": "auth.token.name === newData.val()"
+              ".validate": "auth.token.name === newData.val() || (auth.token.name === null && newData.val() === 'Anonymous')"
             },
             "profile_picture": {
               ".validate": "auth.token.picture === newData.val()"
@@ -123,10 +126,10 @@
       "$uid": {
         ".write": "auth.uid === $uid",
         "full_name": {
-          ".validate": "auth.token.name === newData.val()"
+          ".validate": "auth.token.name === newData.val() || (auth.token.name === null && newData.val() === 'Anonymous')"
         },
         "profile_picture": {
-          ".validate": "auth.token.picture === newData.isString()"
+          ".validate": "auth.token.picture === newData.val()"
         },
         "posts": {
           "$postId": {
