@@ -18,6 +18,7 @@
 const functions = require('firebase-functions');
 const latinize = require('latinize');
 const admin = require('firebase-admin');
+const http = require('http');
 try {
   admin.initializeApp();
 } catch (e) {}
@@ -37,6 +38,37 @@ exports.updateAllProfiles = functions.https.onCall((data, context) => {
  */
 exports.createPublicProfile = functions.auth.user().onCreate(user => {
   return admin.database().ref().update(buildProfileUpdate(user));
+});
+
+/**
+ * Caches the Facebook profile pics to avoid URL expiry issues.
+ */
+exports.cacheFacebookProfilePic = functions.database.ref('/people/{uid}/profile_picture').onWrite((change, context) => {
+  if (change.after.exists() && change.after.val().indexOf('facebook.com') !== -1) {
+    const file = admin.storage().bucket().file(`/${context.params.uid}/profilePic.jpg`);
+    const uploadStream = file.createWriteStream({contentType: 'image/jpeg'});
+    http.get(change.after.val(), response => {
+      response.pipe(uploadStream);
+    });
+    return new Promise((resolve, reject) => uploadStream.on('finish', resolve).on('error', reject)).then(() => {
+      console.log('Facebook Profile Pic cached.');
+      const config = {
+        action: 'read',
+        expires: '03-01-2500'
+      };
+      return file.getSignedUrl(config);
+    }).then(url => {
+      console.log('Signed URL generated.', url);
+      return Promise.all([
+        admin.auth().updateUser(context.params.uid, {photoURL: url}),
+        change.after.val().ref.set(url)
+      ]);
+    }).then(() => {
+      console.log('Profile Pic URL changed.');
+      return null;
+    });
+  }
+  return null;
 });
 
 /**

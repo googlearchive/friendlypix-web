@@ -81,6 +81,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') 
 }
 
 /**
+ * Caches the Facebook profile pics to avoid URL expiry issues.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cacheFacebookProfilePic') {
+  exports.cacheFacebookProfilePic = require('./publicProfiles').cacheFacebookProfilePic;
+}
+
+/**
  * Update all public profiles upon call.
  */
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfiles') {
@@ -90,6 +97,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfil
 /**
  * Update user's public profile when his account is created.
  */
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'createPublicProfile') {
-  exports.createPublicProfile = require('./publicProfiles').createPublicProfile;
-}
+// Note: Disabled for now as we're switching to do this on the client.
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'createPublicProfile') {
+//   exports.createPublicProfile = require('./publicProfiles').createPublicProfile;
+// }
