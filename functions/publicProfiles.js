@@ -18,7 +18,7 @@
 const functions = require('firebase-functions');
 const latinize = require('latinize');
 const admin = require('firebase-admin');
-const http = require('http');
+const https = require('https');
 try {
   admin.initializeApp();
 } catch (e) {}
@@ -47,7 +47,7 @@ exports.cacheFacebookProfilePic = functions.database.ref('/people/{uid}/profile_
   if (change.after.exists() && change.after.val().indexOf('facebook.com') !== -1) {
     const file = admin.storage().bucket().file(`/${context.params.uid}/profilePic.jpg`);
     const uploadStream = file.createWriteStream({contentType: 'image/jpeg'});
-    http.get(change.after.val(), response => {
+    https.get(change.after.val(), response => {
       response.pipe(uploadStream);
     });
     return new Promise((resolve, reject) => uploadStream.on('finish', resolve).on('error', reject)).then(() => {
@@ -57,11 +57,11 @@ exports.cacheFacebookProfilePic = functions.database.ref('/people/{uid}/profile_
         expires: '03-01-2500'
       };
       return file.getSignedUrl(config);
-    }).then(url => {
-      console.log('Signed URL generated.', url);
+    }).then(urls => {
+      console.log('Signed URL generated.', urls[0]);
       return Promise.all([
-        admin.auth().updateUser(context.params.uid, {photoURL: url}),
-        change.after.val().ref.set(url)
+        admin.auth().updateUser(context.params.uid, {photoURL: urls[0]}),
+        change.after.ref.set(urls[0])
       ]);
     }).then(() => {
       console.log('Profile Pic URL changed.');

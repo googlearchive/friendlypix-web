@@ -52,7 +52,7 @@
             ".validate": "auth.token.name === newData.val() || (auth.token.name === null && newData.val() === 'Anonymous')"
           },
           "profile_picture": {
-            ".validate": "auth.token.picture === newData.val()"
+            ".validate": "true"
           }
         }
       }
@@ -86,7 +86,7 @@
               ".validate": "auth.token.name === newData.val() || (auth.token.name === null && newData.val() === 'Anonymous')"
             },
             "profile_picture": {
-              ".validate": "auth.token.picture === newData.val()"
+              ".validate": "true"
             },
             "$other": {
               ".validate": false
@@ -130,7 +130,7 @@
           ".validate": "auth.token.name === newData.val() || (auth.token.name === null && newData.val() === 'Anonymous')"
         },
         "profile_picture": {
-          ".validate": "auth.token.picture === newData.val()"
+          ".validate": "true"
         },
         "posts": {
           "$postId": {
