@@ -352,7 +352,21 @@ friendlyPix.Firebase = class {
   /**
    * Saves or updates public user data in Firebase (such as image URL, display name...).
    */
-  saveUserData(imageUrl, displayName) {
+  updatePublicProfile() {
+    let displayName = firebase.auth().currentUser.displayName;
+    let imageUrl = firebase.auth().currentUser.photoURL;
+
+    // If the main profile Pic is an old facebook profile pic URL we'll force the update.
+    if (imageUrl.indexOf('facebook') !== -1) {
+      const providerPhotoURL = firebase.auth().currentUser.providerData[0].photoURL;
+      if (providerPhotoURL !== imageUrl) {
+        firebase.auth().currentUser.updateProfile({photoURL: providerPhotoURL}).then(() => {
+          console.log('User profile updated.');
+        });
+        imageUrl = providerPhotoURL;
+      }
+    }
+
     if (!displayName) {
       displayName = 'Anonymous';
     }
@@ -373,7 +387,9 @@ friendlyPix.Firebase = class {
         reversed_full_name: searchReversedFullName
       }
     };
-    return this.database.ref(`people/${this.auth.currentUser.uid}`).update(updateData);
+    return this.database.ref(`/people/${this.auth.currentUser.uid}`).update(updateData).then(() => {
+      console.log('Public profile updated.');
+    });
   }
 
   /**
