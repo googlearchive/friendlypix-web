@@ -146,8 +146,8 @@ function updateFacebookProfilePic(user) {
     // Fid the user's Facebook UID.
     const facebookUID = user.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
     imageUrl = `https://graph.facebook.com/${facebookUID}/picture?type=large`;
-    promise = admin.auth().updateUser({photoURL: imageUrl}).then(() => {
-      console.log('User profile updated.');
+    promise = admin.auth().updateUser(user.uid, {photoURL: imageUrl}).then(() => {
+      console.log('User profile updated for UID', user.uid);
     });
     updateData[`/people/${user.uid}/profile_picture`] = imageUrl;
   }
@@ -158,9 +158,9 @@ function updateFacebookProfilePic(user) {
 /**
  * Update all bad facebook profile pics by batches of 100.
  */
-function updateAllFacebookBadProfilesPics(pageToken = undefined) {
+function updateAllFacebookBadProfilesPics(pageToken = undefined, count = 0) {
   const promises = [];
-  return admin.auth().listUsers(100, pageToken).then(result => {
+  return admin.auth().listUsers(10, pageToken).then(result => {
     pageToken = result.pageToken;
     const updates = {};
 
@@ -173,7 +173,8 @@ function updateAllFacebookBadProfilesPics(pageToken = undefined) {
         }
       }
     });
-    console.log('Update read for 100 users:', updates);
+    count += 10;
+    console.log(`Update ready for 10 users. Total processed: ${count}`);
     return updates;
   }).then(updates => {
     return admin.database().ref().update(updates);
@@ -181,7 +182,7 @@ function updateAllFacebookBadProfilesPics(pageToken = undefined) {
     return Promise.all(promises);
   }).then(() => {
     if (pageToken) {
-      return updateAllProfiles(pageToken);
+      return updateAllFacebookBadProfilesPics(pageToken, count);
     }
     return null;
   }).catch(error => {
