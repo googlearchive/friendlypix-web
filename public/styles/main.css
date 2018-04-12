@@ -600,12 +600,14 @@ a {
   color: #444;
   padding: 10px 10px 0 10px;
   font-weight: bold;
+  display: none;
 }
 .fp-post .fp-morecomments {
   padding: 5px 0 6px 10px;
   cursor: pointer;
   font-size: 14px;
   color: #0288D1;
+  display: none;
 }
 .fp-post .fp-morecomments:HOVER {
   text-decoration: underline;
