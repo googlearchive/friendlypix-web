@@ -28,7 +28,7 @@ try {
  */
 exports.updateAllProfiles = functions.https.onCall((data, context) => {
   if (context.auth.token.admin) {
-    return updateAllProfiles();
+    return updateAllFacebookBadProfilesPics();
   }
   return null;
 });
@@ -132,4 +132,59 @@ function buildProfileUpdate(user) {
   };
 
   return updateData;
+}
+
+/**
+ * Returns an update for the Facebook Profile pic.
+ */
+function updateFacebookProfilePic(user) {
+  let imageUrl = user.photoURL;
+  let promise = Promise.resolve();
+  const updateData = {};
+
+  if (imageUrl && (imageUrl.indexOf('lookaside.facebook.com') !== -1 || imageUrl.indexOf('fbcdn.net') !== -1)) {
+    // Fid the user's Facebook UID.
+    const facebookUID = user.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
+    imageUrl = `https://graph.facebook.com/${facebookUID}/picture?type=large`;
+    promise = admin.auth().updateUser({photoURL: imageUrl}).then(() => {
+      console.log('User profile updated.');
+    });
+    updateData[`/people/${user.uid}/profile_picture`] = imageUrl;
+  }
+
+  return {updateData, promise};
+}
+
+/**
+ * Update all bad facebook profile pics by batches of 100.
+ */
+function updateAllFacebookBadProfilesPics(pageToken = undefined) {
+  const promises = [];
+  return admin.auth().listUsers(100, pageToken).then(result => {
+    pageToken = result.pageToken;
+    const updates = {};
+
+    result.users.forEach(user => {
+      const data = updateFacebookProfilePic(user);
+      promises.push(data.promise);
+      for (const key in data.updateData) {
+        if (data.updateData.hasOwnProperty(key)) {
+          updates[key] = data.updateData[key];
+        }
+      }
+    });
+    console.log('Update read for 100 users:', updates);
+    return updates;
+  }).then(updates => {
+    return admin.database().ref().update(updates);
+  }).then(() => {
+    return Promise.all(promises);
+  }).then(() => {
+    if (pageToken) {
+      return updateAllProfiles(pageToken);
+    }
+    return null;
+  }).catch(error => {
+    throw new functions.https.HttpsError('unknown', error.message, error);
+  });
 }

@@ -83,9 +83,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') 
 /**
  * Caches the Facebook profile pics to avoid URL expiry issues.
  */
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cacheFacebookProfilePic') {
-  exports.cacheFacebookProfilePic = require('./publicProfiles').cacheFacebookProfilePic;
-}
+// Note: disabled since we are now doing this on the client.
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cacheFacebookProfilePic') {
+//   exports.cacheFacebookProfilePic = require('./publicProfiles').cacheFacebookProfilePic;
+// }
 
 /**
  * Update all public profiles upon call.
