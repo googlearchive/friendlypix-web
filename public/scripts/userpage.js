@@ -288,16 +288,19 @@ friendlyPix.UserPage = class {
    */
   static createImageCard(postId, thumbUrl, text) {
     const element = $(`
-          <a href="/post/${postId}" class="fp-post-${postId} fp-image mdl-cell mdl-cell--12-col mdl-cell--4-col-tablet
-                                            mdl-cell--4-col-desktop mdl-grid mdl-grid--no-spacing">
+          <a class="fp-image mdl-cell mdl-cell--12-col mdl-cell--4-col-tablet
+                    mdl-cell--4-col-desktop mdl-grid mdl-grid--no-spacing">
               <div class="fp-overlay">
                   <i class="material-icons">favorite</i><span class="likes">0</span>
                   <i class="material-icons">mode_comment</i><span class="comments">0</span>
-                  <div class="fp-pic-text">${text}</div>
+                  <div class="fp-pic-text"/>
               </div>
               <div class="mdl-card mdl-shadow--2dp mdl-cell
                           mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop"></div>
           </a>`);
+    $('.fp-pic-text', element).text(text);
+    element.attr('href', `/post/${postId}`);
+    element.addClass(`fp-post-${postId}`);
     // Display the thumbnail.
     $('.mdl-card', element).css('background-image', `url("${thumbUrl.replace(/"/g, '\\"')}")`);
     // Start listening for comments and likes counts.
@@ -313,6 +316,7 @@ friendlyPix.UserPage = class {
    * Returns an image Card element for the image with the given URL.
    */
   static createProfileCardHtml(uid, profilePic = '/images/silhouette.jpg', fullName = 'Anonymous') {
+    fullName = friendlyPix.MaterialUtils.escapeHtml(fullName);
     return `
         <a class="fp-usernamelink mdl-button mdl-js-button" href="/user/${uid}">
             <div class="fp-avatar" style="background-image: url('${profilePic}')"></div>

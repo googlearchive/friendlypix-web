@@ -100,4 +100,16 @@ friendlyPix.MaterialUtils = class {
     const mdlLayoutElement = $('.mdl-layout');
     mdlLayoutElement.unbind('scroll');
   }
+
+  /**
+   * Escapes HTML characters from String.
+   */
+  static escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 };

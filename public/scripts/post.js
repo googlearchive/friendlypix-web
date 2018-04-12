@@ -453,6 +453,7 @@ friendlyPix.Post = class {
    * Returns the HTML for a post's comment.
    */
   createComment(author = {}, text, postId, commentId, isOwner = false) {
+    commentId = friendlyPix.MaterialUtils.escapeHtml(commentId);
     try {
       const element = $(`
         <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
