@@ -1,8 +1,6 @@
-# Friendly Pix Web
+# Shopping
 
-Friendly Pix Web is a sample app demonstrating how to build a JavaScript/Web app with the Firebase Platform.
-
-Friendly Pix is a place where you can share photos, follow friends, comment on photos...
+L một ứng dụng mẫu thể hiện cách xây dựng một ứng dụng JavaScript / Web với Nền tảng Firebase. à nơi bạn có thể chia sẻ ảnh, theo dõi bạn bè, nhận xét về ảnh ...
 
 
 ## Few words on dependencies
