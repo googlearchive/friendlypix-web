@@ -384,6 +384,13 @@ friendlyPix.Firebase = class {
   }
 
   /**
+   * Fetches the user's privacy setting for social data, likes and comments.
+   */
+  getSocialSetting(uid) {
+    return this.database.ref(`/privacy/${uid}/social`).once('value');
+  }
+
+  /**
    * Subscribe to receive updates on a user's post like status.
    */
   registerToUserLike(postId, callback) {

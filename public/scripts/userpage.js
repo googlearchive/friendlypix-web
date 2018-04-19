@@ -97,7 +97,7 @@ friendlyPix.UserPage = class {
       });
     }).then((uid) => {
       this.userId = uid;
-      this.fetchPrivacySettings(uid);
+      this.initializePrivacySettings(uid);
     }).then((uid) => {
       this.privacyDialog.get(0).showModal();
     })
@@ -107,7 +107,7 @@ friendlyPix.UserPage = class {
    * Fetches previously saved privacy settings if they exist and
    * enables the Submit button if user has consented to data processing.
    */
-  fetchPrivacySettings() {
+  initializePrivacySettings() {
     if (this.savedPrivacySettings == null) {
       const uri = `/privacy/${this.userId}`;
       this.database.ref(uri).once('value').then(snapshot => {
