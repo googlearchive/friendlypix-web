@@ -119,7 +119,6 @@ friendlyPix.UserPage = class {
         if (this.savedPrivacySettings.content) {
           this.allowContent.prop("checked", true);
         } else {
-          console.log("addButton: ", this.uploadButton);
           this.uploadButton.prop("disabled", true);
         }
         if (this.savedPrivacySettings.social) {
@@ -133,12 +132,16 @@ friendlyPix.UserPage = class {
    * Saves new privacy settings and closes the privacy dialog.
    */
   savePrivacySettings() {
-    const uri = `/privacy/${this.userId}`;
-    this.database.ref(uri).set({
+    const settings = {
       data_processing: this.allowDataProcessing.prop("checked"),
       content: this.allowContent.prop("checked"),
       social: this.allowSocial.prop("checked")
-    }).then(() => {
+    }
+    const uri = `/privacy/${this.userId}`;
+    this.database.ref(uri).set(settings).then(() => {
+      if (!settings.social) {
+        this.database.ref(`people/${this.userId}/_search_index`).remove();
+      }
       this.privacyDialog.get(0).close();
     })
   }

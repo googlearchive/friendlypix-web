@@ -89,7 +89,7 @@ friendlyPix.Auth = class {
         friendlyPix.firebase.getSocialSetting(user.uid).then(snapshot => {
           const socialEnabled = snapshot.val();
           friendlyPix.firebase.saveUserData(user.photoURL, user.displayName, socialEnabled);
-        });
+        })
       }
     });
   }
