@@ -85,7 +85,11 @@ friendlyPix.Auth = class {
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
-        friendlyPix.firebase.saveUserData(user.photoURL, user.displayName);
+
+        friendlyPix.firebase.getSocialSetting(user.uid).then(snapshot => {
+          const socialEnabled = snapshot.val();
+          friendlyPix.firebase.saveUserData(user.photoURL, user.displayName, socialEnabled);
+        });
       }
     });
   }

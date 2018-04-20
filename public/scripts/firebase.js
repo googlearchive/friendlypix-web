@@ -352,7 +352,7 @@ friendlyPix.Firebase = class {
   /**
    * Saves or updates public user data in Firebase (such as image URL, display name...).
    */
-  saveUserData(imageUrl, displayName) {
+  saveUserData(imageUrl, displayName, socialEnabled) {
     if (!displayName) {
       displayName = 'Anonymous';
     }
@@ -368,11 +368,15 @@ friendlyPix.Firebase = class {
     const updateData = {
       profile_picture: imageUrl,
       full_name: displayName,
-      _search_index: {
+    };
+
+    if (socialEnabled) {
+      updateData._search_index = {
         full_name: searchFullName,
         reversed_full_name: searchReversedFullName
       }
-    };
+    }
+
     return this.database.ref(`people/${this.auth.currentUser.uid}`).update(updateData);
   }
 
