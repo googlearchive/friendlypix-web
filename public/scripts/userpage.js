@@ -98,7 +98,6 @@ friendlyPix.UserPage = class {
     }).then((uid) => {
       this.userId = uid;
       this.initializePrivacySettings(uid);
-    }).then((uid) => {
       this.privacyDialog.get(0).showModal();
     })
   }
@@ -137,7 +136,7 @@ friendlyPix.UserPage = class {
       data_processing: this.allowDataProcessing.prop("checked"),
       content: this.allowContent.prop("checked"),
       social: this.allowSocial.prop("checked")
-    }
+    };
     const uri = `/privacy/${this.userId}`;
     this.database.ref(uri).set(settings).then(() => {
       if (!settings.social) {
