@@ -109,20 +109,21 @@ friendlyPix.UserPage = class {
    */
   initializePrivacySettings() {
     if (this.savedPrivacySettings == null) {
-      const uri = `/privacy/${this.userId}`;
-      this.database.ref(uri).once('value').then(snapshot => {
+      friendlyPix.firebase.getPrivacySettings(this.userId).then(snapshot => {
         this.savedPrivacySettings = snapshot.val();
-        if (this.savedPrivacySettings.data_processing) {
-          this.allowDataProcessing.prop('checked', true);
-          this.privacyDialogSave.removeAttr("disabled");
-        }
-        if (this.savedPrivacySettings.content) {
-          this.allowContent.prop("checked", true);
-        } else {
-          this.uploadButton.prop("disabled", true);
-        }
-        if (this.savedPrivacySettings.social) {
-          this.allowSocial.prop("checked", true);
+        if (this.savedPrivacySettings) {
+          if (this.savedPrivacySettings.data_processing) {
+            this.allowDataProcessing.prop('checked', true);
+            this.privacyDialogSave.removeAttr("disabled");
+          }
+          if (this.savedPrivacySettings.content) {
+            this.allowContent.prop("checked", true);
+          } else {
+            this.uploadButton.prop("disabled", true);
+          }
+          if (this.savedPrivacySettings.social) {
+            this.allowSocial.prop("checked", true);
+          }
         }
       })
     }
