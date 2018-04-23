@@ -199,6 +199,14 @@
         }
       }
     },
+    // Privacy settings
+    "privacy": {
+      "$uid": {
+        ".write": "auth.uid === $uid",
+        ".read": "auth.uid === $uid",
+        ".validate": "newData.val() === true"
+      }
+    }
     // Disallow all other attributes.
     "$other": {
       ".validate": false
