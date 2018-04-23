@@ -25,7 +25,7 @@ friendlyPix.Post = class {
    * Initializes the single post's UI.
    * @constructor
    */
-  constructor() {
+  constructor(postId) {
     // List of all times running on the page.
     this.timers = [];
 
@@ -37,7 +37,7 @@ friendlyPix.Post = class {
     $(document).ready(() => {
       this.postPage = $('#page-post');
       // Pointers to DOM elements.
-      this.postElement = $(friendlyPix.Post.createPostHtml());
+      this.postElement = $(friendlyPix.Post.createPostHtml(postId));
       friendlyPix.MaterialUtils.upgradeTextFields(this.postElement);
       this.toast = $('.mdl-js-snackbar');
       this.theatre = $('.fp-theatre');
@@ -54,7 +54,7 @@ friendlyPix.Post = class {
       // Clear listeners and previous post data.
       this.clear();
       if (!post) {
-        var data = {
+        const data = {
           message: 'This post does not exists.',
           timeout: 5000
         };
@@ -86,20 +86,47 @@ friendlyPix.Post = class {
   /**
    * Displays the given list of `comments` in the post.
    */
-  displayComments(comments) {
+  displayComments(postId, comments) {
     const commentsIds = Object.keys(comments);
     for (let i = commentsIds.length - 1; i >= 0; i--) {
-      $('.fp-comments', this.postElement).prepend(
-          friendlyPix.Post.createCommentHtml(comments[commentsIds[i]].author,
-              comments[commentsIds[i]].text));
+      this.displayComment(comments[commentsIds[i]], postId, commentsIds[i]);
     }
+  }
+
+  /**
+   * Displays a single comment or replace the existing one with new content.
+   */
+  displayComment(comment, postId, commentId, prepend = true) {
+    const newElement = this.createComment(comment.author, comment.text, postId,
+        commentId, comment.author.uid === friendlyPix.auth.userId);
+    if (prepend) {
+      $('.fp-comments', this.postElement).prepend(newElement);
+    } else {
+      $('.fp-comments', this.postElement).append(newElement);
+    }
+    friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
+
+    // Subscribe to updates of the comment.
+    friendlyPix.firebase.subscribeToComment(postId, commentId, snap => {
+      const updatedComment = snap.val();
+      if (updatedComment) {
+        const updatedElement = this.createComment(updatedComment.author,
+          updatedComment.text, postId, commentId,
+          updatedComment.author.uid === friendlyPix.auth.userId);
+        const element = $('#comment-' + commentId);
+        element.replaceWith(updatedElement);
+      } else {
+        $('#comment-' + commentId).remove();
+      }
+      friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
+    });
   }
 
   /**
    * Shows the "show more comments" button and binds it the `nextPage` callback. If `nextPage` is
    * `null` then the button is hidden.
    */
-  displayNextPageButton(nextPage) {
+  displayNextPageButton(postId, nextPage) {
     const nextPageButton = $('.fp-morecomments', this.postElement);
     if (nextPage) {
       nextPageButton.show();
@@ -107,8 +134,8 @@ friendlyPix.Post = class {
       nextPageButton.prop('disabled', false);
       nextPageButton.click(() => nextPage().then(data => {
         nextPageButton.prop('disabled', true);
-        this.displayComments(data.entries);
-        this.displayNextPageButton(data.nextPage);
+        this.displayComments(postId, data.entries);
+        this.displayNextPageButton(postId, data.nextPage);
       }));
     } else {
       nextPageButton.hide();
@@ -119,8 +146,10 @@ friendlyPix.Post = class {
    * Fills the post's Card with the given details.
    * Also sets all auto updates and listeners on the UI elements of the post.
    */
-  fillPostData(postId, thumbUrl, imageText, author, timestamp, thumbStorageUri, picStorageUri, picUrl) {
+  fillPostData(postId, thumbUrl, imageText, author = {}, timestamp, thumbStorageUri, picStorageUri, picUrl) {
     const post = this.postElement;
+
+    friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
 
     // Fills element's author profile.
     $('.fp-usernamelink', post).attr('href', `/user/${author.uid}`);
@@ -141,9 +170,11 @@ friendlyPix.Post = class {
 
       this._setupDate(postId, timestamp);
       this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
+      this._setupReportButton(postId);
       this._setupLikeCountAndStatus(postId, socialEnabled);
       this._setupComments(postId, author, imageText, socialEnabled);
     })
+
     return post;
   }
 
@@ -164,7 +195,7 @@ friendlyPix.Post = class {
     this.theatre.css('display', 'flex');
     // Leave theatre mode if click or ESC key down.
     this.theatre.off('click');
-    this.theatre.click(() => this.leaveTheatreMode())
+    this.theatre.click(() => this.leaveTheatreMode());
     $(document).off('keydown');
     $(document).keydown(e => {
       if (e.which === 27) {
@@ -196,7 +227,7 @@ friendlyPix.Post = class {
     $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp));
     // Update the time counter every minutes.
     this.timers.push(setInterval(
-      () => $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp)), 60000));
+        () => $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp)), 60000));
   }
 
   /**
@@ -208,19 +239,18 @@ friendlyPix.Post = class {
 
     // Creates the initial comment with the post's text.
     $('.fp-first-comment', post).empty();
-    $('.fp-first-comment', post).append(friendlyPix.Post.createCommentHtml(author, imageText));
+    $('.fp-first-comment', post).append(this.createComment(author, imageText));
 
     // Load first page of comments and listen to new comments.
-    $('.fp-comments', post).empty();
     friendlyPix.firebase.getComments(postId).then(data => {
-      this.displayComments(data.entries);
-      this.displayNextPageButton(data.nextPage);
+      $('.fp-comments', post).empty();
+      this.displayComments(postId, data.entries);
+      this.displayNextPageButton(postId, data.nextPage);
 
       // Display any new comments.
       const commentIds = Object.keys(data.entries);
       friendlyPix.firebase.subscribeToComments(postId, (commentId, commentData) => {
-        $('.fp-comments', post).append(
-          friendlyPix.Post.createCommentHtml(commentData.author, commentData.text));
+        this.displayComment(commentData, postId, commentId, false);
       }, commentIds ? commentIds[commentIds.length - 1] : 0);
     });
 
@@ -245,51 +275,97 @@ friendlyPix.Post = class {
   }
 
   /**
-   * Shows/Hode and binds actions to the Delete button.
+   * Binds the action to the report button.
    * @private
    */
-  _setupDeleteButton(postId, author, picStorageUri, thumbStorageUri) {
+  _setupReportButton(postId) {
     const post = this.postElement;
 
-    if (this.auth.currentUser && this.auth.currentUser.uid === author.uid && picStorageUri) {
-      $('.fp-delete-post', post).show();
-      $('.fp-delete-post', post).off('click');
-      $('.fp-delete-post', post).click(() => {
+    if (this.auth.currentUser) {
+      $('.fp-report-post', post).show();
+      $('.fp-report-post', post).off('click');
+      $('.fp-report-post', post).click(() => {
         swal({
           title: 'Are you sure?',
-          text: 'You will not be able to recover this post!',
+          text: 'You are about to flag this post for inappropriate content! An administrator will review your claim.',
           type: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes, delete it!',
-          closeOnConfirm: false,
+          confirmButtonText: 'Yes, report this post!',
+          closeOnConfirm: true,
           showLoaderOnConfirm: true,
           allowEscapeKey: true
         }, () => {
-          $('.fp-delete-post', post).prop('disabled', true);
-          friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
+          $('.fp-report-post', post).prop('disabled', true);
+          friendlyPix.firebase.reportPost(postId).then(() => {
             swal({
-              title: 'Deleted!',
-              text: 'Your post has been deleted.',
+              title: 'Reported!',
+              text: 'This post has been reported. Please allow some time before an admin reviews it.',
               type: 'success',
               timer: 2000
             });
-            $('.fp-delete-post', post).prop('disabled', false);
-            page(`/user/${this.auth.currentUser.uid}`);
+            $('.fp-report-post', post).prop('disabled', false);
           }).catch(error => {
             swal.close();
-            $('.fp-delete-post', post).prop('disabled', false);
+            $('.fp-report-post', post).prop('disabled', false);
             const data = {
-              message: `There was an error deleting your post: ${error}`,
+              message: `There was an error reporting your post: ${error}`,
               timeout: 5000
             };
             this.toast[0].MaterialSnackbar.showSnackbar(data);
           });
         });
       });
-    } else {
-      $('.fp-delete-post', post).hide();
     }
+  }
+
+  /**
+   * Shows/Hide and binds actions to the Delete button.
+   * @private
+   */
+  _setupDeleteButton(postId, author = {}, picStorageUri, thumbStorageUri) {
+    const post = this.postElement;
+
+    if (this.auth.currentUser && this.auth.currentUser.uid === author.uid) {
+      post.addClass('fp-owned-post');
+    } else {
+      post.removeClass('fp-owned-post');
+    }
+
+    $('.fp-delete-post', post).off('click');
+    $('.fp-delete-post', post).click(() => {
+      swal({
+        title: 'Are you sure?',
+        text: 'You are about to delete this post. Once deleted, you will not be able to recover it!',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes, delete it!',
+        closeOnConfirm: false,
+        showLoaderOnConfirm: true,
+        allowEscapeKey: true
+      }, () => {
+        $('.fp-delete-post', post).prop('disabled', true);
+        friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
+          swal({
+            title: 'Deleted!',
+            text: 'Your post has been deleted.',
+            type: 'success',
+            timer: 2000
+          });
+          $('.fp-delete-post', post).prop('disabled', false);
+          page(`/user/${this.auth.currentUser.uid}`);
+        }).catch(error => {
+          swal.close();
+          $('.fp-delete-post', post).prop('disabled', false);
+          const data = {
+            message: `There was an error deleting your post: ${error}`,
+            timeout: 5000
+          };
+          this.toast[0].MaterialSnackbar.showSnackbar(data);
+        });
+      });
+    });
   }
 
   /**
@@ -336,7 +412,7 @@ friendlyPix.Post = class {
   /**
    * Returns the HTML for a post's comment.
    */
-  static createPostHtml() {
+  static createPostHtml(postId = 0) {
     return `
         <div class="fp-post mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet
                     mdl-cell--8-col-desktop mdl-grid mdl-grid--no-spacing">
@@ -347,11 +423,15 @@ friendlyPix.Post = class {
                 <div class="fp-avatar"></div>
                 <div class="fp-username mdl-color-text--black"></div>
               </a>
-              <!-- Delete button -->
-              <button class="fp-delete-post mdl-button mdl-js-button">
-                Delete
-              </button>
               <a href="/post/" class="fp-time">now</a>
+              <!-- Drop Down Menu -->
+              <button class="fp-signed-in-only mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="fp-post-menu-${postId}">
+                <i class="material-icons">more_vert</i>
+              </button>
+              <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="fp-post-menu-${postId}">
+                <li class="mdl-menu__item fp-report-post"><i class="material-icons">report</i> Report</li>
+                <li class="mdl-menu__item fp-delete-post"><i class="material-icons">delete</i> Delete post</li>
+              </ul>
             </div>
             <div class="fp-image"></div>
             <div class="fp-likes">0 likes</div>
@@ -365,7 +445,7 @@ friendlyPix.Post = class {
               </span>
               <form class="fp-add-comment" action="#">
                 <div class="mdl-textfield mdl-js-textfield">
-                  <input class="mdl-textfield__input" type="text">
+                  <input class="mdl-textfield__input">
                   <label class="mdl-textfield__label">Comment...</label>
                 </div>
               </form>
@@ -377,12 +457,52 @@ friendlyPix.Post = class {
   /**
    * Returns the HTML for a post's comment.
    */
-  static createCommentHtml(author, text) {
-    return `
-        <div class="fp-comment">
-            <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
-            <span class="fp-text">${$('<div>').text(text).html()}</span>
-        </div>`;
+  createComment(author = {}, text, postId, commentId, isOwner = false) {
+    commentId = friendlyPix.MaterialUtils.escapeHtml(commentId);
+    try {
+      const element = $(`
+        <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
+          <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
+          <span class="fp-text">${$('<div>').text(text).html()}</span>
+          <!-- Drop Down Menu -->
+          <button class="fp-edit-delete-comment-container fp-signed-in-only mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="fp-comment-menu-${commentId}">
+            <i class="material-icons">more_vert</i>
+          </button>
+          <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="fp-comment-menu-${commentId}">
+            <li class="mdl-menu__item fp-report-comment"><i class="material-icons">report</i> Report</li>
+            <li class="mdl-menu__item fp-edit-comment"><i class="material-icons">mode_edit</i> Edit</li>
+            <li class="mdl-menu__item fp-delete-comment"><i class="material-icons">delete</i> Delete comment</li>
+          </ul>
+        </div>`);
+      $('.fp-delete-comment', element).click(() => {
+        if (window.confirm('Delete the comment?')) {
+          friendlyPix.firebase.deleteComment(postId, commentId).then(() => {
+            element.text('this comment has been deleted');
+            element.addClass('fp-comment-deleted');
+          });
+        }
+      });
+      $('.fp-report-comment', element).click(() => {
+        if (window.confirm('Report this comment for inappropriate content?')) {
+          friendlyPix.firebase.reportComment(postId, commentId).then(() => {
+            element.text('this comment has been flagged for review.');
+            element.addClass('fp-comment-deleted');
+          });
+        }
+      });
+      $('.fp-edit-comment', element).click(() => {
+        const newComment = window.prompt('Edit the comment?', text);
+        if (newComment !== null && newComment !== '') {
+          friendlyPix.firebase.editComment(postId, commentId, newComment).then(() => {
+            $('.fp-text', element).text(newComment);
+          });
+        }
+      });
+      return element;
+    } catch (e) {
+      console.error('Error while displaying comment', e);
+    }
+    return $('<div/>');
   }
 
   /**
@@ -399,7 +519,7 @@ friendlyPix.Post = class {
     millis = (millis - mins) / 60;
     const hrs = millis % 24;
     const days = (millis - hrs) / 24;
-    var timeSinceCreation = [days, hrs, mins, secs, ms];
+    const timeSinceCreation = [days, hrs, mins, secs, ms];
 
     let timeText = 'Now';
     if (timeSinceCreation[0] !== 0) {

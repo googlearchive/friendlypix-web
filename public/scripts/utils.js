@@ -61,6 +61,18 @@ friendlyPix.MaterialUtils = class {
   }
 
   /**
+   * Upgrades the dropdowns in the element.
+   */
+  static upgradeDropdowns(element) {
+    if (element) {
+      componentHandler.upgradeElements($('.mdl-js-button', element).get());
+      componentHandler.upgradeElements($('.mdl-js-menu', element).get());
+    } else {
+      componentHandler.upgradeDom();
+    }
+  }
+
+  /**
    * Returns a Promise which resolves when the user has reached the bottom of the page while
    * scrolling.
    * If an `offset` is specified the promise will resolve before reaching the bottom of
@@ -87,5 +99,16 @@ friendlyPix.MaterialUtils = class {
   static stopOnEndScrolls() {
     const mdlLayoutElement = $('.mdl-layout');
     mdlLayoutElement.unbind('scroll');
+  }
+
+  /**
+   * Escapes HTML characters from String.
+   */
+  static escapeHtml(unsafe) {
+    if (!unsafe) {
+      return unsafe;
+    }
+    return unsafe.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 };

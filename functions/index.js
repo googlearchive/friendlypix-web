@@ -37,3 +37,68 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'blurOffensiveIm
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cleanupAccount') {
   exports.cleanupAccount = require('./cleanupAccount').default;
 }
+
+/**
+ * Moderate comments text.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'moderateComments') {
+  exports.moderateComments = require('./moderateText').moderateComments;
+}
+
+/**
+ * Moderate posts text.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'moderatePosts') {
+  exports.moderatePosts = require('./moderateText').moderatePosts;
+}
+
+/**
+ * Send email upon comment flag.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnCommentReport') {
+  exports.sendEmailOnCommentReport = require('./sendEmailOnReport').sendEmailOnCommentReport;
+}
+
+/**
+ * Send email upon post flag.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnPostReport') {
+  exports.sendEmailOnPostReport = require('./sendEmailOnReport').sendEmailOnPostReport;
+}
+
+/**
+ * Mark some users as admins.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'markAdmins') {
+  exports.markAdmins = require('./markAdmins').default;
+}
+
+/**
+ * Unmark some users as admins.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') {
+  exports.removeAdmins = require('./markAdmins').removeAdmins;
+}
+
+/**
+ * Caches the Facebook profile pics to avoid URL expiry issues.
+ */
+// Note: disabled since we are now doing this on the client.
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cacheFacebookProfilePic') {
+//   exports.cacheFacebookProfilePic = require('./publicProfiles').cacheFacebookProfilePic;
+// }
+
+/**
+ * Update all public profiles upon call.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfiles') {
+  exports.updateAllProfiles = require('./publicProfiles').updateAllProfiles;
+}
+
+/**
+ * Update user's public profile when his account is created.
+ */
+// Note: Disabled for now as we're switching to do this on the client.
+// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'createPublicProfile') {
+//   exports.createPublicProfile = require('./publicProfiles').createPublicProfile;
+// }

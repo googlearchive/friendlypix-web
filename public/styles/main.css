@@ -30,6 +30,21 @@ a {
 .mdl-card {
   display: block;
 }
+.fp-signed-in .fp-signed-out-only {
+  display: none !important;
+}
+.fp-signed-out .fp-signed-in-only {
+  display: none !important;
+}
+.fp-auth-state-unknown .fp-initially-hidden {
+  display: none;
+}
+.fp-admin-only {
+   display: none;
+ }
+.fp-admin .fp-admin-only {
+  display: block;
+}
 /* Theatre mode */
 .fp-theatre {
   display: none;
@@ -83,10 +98,11 @@ a {
   color: white;
   text-decoration: none;
 }
-.fp-logo .material-icons {
-  top: 4px;
-  font-size: 32px;
-  margin-right: -2px;
+.fp-logo img {
+  top: -4px;
+  height: 44px;
+  width: 44px;
+  margin-right: 2px;
   position: relative;
 }
 .fp-header .mdl-layout__header-row {
@@ -108,6 +124,11 @@ a {
     top: 2.5px;
     font-size: 23px;
   }
+  .fp-titlebar .fp-logo img {
+    top: -3px;
+    height: 30px;
+    width: 30px;
+  }
 }
 @media screen and (max-width: 479px) {
   .fp-titlebar h3 {
@@ -124,7 +145,6 @@ a {
 /* Signed-in user */
 
 .fp-signed-in-user-container {
-  display: none;
   margin-left: 10px;
 }
 .fp-avatar {
@@ -170,9 +190,6 @@ a {
 }
 .mdl-layout__drawer .fp-sign-in-button {
   margin: 10px 0 0 0;
-}
-.fp-sign-out {
-  display: none;
 }
 .fp-sign-in-button {
   margin-left: 10px;
@@ -245,7 +262,7 @@ a {
 @media screen and (max-width: 479px) {
   .mdl-layout__drawer-button {
     display: block;
-    top: 3px;
+    top: 0;
   }
 }
 
@@ -329,10 +346,15 @@ a {
   width: 215px;
   box-sizing: border-box;
 }
-.fp-follow, .fp-notifications {
-  width: 220px;
+.fp-follow, .fp-notifications, .fp-block {
+  width: 100%;
   text-align: left;
+}
+.fp-follow, .fp-notifications {
   margin-top: 20px;
+}
+.fp-notifications {
+  margin-bottom: 10px;
 }
 .fp-name-follow-container {
   margin-left: 10%;
@@ -421,14 +443,32 @@ a {
   .fp-user-following {
     margin: 35px 16px 0 16px;
   }
-  .fp-follow, .fp-notifications {
+  .fp-notifications {
     margin-top: 10px;
   }
+  .fp-follow {
+    margin-top: 5px;
+  }
   #page-user-info .fp-user-detail-container {
-    margin-top: 10px;
+    margin-top: 5px;
   }
   #page-user-info .fp-user-detail {
     font-size: 13px;
+  }
+  .mdl-switch {
+    height: 18px;
+  }
+  .mdl-switch__label {
+    font-size: 13px;
+  }
+  .mdl-switch__track {
+    height: 12px;
+    width: 32px;
+  }
+  .mdl-switch__thumb {
+    height: 16px;
+    width: 16px;
+    top: 3px;
   }
 }
 
@@ -460,7 +500,9 @@ a {
 }
 #page-user-info .fp-image .mdl-card {
   max-height: 150px;
-  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: black;
   background-position: 50% 50%;
   display: flex;
   justify-content: flex-end;
@@ -523,7 +565,9 @@ a {
 }
 .fp-post .fp-image {
   flex: 1;
-  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: black;
   background-position: 50% 50%;
   box-sizing: border-box;
   padding-top: 25%;
@@ -556,18 +600,55 @@ a {
   color: #444;
   padding: 10px 10px 0 10px;
   font-weight: bold;
+  display: none;
 }
 .fp-post .fp-morecomments {
   padding: 5px 0 6px 10px;
   cursor: pointer;
   font-size: 14px;
   color: #0288D1;
+  display: none;
 }
 .fp-post .fp-morecomments:HOVER {
   text-decoration: underline;
 }
 .fp-post .fp-comments {
   padding: 0 10px 0 10px;
+}
+.fp-post .fp-comment {
+  position: relative;
+  margin-left: -7px;
+  padding-left: 7px;
+}
+.fp-post .fp-comment:HOVER {
+  background-color: #f0f0f0;
+  border-radius: 15px;
+}
+.fp-post .fp-comments .fp-comment:HOVER .fp-edit-delete-comment-container {
+  display: block;
+}
+.fp-post .fp-first-comment .fp-edit-delete-comment-container {
+  display: none !important;
+}
+.fp-post .fp-edit-comment, .fp-post .fp-delete-comment {
+  display: none
+}
+.fp-post .fp-comment-owned .fp-edit-comment, .fp-post .fp-comment-owned .fp-delete-comment {
+  display: block
+}
+.fp-post .fp-comment-deleted {
+  font-style: italic;
+  color: #aaa;
+}
+.fp-post .fp-edit-delete-comment-container {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: 0;
+  transform: scale(0.7);
+}
+.fp-post .fp-delete-comment {
+  color: red;
 }
 .fp-post .fp-first-comment {
   padding: 10px 10px 0 10px;
@@ -637,11 +718,15 @@ a {
   font-weight: normal;
 }
 .fp-delete-post {
-  float: right;
   color: red;
-  font-size: 12px;
-  margin-right: -5px;
   display: none;
+}
+
+.fp-admin .fp-delete-post,
+.fp-owned-post .fp-delete-post,
+.fp-admin .fp-delete-comment,
+.fp-admin .fp-edit-comment {
+  display: block;
 }
 
 /* Splash Page */
@@ -773,10 +858,6 @@ a {
 }
 
 /* Misc */
-
-.fp-initially-hidden {
-  display: none;
-}
 .mdl-snackbar {
   z-index: 101;
 }

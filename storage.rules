@@ -2,10 +2,10 @@
 // the uploaded file is an image and its size is below the given number of MB.
 // Also allow deletes.
 function isImageAndBelowMaxSize(uid, maxSizeMB) {
-  return request.auth.uid == uid
+  return request.auth.token.admin == true || (request.auth.uid == uid
       && (request.resource == null // Allow deletes
           || request.resource.size < maxSizeMB * 1024 * 1024 // Max size for the uploaded file
-              && request.resource.contentType.matches('image/.*')) // The file is an image
+              && request.resource.contentType.matches('image/.*'))) // The file is an image
 }
 
 service firebase.storage {

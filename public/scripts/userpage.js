@@ -42,6 +42,9 @@ friendlyPix.UserPage = class {
       this.noPosts = $('.fp-no-posts', this.userPage);
       this.followLabel = $('.mdl-switch__label', this.followContainer);
       this.followCheckbox = $('#follow');
+      this.blockContainer = $('.fp-block');
+      this.blockLabel = $('.mdl-switch__label', this.blockContainer);
+      this.blockCheckbox = $('#block');
       this.nbPostsContainer = $('.fp-user-nbposts', this.userPage);
       this.nbFollowers = $('.fp-user-nbfollowers', this.userPage);
       this.nbFollowing = $('.fp-user-nbfollowing', this.userPage);
@@ -63,7 +66,9 @@ friendlyPix.UserPage = class {
 
       // Event bindings.
       this.followCheckbox.change(() => this.onFollowChange());
+      this.blockCheckbox.change(() => this.onBlockChange());
       this.auth.onAuthStateChanged(() => this.trackFollowStatus());
+      this.auth.onAuthStateChanged(() => this.trackBlockStatus());
       this.nbFollowingContainer.click(() => this.displayFollowing());
       this.closeFollowingButton.click(() => {
         this.followingContainer.hide();
@@ -157,6 +162,16 @@ friendlyPix.UserPage = class {
   }
 
   /**
+   * Triggered when the user changes the "Block" checkbox.
+   */
+  onBlockChange() {
+    const checked = this.blockCheckbox.prop('checked');
+    this.blockCheckbox.prop('disabled', true);
+
+    friendlyPix.firebase.toggleBlockUser(this.userId, checked);
+  }
+
+  /**
    * Starts tracking the "Follow" checkbox status.
    */
   trackFollowStatus() {
@@ -166,6 +181,20 @@ friendlyPix.UserPage = class {
         this.followCheckbox.prop('disabled', false);
         this.followLabel.text(data.val() ? 'Following' : 'Follow');
         friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
+      });
+    }
+  }
+
+  /**
+   * Starts tracking the "Blocked" checkbox status.
+   */
+  trackBlockStatus() {
+    if (this.auth.currentUser) {
+      friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, data => {
+        this.blockCheckbox.prop('checked', data.val() !== null);
+        this.blockCheckbox.prop('disabled', false);
+        this.blockLabel.text(data.val() ? 'Blocked' : 'Block');
+        friendlyPix.MaterialUtils.refreshSwitchState(this.blockContainer);
       });
     }
   }
@@ -217,6 +246,7 @@ friendlyPix.UserPage = class {
     // the "Notifications" checkbox.
     if (this.auth.currentUser && userId === this.auth.currentUser.uid) {
       this.followContainer.hide();
+      this.blockContainer.hide();
       friendlyPix.messaging.enableNotificationsContainer.show();
       friendlyPix.messaging.enableNotificationsCheckbox.prop('disabled', true);
       friendlyPix.MaterialUtils.refreshSwitchState(friendlyPix.messaging.enableNotificationsContainer);
@@ -225,9 +255,13 @@ friendlyPix.UserPage = class {
       friendlyPix.messaging.enableNotificationsContainer.hide();
       this.followContainer.show();
       this.followCheckbox.prop('disabled', true);
+      this.blockContainer.show();
+      this.blockContainer.prop('disabled', true);
       friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
       // Start live tracking the state of the "Follow" Checkbox.
       this.trackFollowStatus();
+      // Start live tracking the state of the "Block" Checkbox.
+      this.trackBlockStatus();
     }
 
     // Load user's profile.
@@ -338,16 +372,19 @@ friendlyPix.UserPage = class {
    */
   static createImageCard(postId, thumbUrl, text) {
     const element = $(`
-          <a href="/post/${postId}" class="fp-post-${postId} fp-image mdl-cell mdl-cell--12-col mdl-cell--4-col-tablet
-                                            mdl-cell--4-col-desktop mdl-grid mdl-grid--no-spacing">
+          <a class="fp-image mdl-cell mdl-cell--12-col mdl-cell--4-col-tablet
+                    mdl-cell--4-col-desktop mdl-grid mdl-grid--no-spacing">
               <div class="fp-overlay">
                   <i class="material-icons">favorite</i><span class="likes">0</span>
                   <i class="material-icons">mode_comment</i><span class="comments">0</span>
-                  <div class="fp-pic-text">${text}</div>
+                  <div class="fp-pic-text"/>
               </div>
               <div class="mdl-card mdl-shadow--2dp mdl-cell
                           mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop"></div>
           </a>`);
+    $('.fp-pic-text', element).text(text);
+    element.attr('href', `/post/${postId}`);
+    element.addClass(`fp-post-${postId}`);
     // Display the thumbnail.
     $('.mdl-card', element).css('background-image', `url("${thumbUrl.replace(/"/g, '\\"')}")`);
     // Start listening for comments and likes counts.
@@ -363,6 +400,7 @@ friendlyPix.UserPage = class {
    * Returns an image Card element for the image with the given URL.
    */
   static createProfileCardHtml(uid, profilePic = '/images/silhouette.jpg', fullName = 'Anonymous') {
+    fullName = friendlyPix.MaterialUtils.escapeHtml(fullName);
     return `
         <a class="fp-usernamelink mdl-button mdl-js-button" href="/user/${uid}">
             <div class="fp-avatar" style="background-image: url('${profilePic}')"></div>

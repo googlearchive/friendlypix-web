@@ -28,37 +28,37 @@ friendlyPix.Router = class {
    */
   constructor() {
     $(document).ready(() => {
-      friendlyPix.auth.waitForAuth.then(() => {
-        // Dom elements.
-        this.pagesElements = $('[id^=page-]');
-        this.splashLogin = $('#login', '#page-splash');
+      // Dom elements.
+      this.pagesElements = $('[id^=page-]');
+      this.splashLogin = $('#login', '#page-splash');
 
-        // Make sure /add is never opened on website load.
-        if (window.location.pathname === '/add') {
-          page('/');
-        }
+      // Make sure /add is never opened on website load.
+      if (window.location.pathname === '/add') {
+        page('/');
+      }
 
-        // Configuring routes.
-        const pipe = friendlyPix.Router.pipe;
-        const displayPage = this.displayPage.bind(this);
-        const loadUser = userId => friendlyPix.userPage.loadUser(userId);
-        const showHomeFeed = () => friendlyPix.feed.showHomeFeed();
-        const showGeneralFeed = () => friendlyPix.feed.showGeneralFeed();
-        const clearFeed = () => friendlyPix.feed.clear();
-        const showPost = postId => friendlyPix.post.loadPost(postId);
+      // Configuring routes.
+      const pipe = friendlyPix.Router.pipe;
+      const displayPage = this.displayPage.bind(this);
+      const loadUser = userId => friendlyPix.userPage.loadUser(userId);
+      const showHomeFeed = () => friendlyPix.feed.showHomeFeed();
+      const showGeneralFeed = () => friendlyPix.feed.showGeneralFeed();
+      const clearFeed = () => friendlyPix.feed.clear();
+      const showPost = postId => friendlyPix.post.loadPost(postId);
 
-        page('/', pipe(showHomeFeed, null, true),
-            pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
-        page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
-        page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
-        page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
-        page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
-        page('/add', pipe(displayPage, {pageId: 'add', onlyAuthed: true}));
-        page('*', () => page('/'));
+      page('/', pipe(showHomeFeed, null, true),
+          pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
+      page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
+      page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
+      page('/post/:postId/admin', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post', admin: true}));
+      page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
+      page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
+      page('/terms', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'terms'}));
+      page('/add', pipe(displayPage, {pageId: 'add', onlyAuthed: true}));
+      page('*', () => page('/'));
 
-        // Start routing.
-        page();
-      });
+      // Start routing.
+      page();
     });
   }
 
@@ -68,6 +68,25 @@ friendlyPix.Router = class {
    * the user is not signed-in.
    */
   displayPage(attributes, context) {
+    const onlyAuthed = attributes.onlyAuthed;
+    const admin = attributes.admin;
+    if (admin) {
+      friendlyPix.Router.enableAdminMode();
+    } else {
+      friendlyPix.Router.disableAdminMode();
+    }
+
+    if (onlyAuthed) {
+      // If the pge can only be displayed if the user is authenticated then we wait or the auth state.
+      friendlyPix.auth.waitForAuth.then(() => {
+        this._displayPage(attributes, context);
+      });
+    } else {
+      this._displayPage(attributes, context);
+    }
+  }
+
+  _displayPage(attributes, context) {
     const onlyAuthed = attributes.onlyAuthed;
     let pageId = attributes.pageId;
 
@@ -79,7 +98,7 @@ friendlyPix.Router = class {
     this.pagesElements.each(function(index, element) {
       if (element.id === 'page-' + pageId) {
         $(element).show();
-      } else if (element.id === 'page-splash') {
+      } else if (element.id === 'page-splash' && onlyAuthed) {
         $(element).fadeOut(1000);
       } else {
         $(element).hide();
@@ -98,6 +117,20 @@ friendlyPix.Router = class {
       path = '/';
     }
     page(path);
+  }
+
+  /**
+   * Turn the UI into admin mode.
+   */
+  static enableAdminMode() {
+    document.body.classList.add('fp-admin');
+  }
+
+  /**
+   * Switch off admin mode in the UI.
+   */
+  static disableAdminMode() {
+    document.body.classList.remove('fp-admin');
   }
 
   /**

@@ -57,11 +57,9 @@ friendlyPix.Feed = class {
     for (let i = postIds.length - 1; i >= 0; i--) {
       this.noPostsMessage.hide();
       const postData = posts[postIds[i]];
-      const post = new friendlyPix.Post();
+      const post = new friendlyPix.Post(postIds[i]);
       this.posts.push(post);
-      const postElement = post.fillPostData(postIds[i], postData.thumb_url || postData.url,
-          postData.text, postData.author, postData.timestamp, postData.thumb_storage_uri,
-          postData.full_storage_uri, postData.full_url);
+      const postElement = post.postElement;
       // If a post with similar ID is already in the feed we replace it instead of appending.
       const existingPostElement = $(`.fp-post-${postIds[i]}`, this.feedImageContainer);
       if (existingPostElement.length) {
@@ -69,6 +67,9 @@ friendlyPix.Feed = class {
       } else {
         this.feedImageContainer.append(postElement.addClass(`fp-post-${postIds[i]}`));
       }
+      post.fillPostData(postIds[i], postData.thumb_url || postData.url,
+        postData.text, postData.author, postData.timestamp, postData.thumb_storage_uri,
+        postData.full_storage_uri, postData.full_url);
     }
   }
 
@@ -110,10 +111,11 @@ friendlyPix.Feed = class {
     for (let i = 0; i < postKeys.length; i++) {
       this.noPostsMessage.hide();
       const post = newPosts[postKeys[i]];
-      const postElement = new friendlyPix.Post();
+      const postElement = new friendlyPix.Post(postKeys[i]);
       this.posts.push(postElement);
-      this.feedImageContainer.prepend(postElement.fillPostData(postKeys[i], post.thumb_url ||
-          post.url, post.text, post.author, post.timestamp, null, null, post.full_url));
+      this.feedImageContainer.prepend(postElement.postElement);
+      postElement.fillPostData(postKeys[i], post.thumb_url ||
+          post.url, post.text, post.author, post.timestamp, null, null, post.full_url);
     }
   }
 

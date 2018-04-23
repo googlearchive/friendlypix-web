@@ -352,7 +352,21 @@ friendlyPix.Firebase = class {
   /**
    * Saves or updates public user data in Firebase (such as image URL, display name...).
    */
-  saveUserData(imageUrl, displayName, socialEnabled) {
+  updatePublicProfile() {
+    let user = firebase.auth().currentUser;
+    let displayName = user.displayName;
+    let imageUrl = user.photoURL;
+
+    // If the main profile Pic is an expiring facebook profile pic URL we'll update it automatically to use the permanent graph API URL.
+    if (imageUrl && (imageUrl.indexOf('lookaside.facebook.com') !== -1 || imageUrl.indexOf('fbcdn.net') !== -1)) {
+      // Fid the user's Facebook UID.
+      const facebookUID = firebase.auth().currentUser.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
+      imageUrl = `https://graph.facebook.com/${facebookUID}/picture?type=large`;
+      user.updateProfile({photoURL: imageUrl}).then(() => {
+        console.log('User profile updated.');
+      });
+    }
+
     if (!displayName) {
       displayName = 'Anonymous';
     }
@@ -365,19 +379,24 @@ friendlyPix.Firebase = class {
       console.error(e);
     }
 
-    const updateData = {
-      profile_picture: imageUrl,
-      full_name: displayName,
-    };
+    friendlyPix.firebase.getSocialSetting(user.uid).then(snapshot => {
+      const socialEnabled = snapshot.val();
 
-    if (socialEnabled) {
-      updateData._search_index = {
-        full_name: searchFullName,
-        reversed_full_name: searchReversedFullName
-      }
-    }
+      const updateData = {
+        profile_picture: imageUrl || null,
+        full_name: displayName,
+      };
 
-    return this.database.ref(`people/${this.auth.currentUser.uid}`).update(updateData);
+      if (socialEnabled) {
+        updateData._search_index = {
+          full_name: searchFullName,
+          reversed_full_name: searchReversedFullName
+        }
+      };
+      return this.database.ref(`/people/${user.uid}`).update(updateData).then(() => {
+        console.log('Public profile updated.');
+      });
+    })
   }
 
   /**
@@ -425,14 +444,40 @@ friendlyPix.Firebase = class {
   addComment(postId, commentText) {
     const commentObject = {
       text: commentText,
-      timestamp: Date.now(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
       author: {
         uid: this.auth.currentUser.uid,
-        full_name: this.auth.currentUser.displayName,
-        profile_picture: this.auth.currentUser.photoURL
+        full_name: this.auth.currentUser.displayName || 'Anonymous',
+        profile_picture: this.auth.currentUser.photoURL || null
       }
     };
     return this.database.ref(`comments/${postId}`).push(commentObject);
+  }
+
+  /**
+   * Deletes a comment.
+   */
+  deleteComment(postId, commentId) {
+    return this.database.ref(`/comments/${postId}/${commentId}`).remove();
+  }
+
+  /**
+   * Edit a comment.
+   */
+  editComment(postId, commentId, commentText) {
+    return this.database.ref(`/comments/${postId}/${commentId}`).update({
+      text: commentText,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+  }
+
+  /**
+   * Subscribe to a comment update.
+   */
+  subscribeToComment(postId, commentId, callback) {
+    const commentRef = this.database.ref(`/comments/${postId}/${commentId}`);
+    commentRef.on('value', callback);
+    this.firebaseRefs.push(commentRef);
   }
 
   /**
@@ -448,22 +493,24 @@ friendlyPix.Firebase = class {
     const metadata = {
       contentType: pic.type
     };
-    var picUploadTask = picRef.put(pic, metadata).then(snapshot => {
+    const picUploadTask = picRef.put(pic, metadata).then(snapshot => {
       console.log('New pic uploaded. Size:', snapshot.totalBytes, 'bytes.');
-      var url = snapshot.metadata.downloadURLs[0];
-      console.log('File available at', url);
-      return url;
+      return snapshot.ref.getDownloadURL().then(url => {
+        console.log('File available at', url);
+        return url;
+      });
     }).catch(error => {
       console.error('Error while uploading new pic', error);
     });
 
     // Start the thumb file upload to Cloud Storage.
     const thumbRef = this.storage.ref(`${this.auth.currentUser.uid}/thumb/${newPostKey}/${fileName}`);
-    var tumbUploadTask = thumbRef.put(thumb, metadata).then(snapshot => {
+    const tumbUploadTask = thumbRef.put(thumb, metadata).then(snapshot => {
       console.log('New thumb uploaded. Size:', snapshot.totalBytes, 'bytes.');
-      var url = snapshot.metadata.downloadURLs[0];
-      console.log('File available at', url);
-      return url;
+      return snapshot.ref.getDownloadURL().then(url => {
+        console.log('File available at', url);
+        return url;
+      });
     }).catch(error => {
       console.error('Error while uploading new thumb', error);
     });
@@ -476,13 +523,14 @@ friendlyPix.Firebase = class {
         full_url: urls[0],
         thumb_url: urls[1],
         text: text,
+        client: 'web',
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         full_storage_uri: picRef.toString(),
         thumb_storage_uri: thumbRef.toString(),
         author: {
           uid: this.auth.currentUser.uid,
-          full_name: this.auth.currentUser.displayName,
-          profile_picture: this.auth.currentUser.photoURL
+          full_name: this.auth.currentUser.displayName || 'Anonymous',
+          profile_picture: this.auth.currentUser.photoURL || null
         }
       };
       update[`/people/${this.auth.currentUser.uid}/posts/${newPostKey}`] = true;
@@ -522,6 +570,18 @@ friendlyPix.Firebase = class {
   }
 
   /**
+   * Blocks/Unblocks a user and return a promise once that's done.
+   */
+  toggleBlockUser(followedUserId, block) {
+    // Add or remove posts to the user's home feed.
+    const update = {};
+    update[`/blocking/${this.auth.currentUser.uid}/${followedUserId}`] = block ? !!block : null;
+    update[`/blocked/${followedUserId}/${this.auth.currentUser.uid}`] = block ? !!block : null;
+
+    return this.database.ref().update(update);
+  }
+
+  /**
    * Listens to updates on the followed status of the given user.
    */
   registerToFollowStatusUpdate(userId, callback) {
@@ -529,6 +589,16 @@ friendlyPix.Firebase = class {
         this.database.ref(`/people/${this.auth.currentUser.uid}/following/${userId}`);
     followStatusRef.on('value', callback);
     this.firebaseRefs.push(followStatusRef);
+  }
+
+  /**
+   * Listens to updates on the blocked status of the given user.
+   */
+  registerToBlockedStatusUpdate(userId, callback) {
+    const blockStatusRef =
+        this.database.ref(`/blocking/${this.auth.currentUser.uid}/${userId}`);
+    blockStatusRef.on('value', callback);
+    this.firebaseRefs.push(blockStatusRef);
   }
 
   /**
@@ -664,6 +734,20 @@ friendlyPix.Firebase = class {
       return Promise.all([deleteFromDatabase, deletePicFromStorage, deleteThumbFromStorage]);
     }
     return deleteFromDatabase;
+  }
+
+  /**
+   * Flags the posts for inappropriate content.
+   */
+  reportPost(postId) {
+    return this.database.ref(`/postFlags/${postId}/${this.auth.currentUser.uid}`).set(true);
+  }
+
+  /**
+   * Flags the comment for inappropriate content.
+   */
+  reportComment(postId, commentId) {
+    return this.database.ref(`/commentFlags/${postId}/${commentId}/${this.auth.currentUser.uid}`).set(true);
   }
 
   /**

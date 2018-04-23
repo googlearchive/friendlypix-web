@@ -36,6 +36,7 @@
     "page": true,
     "ga": true,
     "firebase": true,
-    "gapi": true
+    "gapi": true,
+    "importScripts": true
   }
 }

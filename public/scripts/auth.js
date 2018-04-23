@@ -48,14 +48,13 @@ friendlyPix.Auth = class {
       this.signedInUsername = $('.fp-username', signedInUserContainer);
       this.signOutButton = $('.fp-sign-out');
       this.deleteAccountButton = $('.fp-delete-account');
-      this.signedOutOnlyElements = $('.fp-signed-out-only');
-      this.signedInOnlyElements = $('.fp-signed-in-only');
       this.usernameLink = $('.fp-usernamelink');
+      this.updateAll = $('.fp-update-all');
 
       // Event bindings
       this.signOutButton.click(() => this.auth.signOut());
       this.deleteAccountButton.click(() => this.deleteAccount());
-      this.signedInOnlyElements.hide();
+      this.updateAll.click(() => this.updateAllAccounts());
     });
 
     this.auth.onAuthStateChanged(user => this.onAuthStateChanged(user));
@@ -71,31 +70,22 @@ friendlyPix.Auth = class {
     }
     this._waitForAuthPromiseResolver.resolve();
     $(document).ready(() => {
+      document.body.classList.remove('fp-auth-state-unknown');
       if (!user) {
-        this.signedOutOnlyElements.show();
-        this.signedInOnlyElements.hide();
         this.userId = null;
         this.signedInUserAvatar.css('background-image', '');
         firebaseUi.start('#firebaseui-auth-container', uiConfig);
+        document.body.classList.remove('fp-signed-in');
+        document.body.classList.add('fp-signed-out');
       } else {
-        this.signedOutOnlyElements.hide();
-        this.signedInOnlyElements.show();
+        document.body.classList.remove('fp-signed-out');
+        document.body.classList.add('fp-signed-in');
         this.userId = user.uid;
         this.signedInUserAvatar.css('background-image',
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
-        friendlyPix.firebase.getPrivacySettings(user.uid).then(snapshot => {
-          const settings = snapshot.val();
-          // display privacy modal if there are no privacy preferences
-          if (!settings) {
-            friendlyPix.userPage.showPrivacyDialog();
-          }
-        })
-        friendlyPix.firebase.getSocialSetting(user.uid).then(snapshot => {
-          const socialEnabled = snapshot.val();
-          friendlyPix.firebase.saveUserData(user.photoURL, user.displayName, socialEnabled);
-        })
+        friendlyPix.firebase.updatePublicProfile();
       }
     });
   }
@@ -111,7 +101,17 @@ friendlyPix.Auth = class {
         this.auth.signOut();
       }
     });
-  };
+  }
+
+  updateAllAccounts() {
+    const updateAllProfiles = firebase.functions().httpsCallable('updateAllProfiles');
+    updateAllProfiles().then(() => {
+      window.alert('Profiles update Finished successfully.');
+    }).catch(error => {
+      console.error('Error updating user profiles.', error);
+      window.alert('Error updating user profiles: ' + error.message);
+    });
+  }
 };
 
 friendlyPix.auth = new friendlyPix.Auth();
