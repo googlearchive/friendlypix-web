@@ -379,8 +379,8 @@ friendlyPix.Firebase = class {
       console.error(e);
     }
 
-    friendlyPix.firebase.getSocialSetting(user.uid).then(snapshot => {
-      const socialEnabled = snapshot.val();
+    friendlyPix.firebase.getPrivacySettings(user.uid).then(snapshot => {
+      const socialEnabled = snapshot.val().social;
 
       const updateData = {
         profile_picture: imageUrl || null,
@@ -404,13 +404,6 @@ friendlyPix.Firebase = class {
    */
   getPostData(postId) {
     return this.database.ref(`/posts/${postId}`).once('value');
-  }
-
-  /**
-   * Fetches the user's privacy setting for social data, likes and comments.
-   */
-  getSocialSetting(uid) {
-    return this.database.ref(`/privacy/${uid}/social`).once('value');
   }
 
   /**

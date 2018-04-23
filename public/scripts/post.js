@@ -165,8 +165,8 @@ friendlyPix.Post = class {
       this._setupThumb(thumbUrl, picUrl);
     });
 
-    friendlyPix.firebase.getSocialSetting(this.auth.currentUser.uid).then(snapshot => {
-      const socialEnabled = snapshot.val();
+    friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then(snapshot => {
+      const socialEnabled = snapshot.val().social;
 
       this._setupDate(postId, timestamp);
       this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
