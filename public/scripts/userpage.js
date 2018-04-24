@@ -63,6 +63,7 @@ friendlyPix.UserPage = class {
       this.allowSocial = $('#allow-social');
 
       this.uploadButton = $('button#add');
+      this.mobileUploadButton = $('button#add-floating');
 
       // Event bindings.
       this.followCheckbox.change(() => this.onFollowChange());
@@ -78,13 +79,7 @@ friendlyPix.UserPage = class {
       // Event bindings for Privacy Consent Dialog
       this.privacyDialogButton.click(() => this.showPrivacyDialog());
       this.privacyDialogSave.click(() => this.savePrivacySettings());
-      this.allowDataProcessing.change(() => {
-        // The submit button for the privacy settings is disabled until
-        // the data privacy policy is agreed to
-        if (this.allowDataProcessing.is(':checked')) {
-            this.privacyDialogSave.removeAttr("disabled");
-        }
-      });
+      this.allowDataProcessing.change(() => this.toggleSubmitStates());
     });
   }
 
@@ -108,6 +103,19 @@ friendlyPix.UserPage = class {
   }
 
   /**
+   * Disable the submit button for the privacy settings until data privacy
+   * policy is agreed to.
+   */
+  toggleSubmitStates() {
+    if (this.allowDataProcessing.is(':checked')) {
+      this.privacyDialogSave.removeAttr("disabled");
+    } else {
+      this.privacyDialogSave.attr("disabled", true);
+    }
+  }
+
+
+  /**
    * Fetches previously saved privacy settings if they exist and
    * enables the Submit button if user has consented to data processing.
    */
@@ -124,6 +132,7 @@ friendlyPix.UserPage = class {
             this.allowContent.prop("checked", true);
           } else {
             this.uploadButton.prop("disabled", true);
+            this.mobileUploadButton.prop("disabled", true);
           }
           if (this.savedPrivacySettings.social) {
             this.allowSocial.prop("checked", true);
@@ -148,6 +157,7 @@ friendlyPix.UserPage = class {
         this.database.ref(`people/${this.userId}/_search_index`).remove();
       }
       this.privacyDialog.get(0).close();
+      window.friendlyPix.router.reloadPage();
     })
   }
 
