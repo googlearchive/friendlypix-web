@@ -97,9 +97,9 @@ friendlyPix.UserPage = class {
    */
   toggleSubmitStates() {
     if (this.allowDataProcessing.is(':checked')) {
-      this.privacyDialogSave.removeAttr("disabled");
+      this.privacyDialogSave.removeAttr('disabled');
     } else {
-      this.privacyDialogSave.attr("disabled", true);
+      this.privacyDialogSave.attr('disabled', true);
     }
   }
 
@@ -116,16 +116,16 @@ friendlyPix.UserPage = class {
         if (this.savedPrivacySettings) {
           if (this.savedPrivacySettings.data_processing) {
             this.allowDataProcessing.prop('checked', true);
-            this.privacyDialogSave.removeAttr("disabled");
+            this.privacyDialogSave.removeAttr('disabled');
           }
           if (this.savedPrivacySettings.content) {
-            this.allowContent.prop("checked", true);
+            this.allowContent.prop('checked', true);
           } else {
-            this.uploadButton.prop("disabled", true);
-            this.mobileUploadButton.prop("disabled", true);
+            this.uploadButton.prop('disabled', true);
+            this.mobileUploadButton.prop('disabled', true);
           }
           if (this.savedPrivacySettings.social) {
-            this.allowSocial.prop("checked", true);
+            this.allowSocial.prop('checked', true);
           }
         }
       })
@@ -139,9 +139,9 @@ friendlyPix.UserPage = class {
     // uid of signed in user
     const uid = firebase.auth().currentUser.uid
     const settings = {
-      data_processing: this.allowDataProcessing.prop("checked"),
-      content: this.allowContent.prop("checked"),
-      social: this.allowSocial.prop("checked")
+      data_processing: this.allowDataProcessing.prop('checked'),
+      content: this.allowContent.prop('checked'),
+      social: this.allowSocial.prop('checked')
     };
     friendlyPix.firebase.setPrivacySettings(uid, settings).then(() => {
       this.privacyDialog.get(0).close();
