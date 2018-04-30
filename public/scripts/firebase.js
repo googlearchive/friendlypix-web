@@ -415,12 +415,13 @@ friendlyPix.Firebase = class {
 
   setPrivacySettings(uid, settings) {
     const uri = `/privacy/${uid}`;
-    this.database.ref(uri).set(settings).then(() => {
-      if (!settings.social) {
-        this.database.ref(`people/${uid}/_search_index`).remove();
-      }
-    })
+    this.database.ref(uri).set(settings);
   }
+
+  removeFromSearch(uid) {
+    this.database.ref(`people/${uid}/_search_index`).remove();
+  }
+
 
   /**
    * Subscribe to receive updates on a user's post like status.

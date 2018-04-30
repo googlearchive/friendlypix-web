@@ -110,7 +110,7 @@ friendlyPix.UserPage = class {
    */
   initializePrivacySettings() {
     const uid = firebase.auth().currentUser.uid
-    if (this.savedPrivacySettings == null) {
+    if (this.savedPrivacySettings === undefined) {
       friendlyPix.firebase.getPrivacySettings(uid).then(snapshot => {
         this.savedPrivacySettings = snapshot.val();
         if (this.savedPrivacySettings) {
@@ -143,10 +143,13 @@ friendlyPix.UserPage = class {
       content: this.allowContent.prop('checked'),
       social: this.allowSocial.prop('checked')
     };
-    friendlyPix.firebase.setPrivacySettings(uid, settings).then(() => {
-      this.privacyDialog.get(0).close();
-      window.friendlyPix.router.reloadPage();
-    })
+
+    friendlyPix.firebase.setPrivacySettings(uid, settings);
+    if (!settings.social) {
+      friendlyPix.firebase.removeFromSearch(uid);
+    }
+    this.privacyDialog.get(0).close();
+    window.friendlyPix.router.reloadPage();
   }
 
   /**
