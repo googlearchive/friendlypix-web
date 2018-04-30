@@ -87,19 +87,8 @@ friendlyPix.UserPage = class {
    * Sets initial state of Privacy Dialog.
    */
   showPrivacyDialog() {
-    const userPromise = new Promise(function(resolve, reject) {
-      firebase.auth().onAuthStateChanged(function(user) {
-        if (user) {
-          resolve(user.uid);
-        } else {
-          reject();
-        }
-      });
-    }).then((uid) => {
-      this.userId = uid;
-      this.initializePrivacySettings(uid);
-      this.privacyDialog.get(0).showModal();
-    })
+    this.initializePrivacySettings();
+    this.privacyDialog.get(0).showModal();
   }
 
   /**
@@ -120,8 +109,9 @@ friendlyPix.UserPage = class {
    * enables the Submit button if user has consented to data processing.
    */
   initializePrivacySettings() {
+    const uid = firebase.auth().currentUser.uid
     if (this.savedPrivacySettings == null) {
-      friendlyPix.firebase.getPrivacySettings(this.userId).then(snapshot => {
+      friendlyPix.firebase.getPrivacySettings(uid).then(snapshot => {
         this.savedPrivacySettings = snapshot.val();
         if (this.savedPrivacySettings) {
           if (this.savedPrivacySettings.data_processing) {
@@ -146,16 +136,14 @@ friendlyPix.UserPage = class {
    * Saves new privacy settings and closes the privacy dialog.
    */
   savePrivacySettings() {
+    // uid of signed in user
+    const uid = firebase.auth().currentUser.uid
     const settings = {
       data_processing: this.allowDataProcessing.prop("checked"),
       content: this.allowContent.prop("checked"),
       social: this.allowSocial.prop("checked")
     };
-    const uri = `/privacy/${this.userId}`;
-    this.database.ref(uri).set(settings).then(() => {
-      if (!settings.social) {
-        this.database.ref(`people/${this.userId}/_search_index`).remove();
-      }
+    friendlyPix.firebase.setPrivacySettings(uid, settings).then(() => {
       this.privacyDialog.get(0).close();
       window.friendlyPix.router.reloadPage();
     })
@@ -247,6 +235,7 @@ friendlyPix.UserPage = class {
    * Displays the given user information in the UI.
    */
   loadUser(userId) {
+    // userId for the Userpage, not the user who is signed in.
     this.userId = userId;
 
     // Reset the UI.

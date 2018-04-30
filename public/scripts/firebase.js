@@ -360,7 +360,7 @@ friendlyPix.Firebase = class {
     // If the main profile Pic is an expiring facebook profile pic URL we'll update it automatically to use the permanent graph API URL.
     if (imageUrl && (imageUrl.indexOf('lookaside.facebook.com') !== -1 || imageUrl.indexOf('fbcdn.net') !== -1)) {
       // Fid the user's Facebook UID.
-      const facebookUID = firebase.auth().currentUser.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
+      const facebookUID = user.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
       imageUrl = `https://graph.facebook.com/${facebookUID}/picture?type=large`;
       user.updateProfile({photoURL: imageUrl}).then(() => {
         console.log('User profile updated.');
@@ -411,6 +411,15 @@ friendlyPix.Firebase = class {
    */
   getPrivacySettings(uid) {
     return this.database.ref(`/privacy/${uid}`).once('value');
+  }
+
+  setPrivacySettings(uid, settings) {
+    const uri = `/privacy/${uid}`;
+    this.database.ref(uri).set(settings).then(() => {
+      if (!settings.social) {
+        this.database.ref(`people/${uid}/_search_index`).remove();
+      }
+    })
   }
 
   /**
