@@ -60,13 +60,21 @@
   <link rel="stylesheet" href="/styles/main.css">
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-25993200-10"></script>
+  <script src="https://www.googletagmanager.com/gtag/js?id=UA-25993200-10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
     gtag('config', 'UA-25993200-10');
+
+    // Track basic JavaScript errors
+    window.addEventListener('error', function(err) {
+      gtag('event', 'exception', {
+        'exDescription': err.message,
+        'exLocation': e.filename + ':  ' + e.lineno
+      });
+    });
   </script>
 
 </head>
