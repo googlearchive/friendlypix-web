@@ -17,6 +17,11 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const promisePool = require('es6-promise-pool');
+const PromisePool = promisePool.PromisePool;
+const secureCompare = require('secure-compare');
+// Maximum concurrent posts and accounts deletions.
+const MAX_CONCURRENT = 3;
 try {
   admin.initializeApp();
 } catch (e) {}
@@ -24,7 +29,7 @@ try {
 /**
  * When a user is deleted we delete all its personal data.
  */
-exports.default = functions.auth.user().onDelete(user => {
+exports.cleanupAccount = functions.auth.user().onDelete(user => {
   const deletedUid = user.uid;
 
   // Gather all path containing user data to delete.
@@ -79,3 +84,154 @@ exports.default = functions.auth.user().onDelete(user => {
 
   return Promise.all([deleteDatabase, deleteStorage]);
 });
+
+/**
+ * Automatically delete all posts that are > 30 days old.
+ */
+exports.deleteOldPosts = functions.https.onRequest((req, res) => {
+  const key = req.query.key;
+
+  // Exit if the keys don't match.
+  if (!secureCompare(key, functions.config().cron.key)) {
+    console.log('The key provided in the request does not match the key set in the environment. Check that', key,
+        'matches the cron.key attribute in `firebase env:get`');
+    res.status(403).send('Security key does not match. Make sure your "key" URL query parameter matches the ' +
+        'cron.key environment variable.');
+    return null;
+  }
+
+  return deleteOldPosts().then(nbPostsDeleted => {
+    console.log(`${nbPostsDeleted} old posts deleted`);
+    res.send(`${nbPostsDeleted} old posts deleted`);
+    return null;
+  });
+});
+
+function deleteOldPosts() {
+  const timestampThreshold = Date.now() - 2592000000; // 30 * 24 * 3600 * 1000
+  return admin.database().ref('/posts').orderByChild('timestamp').endAt(timestampThreshold).once('value').then(snap => {
+    const oldPosts = [];
+
+    snap.forEach(postSnap => {
+      if (postSnap.val().author) {
+        oldPosts.push({
+          postId: postSnap.key,
+          picStorageUri: postSnap.val().picStorageUri,
+          thumbStorageUri: postSnap.val().thumbStorageUri,
+          authorUid: postSnap.val().author.uid
+        });
+      }
+    });
+
+    console.log('Number of old posts to delete:', oldPosts.length);
+
+    const promisePool = new PromisePool(() => deletePost(oldPosts), MAX_CONCURRENT);
+    return promisePool.start().then(() => oldPosts.length);
+  });
+}
+
+function deletePost(oldPosts) {
+  if (oldPosts.length === 0) {
+    return null;
+  }
+
+  const oldPost = oldPosts.pop();
+
+  const postId = oldPost.postId;
+  const picStorageUri = oldPost.picStorageUri;
+  const thumbStorageUri = oldPost.thumbStorageUri;
+  const authorUid = oldPost.authorUid;
+
+  console.log(`Deleting ${postId}`);
+  const updateObj = {};
+  updateObj[`/people/${authorUid}/posts/${postId}`] = null;
+  updateObj[`/comments/${postId}`] = null;
+  updateObj[`/likes/${postId}`] = null;
+  updateObj[`/posts/${postId}`] = null;
+  updateObj[`/feed/${authorUid}/${postId}`] = null;
+  const deleteFromDatabase = admin.database().ref().update(updateObj);
+
+  if (picStorageUri) {
+    const picFileName = picStorageUri.split('appspot.com/')[1];
+    const thumbFileName = thumbStorageUri.split('appspot.com/')[1];
+    const deletePicFromStorage = admin.storage().bucket().file(picFileName).delete();
+    const deleteThumbFromStorage = admin.storage().bucket().file(thumbFileName).delete();
+    return Promise.all([deleteFromDatabase, deletePicFromStorage, deleteThumbFromStorage]);
+  }
+  return deleteFromDatabase.catch(error => {
+    console.error('Deletion of old post', postId, 'failed:', error);
+    return null;
+  });
+}
+
+/**
+ * When requested this Function will delete every user accounts that has been inactive for 30 days.
+ * The request needs to be authorized by passing a 'key' query parameter in the URL. This key must
+ * match a key set as an environment variable using `firebase functions:config:set cron.key="YOUR_KEY"`.
+ */
+exports.deleteInactiveAccounts = functions.https.onRequest((req, res) => {
+  const key = req.query.key;
+
+  // Exit if the keys don't match.
+  if (!secureCompare(key, functions.config().cron.key)) {
+    console.log('The key provided in the request does not match the key set in the environment. Check that', key,
+        'matches the cron.key attribute in `firebase env:get`');
+    res.status(403).send('Security key does not match. Make sure your "key" URL query parameter matches the ' +
+        'cron.key environment variable.');
+    return null;
+  }
+
+  let nbAccounts = 0;
+  // Fetch all user details.
+  return getInactiveUsers().then(inactiveUsers => {
+    console.log('Number of inactive users to delete:', inactiveUsers.length);
+    nbAccounts = inactiveUsers.length;
+
+    // Use a pool so that we delete maximum `MAX_CONCURRENT` users in parallel.
+    const promisePool = new PromisePool(() => deleteInactiveUser(inactiveUsers), MAX_CONCURRENT);
+    return promisePool.start();
+  }).then(() => {
+    console.log(`${nbAccounts} accountsDeleted`);
+    res.send(`${nbAccounts} accountsDeleted`);
+    return null;
+  });
+});
+
+/**
+ * Deletes one inactive user from the list.
+ */
+function deleteInactiveUser(inactiveUsers) {
+  if (inactiveUsers.length > 0) {
+    const userToDelete = inactiveUsers.pop();
+
+    return admin.auth().deleteUser(userToDelete.uid).then(() => {
+      console.log('Deleted user account', userToDelete.uid, 'because of inactivity');
+      return null;
+    }).catch(error => {
+      console.error('Deletion of inactive user account', userToDelete.uid, 'failed:', error);
+      return null;
+    });
+  }
+  return null;
+}
+
+/**
+ * Returns the list of all inactive users.
+ */
+function getInactiveUsers(users = [], nextPageToken) {
+  return admin.auth().listUsers(1000, nextPageToken).then(result => {
+    // Find users that have not signed in in the last 30 days.
+    const inactiveUsers = result.users.filter(
+      user => Date.parse(user.metadata.lastSignInTime) < (Date.now() - 2592000000 /* 30 * 24 * 3600 * 1000 */));
+
+    // Concat with list of previously found inactive users if there was more than 1000 users.
+    users = users.concat(inactiveUsers);
+
+    // If there are more users to fetch we fetch them.
+    if (result.pageToken) {
+      return getInactiveUsers(users, result.pageToken);
+    }
+
+    return users;
+  });
+}
