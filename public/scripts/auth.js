@@ -85,6 +85,13 @@ friendlyPix.Auth = class {
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
+        friendlyPix.firebase.getPrivacySettings(user.uid).then(snapshot => {
+          const settings = snapshot.val();
+          // display privacy modal if there are no privacy preferences
+          if (!settings) {
+            friendlyPix.userPage.showPrivacyDialog();
+          }
+        })
         friendlyPix.firebase.updatePublicProfile();
       }
     });

@@ -379,8 +379,11 @@ friendlyPix.Firebase = class {
       console.error(e);
     }
 
-    friendlyPix.firebase.getPrivacySettings(user.uid).then(snapshot => {
-      const socialEnabled = snapshot.val().social;
+    this.getPrivacySettings(user.uid).then(snapshot => {
+      let socialEnabled = false;
+      if (snapshot.val() !== null) {
+        socialEnabled = snapshot.val().social;
+      }
 
       const updateData = {
         profile_picture: imageUrl || null,
