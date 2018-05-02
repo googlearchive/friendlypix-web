@@ -25,7 +25,7 @@
     // List of all Posts.
     "posts": {
       ".read": true,
-      ".indexOn": "author/uid", // Allow searching for posts by authors. Useful for deletion.
+      ".indexOn": ["author/uid", "timestamp"], // Allow searching for posts by authors. Useful for deletion.
       "$postId": {
         ".write": "!data.exists() || data.exists() && auth.uid === data.child('author').child('uid').val()", // Allow new writes and allow updates and deletes to own posts.
         ".validate": "newData.child('author').child('uid').exists() && newData.child('text').exists()",
