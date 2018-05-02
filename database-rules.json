@@ -204,7 +204,18 @@
       "$uid": {
         ".write": "auth.uid === $uid",
         ".read": "auth.uid === $uid",
-        ".validate": "newData.child('data_processing').isBoolean() && newData.child('content').isBoolean() && newData.child('social').isBoolean()"
+        "data_processing": {
+          ".validate": "newData.isBoolean()"
+        },
+        "content": {
+          ".validate": "newData.isBoolean()"
+        },
+        "social": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": "false"
+        }
       }
     },
     // Disallow all other attributes.
