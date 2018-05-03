@@ -64,10 +64,9 @@ exports.cleanupAccount = functions.auth.user().onDelete(user => {
   const findComments = admin.database().ref('/comments/').once('value').then(commentsSnap => {
     const allPostsPromises = [];
     commentsSnap.forEach(commentList => {
-      const checkPostComments = commentList.ref.orderByChild('author/uid').equalTo(deletedUid).once('value');
-      checkPostComments.then(snap => {
+      const checkPostComments = commentList.ref.orderByChild('author/uid').equalTo(deletedUid).once('value').then(snap => {
         if (snap.exists()) {
-          personalPaths[snap.ref] = null;
+          personalPaths[`/comments/${commentList.key}/${snap.key}`] = null;
         }
       });
       allPostsPromises.push(checkPostComments);
