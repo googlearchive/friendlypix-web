@@ -91,10 +91,10 @@
     <div id="firebaseui-auth-container" class="fp-signed-out-only fp-initially-hidden"></div>
     <a class="fp-skip" href="/feed">skip sign in</a>
   </div>
-  <div class="fp-note">
+  <div class="fp-note fp-signed-out-only fp-initially-hidden">
     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="fp-pre-consent">
       <input type="checkbox" id="fp-pre-consent" class="mdl-checkbox__input">
-      <span class="mdl-checkbox__label">I understand this is a sample application aimed at showcasing the <a href="https://firebase.developers.google.com/docs">Firebase</a> platform capabilities. I will not post personal or private data. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.</span>
+      <span class="mdl-checkbox__label">I understand FriendlyPix is an application aimed at showcasing the <a href="https://firebase.developers.google.com/docs">Firebase</a> platform capabilities, and should not be used with private or sensitive information. All FriendlyPix data and inactive accounts are regularly removed. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.</span>
     </label>
   </div>
 </section>
@@ -444,6 +444,9 @@
                 Upload this pic!
               </button>
             </form>
+            <div class="fp-legalese-add">
+              All uploaded pictures will be publicly viewable, and must adhere to the <a href="/terms">Terms of Service</a>.
+            </div>
           </div>
         </div>
       </div>
@@ -491,8 +494,7 @@
   var uiConfig = {
     'signInFlow': signInFlow,
     'signInOptions': [
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      firebase.auth.FacebookAuthProvider.PROVIDER_ID
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID
     ],
     'callbacks': {
       'uiShown': function() {
