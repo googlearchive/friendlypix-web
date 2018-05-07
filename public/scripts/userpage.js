@@ -88,6 +88,10 @@ friendlyPix.UserPage = class {
    */
   showPrivacyDialog() {
     this.initializePrivacySettings();
+    // Prevent the escape key from dismissing the dialog
+    this.privacyDialog.keydown(function(e) {
+      if (e.keyCode == 27) return false;
+    });
     this.privacyDialog.get(0).showModal();
   }
 
