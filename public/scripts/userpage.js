@@ -124,9 +124,8 @@ friendlyPix.UserPage = class {
           }
           if (this.savedPrivacySettings.content) {
             this.allowContent.prop('checked', true);
-          } else {
-            this.uploadButton.prop('disabled', true);
-            this.mobileUploadButton.prop('disabled', true);
+            this.uploadButton.prop('disabled', false);
+            this.mobileUploadButton.prop('disabled', false);
           }
           if (this.savedPrivacySettings.social) {
             this.allowSocial.prop('checked', true);

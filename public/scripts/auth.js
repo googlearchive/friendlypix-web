@@ -50,6 +50,8 @@ friendlyPix.Auth = class {
       this.deleteAccountButton = $('.fp-delete-account');
       this.usernameLink = $('.fp-usernamelink');
       this.updateAll = $('.fp-update-all');
+      this.uploadButton = $('button#add');
+      this.mobileUploadButton = $('button#add-floating');
 
       // Event bindings
       this.signOutButton.click(() => this.auth.signOut());
@@ -90,6 +92,12 @@ friendlyPix.Auth = class {
           // display privacy modal if there are no privacy preferences
           if (!settings) {
             friendlyPix.userPage.showPrivacyDialog();
+          } else {
+            if (settings.content === true) {
+              // enable upload buttons
+              this.uploadButton.prop('disabled', false);
+              this.mobileUploadButton.prop('disabled', false);
+            }
           }
         })
         friendlyPix.firebase.updatePublicProfile();
