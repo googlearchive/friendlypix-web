@@ -107,6 +107,15 @@ friendlyPix.UserPage = class {
     }
   }
 
+  setUploadButtonState(enabled) {
+    if (enabled) {
+      this.uploadButton.removeAttr('disabled')
+      this.mobileUploadButton.removeAttr('disabled');
+    } else {
+      this.uploadButton.prop('disabled', true);
+      this.mobileUploadButton.prop('disabled', true);
+    }
+  }
 
   /**
    * Fetches previously saved privacy settings if they exist and
@@ -124,8 +133,8 @@ friendlyPix.UserPage = class {
           }
           if (this.savedPrivacySettings.content) {
             this.allowContent.prop('checked', true);
-            this.uploadButton.prop('disabled', false);
-            this.mobileUploadButton.prop('disabled', false);
+            this.uploadButton.removeAttr('disabled')
+            this.mobileUploadButton.removeAttr('disabled');
           }
           if (this.savedPrivacySettings.social) {
             this.allowSocial.prop('checked', true);
@@ -153,6 +162,7 @@ friendlyPix.UserPage = class {
     }
     this.privacyDialog.get(0).close();
     window.friendlyPix.router.reloadPage();
+    this.setUploadButtonState(this.allowContent.prop('checked'));
   }
 
   /**
