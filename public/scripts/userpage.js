@@ -54,6 +54,17 @@ friendlyPix.UserPage = class {
       this.closeFollowingButton = $('.fp-close-following', this.userPage);
       this.userInfoPageImageContainer = $('.fp-image-container', this.userPage);
 
+      // DOM Elements for Privacy Consent Modal
+      this.privacyDialogButton = $('.privacy-dialog-link');
+      this.privacyDialog = $('#privacy-dialog');
+      this.privacyDialogSave = $('.privacy-save');
+      this.allowDataProcessing = $('#allow-data');
+      this.allowContent = $('#allow-content');
+      this.allowSocial = $('#allow-social');
+
+      this.uploadButton = $('button#add');
+      this.mobileUploadButton = $('button#add-floating');
+
       // Event bindings.
       this.followCheckbox.change(() => this.onFollowChange());
       this.blockCheckbox.change(() => this.onBlockChange());
@@ -64,7 +75,94 @@ friendlyPix.UserPage = class {
         this.followingContainer.hide();
         this.nbFollowingContainer.removeClass('is-active');
       });
+
+      // Event bindings for Privacy Consent Dialog
+      this.privacyDialogButton.click(() => this.showPrivacyDialog());
+      this.privacyDialogSave.click(() => this.savePrivacySettings());
+      this.allowDataProcessing.change(() => this.toggleSubmitStates());
     });
+  }
+
+  /**
+   * Sets initial state of Privacy Dialog.
+   */
+  showPrivacyDialog() {
+    this.initializePrivacySettings();
+    // Prevent the escape key from dismissing the dialog
+    this.privacyDialog.keydown(function(e) {
+      if (e.keyCode == 27) return false;
+    });
+    this.privacyDialog.get(0).showModal();
+  }
+
+  /**
+   * Disable the submit button for the privacy settings until data privacy
+   * policy is agreed to.
+   */
+  toggleSubmitStates() {
+    if (this.allowDataProcessing.is(':checked')) {
+      this.privacyDialogSave.removeAttr('disabled');
+    } else {
+      this.privacyDialogSave.attr('disabled', true);
+    }
+  }
+
+  setUploadButtonState(enabled) {
+    if (enabled) {
+      this.uploadButton.removeAttr('disabled')
+      this.mobileUploadButton.removeAttr('disabled');
+    } else {
+      this.uploadButton.prop('disabled', true);
+      this.mobileUploadButton.prop('disabled', true);
+    }
+  }
+
+  /**
+   * Fetches previously saved privacy settings if they exist and
+   * enables the Submit button if user has consented to data processing.
+   */
+  initializePrivacySettings() {
+    const uid = firebase.auth().currentUser.uid
+    if (this.savedPrivacySettings === undefined) {
+      friendlyPix.firebase.getPrivacySettings(uid).then(snapshot => {
+        this.savedPrivacySettings = snapshot.val();
+        if (this.savedPrivacySettings) {
+          if (this.savedPrivacySettings.data_processing) {
+            this.allowDataProcessing.prop('checked', true);
+            this.privacyDialogSave.removeAttr('disabled');
+          }
+          if (this.savedPrivacySettings.content) {
+            this.allowContent.prop('checked', true);
+            this.uploadButton.removeAttr('disabled')
+            this.mobileUploadButton.removeAttr('disabled');
+          }
+          if (this.savedPrivacySettings.social) {
+            this.allowSocial.prop('checked', true);
+          }
+        }
+      })
+    }
+  }
+
+  /**
+   * Saves new privacy settings and closes the privacy dialog.
+   */
+  savePrivacySettings() {
+    // uid of signed in user
+    const uid = firebase.auth().currentUser.uid
+    const settings = {
+      data_processing: this.allowDataProcessing.prop('checked'),
+      content: this.allowContent.prop('checked'),
+      social: this.allowSocial.prop('checked')
+    };
+
+    friendlyPix.firebase.setPrivacySettings(uid, settings);
+    if (!settings.social) {
+      friendlyPix.firebase.removeFromSearch(uid);
+    }
+    this.privacyDialog.get(0).close();
+    window.friendlyPix.router.reloadPage();
+    this.setUploadButtonState(this.allowContent.prop('checked'));
   }
 
   /**
@@ -153,6 +251,7 @@ friendlyPix.UserPage = class {
    * Displays the given user information in the UI.
    */
   loadUser(userId) {
+    // userId for the Userpage, not the user who is signed in.
     this.userId = userId;
 
     // Reset the UI.

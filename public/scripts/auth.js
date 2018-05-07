@@ -50,6 +50,8 @@ friendlyPix.Auth = class {
       this.deleteAccountButton = $('.fp-delete-account');
       this.usernameLink = $('.fp-usernamelink');
       this.updateAll = $('.fp-update-all');
+      this.uploadButton = $('button#add');
+      this.mobileUploadButton = $('button#add-floating');
       this.preConsentCheckbox = $('#fp-pre-consent');
 
       // Event bindings
@@ -95,6 +97,19 @@ friendlyPix.Auth = class {
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
+        friendlyPix.firebase.getPrivacySettings(user.uid).then(snapshot => {
+          const settings = snapshot.val();
+          // display privacy modal if there are no privacy preferences
+          if (!settings) {
+            friendlyPix.userPage.showPrivacyDialog();
+          } else {
+            if (settings.content === true) {
+              // enable upload buttons
+              this.uploadButton.prop('disabled', false);
+              this.mobileUploadButton.prop('disabled', false);
+            }
+          }
+        })
         friendlyPix.firebase.updatePublicProfile();
       }
     });
