@@ -35,7 +35,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'blurOffensiveIm
  * When an account is deleted we delete all the user data in the store as well.
  */
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cleanupAccount') {
-  exports.cleanupAccount = require('./cleanupAccount').default;
+  exports.cleanupAccount = require('./cleanupAccount').cleanupAccount;
 }
 
 /**
@@ -81,14 +81,6 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') 
 }
 
 /**
- * Caches the Facebook profile pics to avoid URL expiry issues.
- */
-// Note: disabled since we are now doing this on the client.
-// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cacheFacebookProfilePic') {
-//   exports.cacheFacebookProfilePic = require('./publicProfiles').cacheFacebookProfilePic;
-// }
-
-/**
  * Update all public profiles upon call.
  */
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfiles') {
@@ -96,9 +88,15 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfil
 }
 
 /**
- * Update user's public profile when his account is created.
+ * Cleanup all old accounts.
  */
-// Note: Disabled for now as we're switching to do this on the client.
-// if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'createPublicProfile') {
-//   exports.createPublicProfile = require('./publicProfiles').createPublicProfile;
-// }
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'deleteInactiveAccounts') {
+  exports.deleteInactiveAccounts = require('./cleanupAccount').deleteInactiveAccounts;
+}
+
+/**
+ * Cleanup all old posts.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'deleteOldPosts') {
+  exports.deleteOldPosts = require('./cleanupAccount').deleteOldPosts;
+}

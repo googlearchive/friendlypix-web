@@ -52,8 +52,18 @@ friendlyPix.Auth = class {
       this.updateAll = $('.fp-update-all');
       this.uploadButton = $('button#add');
       this.mobileUploadButton = $('button#add-floating');
+      this.preConsentCheckbox = $('#fp-pre-consent');
 
       // Event bindings
+      this.preConsentCheckbox.change(() => {
+        const checked = this.preConsentCheckbox.is(':checked');
+        const IDPButtons = $('.firebaseui-idp-button');
+        if (checked) {
+          IDPButtons.removeAttr('disabled');
+        } else {
+          IDPButtons.attr('disabled', 'disabled');
+        }
+      });
       this.signOutButton.click(() => this.auth.signOut());
       this.deleteAccountButton.click(() => this.deleteAccount());
       this.updateAll.click(() => this.updateAllAccounts());

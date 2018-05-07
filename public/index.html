@@ -60,13 +60,21 @@
   <link rel="stylesheet" href="/styles/main.css">
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-25993200-10"></script>
+  <script src="https://www.googletagmanager.com/gtag/js?id=UA-25993200-10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
     gtag('config', 'UA-25993200-10');
+
+    // Track basic JavaScript errors
+    window.addEventListener('error', function(err) {
+      gtag('event', 'exception', {
+        'exDescription': err.message,
+        'exLocation': e.filename + ':  ' + e.lineno
+      });
+    });
   </script>
 
 </head>
@@ -83,7 +91,12 @@
     <div id="firebaseui-auth-container" class="fp-signed-out-only fp-initially-hidden"></div>
     <a class="fp-skip" href="/feed">skip sign in</a>
   </div>
-  <div class="fp-note">Disclaimer: This is a sample application aimed at showcasing the <a href="https://firebase.developers.google.com/docs">Firebase</a> platform capabilities. Avoid posting personal or private data. By signing-in you agree to the <a href="/terms">Terms of Service.</a></div>
+  <div class="fp-note fp-signed-out-only fp-initially-hidden">
+    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="fp-pre-consent">
+      <input type="checkbox" id="fp-pre-consent" class="mdl-checkbox__input">
+      <span class="mdl-checkbox__label">I understand FriendlyPix is an application aimed at showcasing the <a href="https://firebase.developers.google.com/docs">Firebase</a> platform capabilities, and should not be used with private or sensitive information. All FriendlyPix data and inactive accounts are regularly removed. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.</span>
+    </label>
+  </div>
 </section>
 
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
@@ -474,6 +487,9 @@
                 Upload this pic!
               </button>
             </form>
+            <div class="fp-legalese-add">
+              All uploaded pictures will be publicly viewable, and must adhere to the <a href="/terms">Terms of Service</a>.
+            </div>
           </div>
         </div>
       </div>
@@ -521,9 +537,22 @@
   var uiConfig = {
     'signInFlow': signInFlow,
     'signInOptions': [
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      firebase.auth.FacebookAuthProvider.PROVIDER_ID
-    ]
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID
+    ],
+    'callbacks': {
+      'uiShown': function() {
+        const intervalId = setInterval(() => {
+          const IDPButtons = $('.firebaseui-idp-button');
+          const nbIDPButtonDisplayed = IDPButtons.length;
+          if (nbIDPButtonDisplayed > 0) {
+            clearInterval(intervalId);
+            if (!$('#fp-pre-consent').is(':checked')) {
+              IDPButtons.attr('disabled', 'disabled');
+            }
+          }
+        }, 1);
+      }
+    }
   };
   var firebaseUi = new firebaseui.auth.AuthUI(firebase.auth());
 </script>
