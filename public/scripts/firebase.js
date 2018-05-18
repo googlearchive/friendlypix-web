@@ -353,15 +353,16 @@ friendlyPix.Firebase = class {
    * Saves or updates public user data in Firebase (such as image URL, display name...).
    */
   updatePublicProfile() {
-    let displayName = firebase.auth().currentUser.displayName;
-    let imageUrl = firebase.auth().currentUser.photoURL;
+    let user = firebase.auth().currentUser;
+    let displayName = user.displayName;
+    let imageUrl = user.photoURL;
 
     // If the main profile Pic is an expiring facebook profile pic URL we'll update it automatically to use the permanent graph API URL.
     if (imageUrl && (imageUrl.indexOf('lookaside.facebook.com') !== -1 || imageUrl.indexOf('fbcdn.net') !== -1)) {
       // Fid the user's Facebook UID.
-      const facebookUID = firebase.auth().currentUser.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
+      const facebookUID = user.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
       imageUrl = `https://graph.facebook.com/${facebookUID}/picture?type=large`;
-      firebase.auth().currentUser.updateProfile({photoURL: imageUrl}).then(() => {
+      user.updateProfile({photoURL: imageUrl}).then(() => {
         console.log('User profile updated.');
       });
     }
@@ -378,17 +379,27 @@ friendlyPix.Firebase = class {
       console.error(e);
     }
 
-    const updateData = {
-      profile_picture: imageUrl || null,
-      full_name: displayName,
-      _search_index: {
-        full_name: searchFullName,
-        reversed_full_name: searchReversedFullName
+    this.getPrivacySettings(user.uid).then(snapshot => {
+      let socialEnabled = false;
+      if (snapshot.val() !== null) {
+        socialEnabled = snapshot.val().social;
       }
-    };
-    return this.database.ref(`/people/${this.auth.currentUser.uid}`).update(updateData).then(() => {
-      console.log('Public profile updated.');
-    });
+
+      const updateData = {
+        profile_picture: imageUrl || null,
+        full_name: displayName,
+      };
+
+      if (socialEnabled) {
+        updateData._search_index = {
+          full_name: searchFullName,
+          reversed_full_name: searchReversedFullName
+        }
+      };
+      return this.database.ref(`/people/${user.uid}`).update(updateData).then(() => {
+        console.log('Public profile updated.');
+      });
+    })
   }
 
   /**
@@ -397,6 +408,23 @@ friendlyPix.Firebase = class {
   getPostData(postId) {
     return this.database.ref(`/posts/${postId}`).once('value');
   }
+
+  /**
+   * Fetches the user's privacy settings.
+   */
+  getPrivacySettings(uid) {
+    return this.database.ref(`/privacy/${uid}`).once('value');
+  }
+
+  setPrivacySettings(uid, settings) {
+    const uri = `/privacy/${uid}`;
+    this.database.ref(uri).set(settings);
+  }
+
+  removeFromSearch(uid) {
+    this.database.ref(`people/${uid}/_search_index`).remove();
+  }
+
 
   /**
    * Subscribe to receive updates on a user's post like status.

@@ -165,11 +165,19 @@ friendlyPix.Post = class {
       this._setupThumb(thumbUrl, picUrl);
     });
 
-    this._setupDate(postId, timestamp);
-    this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
-    this._setupReportButton(postId);
-    this._setupLikeCountAndStatus(postId);
-    this._setupComments(postId, author, imageText);
+    friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then(snapshot => {
+      let socialEnabled = false;
+      if (snapshot.val() !== null) {
+        socialEnabled = snapshot.val().social;
+      }
+
+      this._setupDate(postId, timestamp);
+      this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
+      this._setupReportButton(postId);
+      this._setupLikeCountAndStatus(postId, socialEnabled);
+      this._setupComments(postId, author, imageText, socialEnabled);
+    })
+
     return post;
   }
 
@@ -229,7 +237,7 @@ friendlyPix.Post = class {
    * Shows comments and binds actions to the comments form.
    * @private
    */
-  _setupComments(postId, author, imageText) {
+  _setupComments(postId, author, imageText, socialEnabled) {
     const post = this.postElement;
 
     // Creates the initial comment with the post's text.
@@ -249,7 +257,7 @@ friendlyPix.Post = class {
       }, commentIds ? commentIds[commentIds.length - 1] : 0);
     });
 
-    if (this.auth.currentUser) {
+    if (this.auth.currentUser && socialEnabled) {
       // Bind comments form posting.
       $('.fp-add-comment', post).off('submit');
       $('.fp-add-comment', post).submit(e => {
@@ -367,10 +375,10 @@ friendlyPix.Post = class {
    * Starts Likes count listener and on/off like status.
    * @private
    */
-  _setupLikeCountAndStatus(postId) {
+  _setupLikeCountAndStatus(postId, socialEnabled) {
     const post = this.postElement;
 
-    if (this.auth.currentUser) {
+    if (this.auth.currentUser && socialEnabled) {
       // Listen to like status.
       friendlyPix.firebase.registerToUserLike(postId, isliked => {
         if (isliked) {

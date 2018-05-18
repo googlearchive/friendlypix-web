@@ -24,6 +24,7 @@
     "sweetalert": "^1.1.3",
     "latinize": "^0.2.0",
     "material-design-lite": "^1.1.3",
-    "firebaseui": "^2.7.0"
+    "firebaseui": "^2.7.0",
+    "dialog-polyfill": "^0.4.9"
   }
 }

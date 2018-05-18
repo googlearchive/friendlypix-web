@@ -939,3 +939,7 @@ a {
   padding: 0 24px;
   color: rgba(255,255,255,.6);
 }
+
+.mdl-dialog {
+  width: 40%;
+}

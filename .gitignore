@@ -15,3 +15,5 @@ node_modules/**
 .firebaserc
 firebase-debug.log
 functions/node_modules/**
+package-lock.json
+functions/package-lock.json

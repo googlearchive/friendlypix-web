@@ -16,10 +16,9 @@ Friendly Pix is built using Javascript, [Firebase](https://firebase.google.com/d
 1. Create a Firebase project using the [Firebase Console](https://firebase.google.com/console).
 1. Visit the **Storage** section and enable storage by clicking the **Getting Started** button.
 1. Enable **Google** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab.
-1. Enable **Facebook** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab. You'll need to provide your Facebook app's credentials. If you haven't yet you'll need to have created a Facebook app on [Facebook for Developers](https://developers.facebook.com)
-1. [Enable the Cloud Vision API](https://console.cloud.google.com/apis/api/vision.googleapis.com/overview?project=_) on your project and enable Billing.
 1. In a console run `firebase use --add` and, when prompted, select the Firebase Project you have just created. This will make sure the Firebase CLI is configured to use your particular project.
-1. To enable email notifications for flagged content, set the mailgun credentials using:
+1. [Optional] To enable the automatic inapropriate image blurring, [Enable the Cloud Vision API](https://console.cloud.google.com/apis/api/vision.googleapis.com/overview?project=_) on your project and enable Billing.
+1. [Optional] To enable email notifications for flagged content, set the mailgun credentials using:
     ```bash
     firebase functions:config:set mailgun.domain=friendly-pix.com mailgun.key=key-XXXXXXXXXXXXXXXX
     ```
@@ -52,6 +51,11 @@ firebase deploy
 
 Before deploying this will automatically install all runtime dependencies, transpile the Javascript code to ES5 and install Cloud Functions dependencies.
 Then this deploys a new version of your code that will be served from `https://<PROJECT_ID>.firebaseapp.com`
+
+
+## Admins
+
+To make a user an admin - allowing him to delete any posts - manually add an entry to `/admins/$index/email: admin@email.com`. For instance `/admins/1/email: bob@gmail.com`.
 
 
 ## Mobile Apps
