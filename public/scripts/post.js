@@ -165,18 +165,26 @@ friendlyPix.Post = class {
       this._setupThumb(thumbUrl, picUrl);
     });
 
-    friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then((snapshot) => {
-      let socialEnabled = false;
-      if (snapshot.val() !== null) {
-        socialEnabled = snapshot.val().social;
-      }
+    if (this.auth.currentUser) {
+      friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then((snapshot) => {
+        let socialEnabled = false;
+        if (snapshot.val() !== null) {
+          socialEnabled = snapshot.val().social;
+        }
 
+        this._setupDate(postId, timestamp);
+        this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
+        this._setupReportButton(postId);
+        this._setupLikeCountAndStatus(postId, socialEnabled);
+        this._setupComments(postId, author, imageText, socialEnabled);
+      });
+    } else {
       this._setupDate(postId, timestamp);
       this._setupDeleteButton(postId, author, picStorageUri, thumbStorageUri);
       this._setupReportButton(postId);
-      this._setupLikeCountAndStatus(postId, socialEnabled);
-      this._setupComments(postId, author, imageText, socialEnabled);
-    });
+      this._setupLikeCountAndStatus(postId);
+      this._setupComments(postId, author, imageText);
+    }
 
     return post;
   }
@@ -237,7 +245,7 @@ friendlyPix.Post = class {
    * Shows comments and binds actions to the comments form.
    * @private
    */
-  _setupComments(postId, author, imageText, socialEnabled) {
+  _setupComments(postId, author, imageText, socialEnabled = false) {
     const post = this.postElement;
 
     // Creates the initial comment with the post's text.
@@ -375,7 +383,7 @@ friendlyPix.Post = class {
    * Starts Likes count listener and on/off like status.
    * @private
    */
-  _setupLikeCountAndStatus(postId, socialEnabled) {
+  _setupLikeCountAndStatus(postId, socialEnabled = false) {
     const post = this.postElement;
 
     if (this.auth.currentUser && socialEnabled) {
