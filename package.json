@@ -10,5 +10,9 @@
     "concurrently": "^3.5.1",
     "firebase-tools": "^3.18.0"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-google": "^0.9.1"
+  }
 }

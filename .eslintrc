@@ -3,6 +3,9 @@
   "env": {
     "browser": true
   },
+  "parserOptions": {
+   "ecmaVersion": 6
+ },
   "rules": {
     "camelcase": 0,
     "default-case": 0,
