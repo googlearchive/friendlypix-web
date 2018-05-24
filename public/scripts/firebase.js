@@ -63,7 +63,7 @@ friendlyPix.Firebase = class {
    * Turns off all Firebase listeners.
    */
   cancelAllSubscriptions() {
-    this.firebaseRefs.forEach(ref => ref.off());
+    this.firebaseRefs.forEach((ref) => ref.off());
     this.firebaseRefs = [];
   }
 
@@ -176,13 +176,13 @@ friendlyPix.Firebase = class {
     if (latestEntryId) {
       feedRef = feedRef.orderByKey().startAt(latestEntryId);
     }
-    feedRef.on('child_added', feedData => {
+    feedRef.on('child_added', (feedData) => {
       if (feedData.key !== latestEntryId) {
         if (!fetchPostDetails) {
           callback(feedData.key, feedData.val());
         } else {
           this.database.ref(`/posts/${feedData.key}`).once('value').then(
-              postData => callback(postData.key, postData.val()));
+              (postData) => callback(postData.key, postData.val()));
         }
       }
     });
@@ -210,7 +210,7 @@ friendlyPix.Firebase = class {
       ref = ref.orderByKey().endAt(earliestEntryId);
     }
     // We're fetching an additional item as a cheap way to test if there is a next page.
-    return ref.limitToLast(pageSize + 1).once('value').then(data => {
+    return ref.limitToLast(pageSize + 1).once('value').then((data) => {
       const entries = data.val() || {};
 
       // Figure out if there is a next page.
@@ -224,12 +224,12 @@ friendlyPix.Firebase = class {
       }
       if (fetchPostDetails) {
         // Fetch details of all posts.
-        const queries = entryIds.map(postId => this.getPostData(postId));
+        const queries = entryIds.map((postId) => this.getPostData(postId));
         // Since all the requests are being done one the same feed it's unlikely that a single one
         // would fail and not the others so using Promise.all() is not so risky.
-        return Promise.all(queries).then(results => {
+        return Promise.all(queries).then((results) => {
           const deleteOps = [];
-          results.forEach(result => {
+          results.forEach((result) => {
             if (result.val()) {
               entries[result.key] = result.val();
             } else {
@@ -257,7 +257,7 @@ friendlyPix.Firebase = class {
     // Make sure we listen on each followed people's posts.
     const followingRef = this.database.ref(`/people/${this.auth.currentUser.uid}/following`);
     this.firebaseRefs.push(followingRef);
-    followingRef.on('child_added', followingData => {
+    followingRef.on('child_added', (followingData) => {
       // Start listening the followed user's posts to populate the home feed.
       const followedUid = followingData.key;
       let followedUserPostsRef = this.database.ref(`/people/${followedUid}/posts`);
@@ -265,7 +265,7 @@ friendlyPix.Firebase = class {
         followedUserPostsRef = followedUserPostsRef.orderByKey().startAt(followingData.val());
       }
       this.firebaseRefs.push(followedUserPostsRef);
-      followedUserPostsRef.on('child_added', postData => {
+      followedUserPostsRef.on('child_added', (postData) => {
         if (postData.key !== followingData.val()) {
           const updates = {};
           updates[`/feed/${this.auth.currentUser.uid}/${postData.key}`] = true;
@@ -275,7 +275,7 @@ friendlyPix.Firebase = class {
       });
     });
     // Stop listening to users we unfollow.
-    followingRef.on('child_removed', followingData => {
+    followingRef.on('child_removed', (followingData) => {
       // Stop listening the followed user's posts to populate the home feed.
       const followedUserId = followingData.key;
       this.database.ref(`/people/${followedUserId}/posts`).off();
@@ -288,24 +288,24 @@ friendlyPix.Firebase = class {
   updateHomeFeeds() {
     // Make sure we listen on each followed people's posts.
     const followingRef = this.database.ref(`/people/${this.auth.currentUser.uid}/following`);
-    return followingRef.once('value', followingData => {
+    return followingRef.once('value', (followingData) => {
       // Start listening the followed user's posts to populate the home feed.
       const following = followingData.val();
       if (!following) {
         return;
       }
-      const updateOperations = Object.keys(following).map(followedUid => {
+      const updateOperations = Object.keys(following).map((followedUid) => {
         let followedUserPostsRef = this.database.ref(`/people/${followedUid}/posts`);
         const lastSyncedPostId = following[followedUid];
         if (lastSyncedPostId instanceof String) {
           followedUserPostsRef = followedUserPostsRef.orderByKey().startAt(lastSyncedPostId);
         }
-        return followedUserPostsRef.once('value', postData => {
+        return followedUserPostsRef.once('value', (postData) => {
           const updates = {};
           if (!postData.val()) {
             return;
           }
-          Object.keys(postData.val()).forEach(postId => {
+          Object.keys(postData.val()).forEach((postId) => {
             if (postId !== lastSyncedPostId) {
               updates[`/feed/${this.auth.currentUser.uid}/${postId}`] = true;
               updates[`/people/${this.auth.currentUser.uid}/following/${followedUid}`] = postId;
@@ -329,16 +329,16 @@ friendlyPix.Firebase = class {
     const reversedQuery = this.database.ref('/people')
         .orderByChild('_search_index/reversed_full_name').startAt(searchString)
         .limitToFirst(maxResults).once('value');
-    return Promise.all([query, reversedQuery]).then(results => {
+    return Promise.all([query, reversedQuery]).then((results) => {
       const people = {};
       // construct people from the two search queries results.
-      results.forEach(result => result.forEach(data => {
+      results.forEach((result) => result.forEach((data) => {
         people[data.key] = data.val();
       }));
 
       // Remove results that do not start with the search query.
       const userIds = Object.keys(people);
-      userIds.forEach(userId => {
+      userIds.forEach((userId) => {
         const name = people[userId]._search_index.full_name;
         const reversedName = people[userId]._search_index.reversed_full_name;
         if (!name.startsWith(searchString) && !reversedName.startsWith(searchString)) {
@@ -360,7 +360,7 @@ friendlyPix.Firebase = class {
     // If the main profile Pic is an expiring facebook profile pic URL we'll update it automatically to use the permanent graph API URL.
     if (imageUrl && (imageUrl.indexOf('lookaside.facebook.com') !== -1 || imageUrl.indexOf('fbcdn.net') !== -1)) {
       // Fid the user's Facebook UID.
-      const facebookUID = user.providerData.find(providerData => providerData.providerId === 'facebook.com').uid;
+      const facebookUID = user.providerData.find((providerData) => providerData.providerId === 'facebook.com').uid;
       imageUrl = `https://graph.facebook.com/${facebookUID}/picture?type=large`;
       user.updateProfile({photoURL: imageUrl}).then(() => {
         console.log('User profile updated.');
@@ -379,7 +379,7 @@ friendlyPix.Firebase = class {
       console.error(e);
     }
 
-    this.getPrivacySettings(user.uid).then(snapshot => {
+    this.getPrivacySettings(user.uid).then((snapshot) => {
       let socialEnabled = false;
       if (snapshot.val() !== null) {
         socialEnabled = snapshot.val().social;
@@ -393,13 +393,13 @@ friendlyPix.Firebase = class {
       if (socialEnabled) {
         updateData._search_index = {
           full_name: searchFullName,
-          reversed_full_name: searchReversedFullName
-        }
+          reversed_full_name: searchReversedFullName,
+        };
       };
       return this.database.ref(`/people/${user.uid}`).update(updateData).then(() => {
         console.log('Public profile updated.');
       });
-    })
+    });
   }
 
   /**
@@ -432,7 +432,7 @@ friendlyPix.Firebase = class {
   registerToUserLike(postId, callback) {
     // Load and listen to new Likes.
     const likesRef = this.database.ref(`likes/${postId}/${this.auth.currentUser.uid}`);
-    likesRef.on('value', data => callback(!!data.val()));
+    likesRef.on('value', (data) => callback(!!data.val()));
     this.firebaseRefs.push(likesRef);
   }
 
@@ -454,8 +454,8 @@ friendlyPix.Firebase = class {
       author: {
         uid: this.auth.currentUser.uid,
         full_name: this.auth.currentUser.displayName || 'Anonymous',
-        profile_picture: this.auth.currentUser.photoURL || null
-      }
+        profile_picture: this.auth.currentUser.photoURL || null,
+      },
     };
     return this.database.ref(`comments/${postId}`).push(commentObject);
   }
@@ -473,7 +473,7 @@ friendlyPix.Firebase = class {
   editComment(postId, commentId, commentText) {
     return this.database.ref(`/comments/${postId}/${commentId}`).update({
       text: commentText,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
     });
   }
 
@@ -497,31 +497,31 @@ friendlyPix.Firebase = class {
     // Start the pic file upload to Cloud Storage.
     const picRef = this.storage.ref(`${this.auth.currentUser.uid}/full/${newPostKey}/${fileName}`);
     const metadata = {
-      contentType: pic.type
+      contentType: pic.type,
     };
-    const picUploadTask = picRef.put(pic, metadata).then(snapshot => {
+    const picUploadTask = picRef.put(pic, metadata).then((snapshot) => {
       console.log('New pic uploaded. Size:', snapshot.totalBytes, 'bytes.');
-      return snapshot.ref.getDownloadURL().then(url => {
+      return snapshot.ref.getDownloadURL().then((url) => {
         console.log('File available at', url);
         return url;
       });
-    }).catch(error => {
+    }).catch((error) => {
       console.error('Error while uploading new pic', error);
     });
 
     // Start the thumb file upload to Cloud Storage.
     const thumbRef = this.storage.ref(`${this.auth.currentUser.uid}/thumb/${newPostKey}/${fileName}`);
-    const tumbUploadTask = thumbRef.put(thumb, metadata).then(snapshot => {
+    const tumbUploadTask = thumbRef.put(thumb, metadata).then((snapshot) => {
       console.log('New thumb uploaded. Size:', snapshot.totalBytes, 'bytes.');
-      return snapshot.ref.getDownloadURL().then(url => {
+      return snapshot.ref.getDownloadURL().then((url) => {
         console.log('File available at', url);
         return url;
       });
-    }).catch(error => {
+    }).catch((error) => {
       console.error('Error while uploading new thumb', error);
     });
 
-    return Promise.all([picUploadTask, tumbUploadTask]).then(urls => {
+    return Promise.all([picUploadTask, tumbUploadTask]).then((urls) => {
       // Once both pics and thumbnails has been uploaded add a new post in the Firebase Database and
       // to its fanned out posts lists (user's posts and home post).
       const update = {};
@@ -536,8 +536,8 @@ friendlyPix.Firebase = class {
         author: {
           uid: this.auth.currentUser.uid,
           full_name: this.auth.currentUser.displayName || 'Anonymous',
-          profile_picture: this.auth.currentUser.photoURL || null
-        }
+          profile_picture: this.auth.currentUser.photoURL || null,
+        },
       };
       update[`/people/${this.auth.currentUser.uid}/posts/${newPostKey}`] = true;
       update[`/feed/${this.auth.currentUser.uid}/${newPostKey}`] = true;
@@ -554,12 +554,12 @@ friendlyPix.Firebase = class {
   toggleFollowUser(followedUserId, follow) {
     // Add or remove posts to the user's home feed.
     return this.database.ref(`/people/${followedUserId}/posts`).once('value').then(
-        data => {
+        (data) => {
           const updateData = {};
           let lastPostId = true;
 
           // Add/remove followed user's posts to the home feed.
-          data.forEach(post => {
+          data.forEach((post) => {
             updateData[`/feed/${this.auth.currentUser.uid}/${post.key}`] = follow ? !!follow : null;
             lastPostId = post.key;
           });
@@ -647,7 +647,7 @@ friendlyPix.Firebase = class {
    */
   registerForLikesCount(postId, likesCallback) {
     const likesRef = this.database.ref(`/likes/${postId}`);
-    likesRef.on('value', data => likesCallback(data.numChildren()));
+    likesRef.on('value', (data) => likesCallback(data.numChildren()));
     this.firebaseRefs.push(likesRef);
   }
 
@@ -656,7 +656,7 @@ friendlyPix.Firebase = class {
    */
   registerForCommentsCount(postId, commentsCallback) {
     const commentsRef = this.database.ref(`/comments/${postId}`);
-    commentsRef.on('value', data => commentsCallback(data.numChildren()));
+    commentsRef.on('value', (data) => commentsCallback(data.numChildren()));
     this.firebaseRefs.push(commentsRef);
   }
 
@@ -667,7 +667,7 @@ friendlyPix.Firebase = class {
    */
   registerForFollowersCount(uid, followersCallback) {
     const followersRef = this.database.ref(`/followers/${uid}`);
-    followersRef.on('value', data => followersCallback(data.numChildren()));
+    followersRef.on('value', (data) => followersCallback(data.numChildren()));
     this.firebaseRefs.push(followersRef);
   }
 
@@ -676,7 +676,7 @@ friendlyPix.Firebase = class {
    */
   registerForFollowingCount(uid, followingCallback) {
     const followingRef = this.database.ref(`/people/${uid}/following`);
-    followingRef.on('value', data => followingCallback(data.numChildren()));
+    followingRef.on('value', (data) => followingCallback(data.numChildren()));
     this.firebaseRefs.push(followingRef);
   }
 
@@ -685,7 +685,7 @@ friendlyPix.Firebase = class {
    */
   registerForThumbChanges(postId, callback) {
     const thumbRef = this.database.ref(`/posts/${postId}/thumb_url`);
-    thumbRef.on('value', data => callback(data.val()));
+    thumbRef.on('value', (data) => callback(data.val()));
     this.firebaseRefs.push(thumbRef);
   }
 
@@ -693,14 +693,14 @@ friendlyPix.Firebase = class {
    * Fetch the list of followed people's profile.
    */
   getFollowingProfiles(uid) {
-    return this.database.ref(`/people/${uid}/following`).once('value').then(data => {
+    return this.database.ref(`/people/${uid}/following`).once('value').then((data) => {
       if (data.val()) {
         const followingUids = Object.keys(data.val());
         const fetchProfileDetailsOperations = followingUids.map(
-          followingUid => this.loadUserProfile(followingUid));
-        return Promise.all(fetchProfileDetailsOperations).then(results => {
+          (followingUid) => this.loadUserProfile(followingUid));
+        return Promise.all(fetchProfileDetailsOperations).then((results) => {
           const profiles = {};
-          results.forEach(result => {
+          results.forEach((result) => {
             if (result.val()) {
               profiles[result.key] = result.val();
             }
@@ -717,7 +717,7 @@ friendlyPix.Firebase = class {
    */
   registerForPostsCount(uid, postsCallback) {
     const userPostsRef = this.database.ref(`/people/${uid}/posts`);
-    userPostsRef.on('value', data => postsCallback(data.numChildren()));
+    userPostsRef.on('value', (data) => postsCallback(data.numChildren()));
     this.firebaseRefs.push(userPostsRef);
   }
 
@@ -768,7 +768,7 @@ friendlyPix.Firebase = class {
    */
   registerForPostsDeletion(deletionCallback) {
     const postsRef = this.database.ref(`/posts`);
-    postsRef.on('child_removed', data => deletionCallback(data.key));
+    postsRef.on('child_removed', (data) => deletionCallback(data.key));
     this.firebaseRefs.push(postsRef);
   }
 };

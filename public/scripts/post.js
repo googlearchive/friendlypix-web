@@ -49,14 +49,14 @@ friendlyPix.Post = class {
    */
   loadPost(postId) {
     // Load the posts information.
-    friendlyPix.firebase.getPostData(postId).then(snapshot => {
+    friendlyPix.firebase.getPostData(postId).then((snapshot) => {
       const post = snapshot.val();
       // Clear listeners and previous post data.
       this.clear();
       if (!post) {
         const data = {
           message: 'This post does not exists.',
-          timeout: 5000
+          timeout: 5000,
         };
         this.toast[0].MaterialSnackbar.showSnackbar(data);
         if (this.auth.currentUser) {
@@ -76,7 +76,7 @@ friendlyPix.Post = class {
    */
   clear() {
     // Stops all timers if any.
-    this.timers.forEach(timer => clearInterval(timer));
+    this.timers.forEach((timer) => clearInterval(timer));
     this.timers = [];
 
     // Remove Firebase listeners.
@@ -107,7 +107,7 @@ friendlyPix.Post = class {
     friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
 
     // Subscribe to updates of the comment.
-    friendlyPix.firebase.subscribeToComment(postId, commentId, snap => {
+    friendlyPix.firebase.subscribeToComment(postId, commentId, (snap) => {
       const updatedComment = snap.val();
       if (updatedComment) {
         const updatedElement = this.createComment(updatedComment.author,
@@ -132,7 +132,7 @@ friendlyPix.Post = class {
       nextPageButton.show();
       nextPageButton.unbind('click');
       nextPageButton.prop('disabled', false);
-      nextPageButton.click(() => nextPage().then(data => {
+      nextPageButton.click(() => nextPage().then((data) => {
         nextPageButton.prop('disabled', true);
         this.displayComments(postId, data.entries);
         this.displayNextPageButton(postId, data.nextPage);
@@ -161,11 +161,11 @@ friendlyPix.Post = class {
     this._setupThumb(thumbUrl, picUrl);
 
     // Make sure we update if the thumb or pic URL changes.
-    friendlyPix.firebase.registerForThumbChanges(postId, thumbUrl => {
+    friendlyPix.firebase.registerForThumbChanges(postId, (thumbUrl) => {
       this._setupThumb(thumbUrl, picUrl);
     });
 
-    friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then(snapshot => {
+    friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then((snapshot) => {
       let socialEnabled = false;
       if (snapshot.val() !== null) {
         socialEnabled = snapshot.val().social;
@@ -176,7 +176,7 @@ friendlyPix.Post = class {
       this._setupReportButton(postId);
       this._setupLikeCountAndStatus(postId, socialEnabled);
       this._setupComments(postId, author, imageText, socialEnabled);
-    })
+    });
 
     return post;
   }
@@ -200,7 +200,7 @@ friendlyPix.Post = class {
     this.theatre.off('click');
     this.theatre.click(() => this.leaveTheatreMode());
     $(document).off('keydown');
-    $(document).keydown(e => {
+    $(document).keydown((e) => {
       if (e.which === 27) {
         this.leaveTheatreMode();
       }
@@ -245,7 +245,7 @@ friendlyPix.Post = class {
     $('.fp-first-comment', post).append(this.createComment(author, imageText));
 
     // Load first page of comments and listen to new comments.
-    friendlyPix.firebase.getComments(postId).then(data => {
+    friendlyPix.firebase.getComments(postId).then((data) => {
       $('.fp-comments', post).empty();
       this.displayComments(postId, data.entries);
       this.displayNextPageButton(postId, data.nextPage);
@@ -260,7 +260,7 @@ friendlyPix.Post = class {
     if (this.auth.currentUser && socialEnabled) {
       // Bind comments form posting.
       $('.fp-add-comment', post).off('submit');
-      $('.fp-add-comment', post).submit(e => {
+      $('.fp-add-comment', post).submit((e) => {
         e.preventDefault();
         const commentText = $(`.mdl-textfield__input`, post).val();
         if (!commentText || commentText.length === 0) {
@@ -297,7 +297,7 @@ friendlyPix.Post = class {
           confirmButtonText: 'Yes, report this post!',
           closeOnConfirm: true,
           showLoaderOnConfirm: true,
-          allowEscapeKey: true
+          allowEscapeKey: true,
         }, () => {
           $('.fp-report-post', post).prop('disabled', true);
           friendlyPix.firebase.reportPost(postId).then(() => {
@@ -305,15 +305,15 @@ friendlyPix.Post = class {
               title: 'Reported!',
               text: 'This post has been reported. Please allow some time before an admin reviews it.',
               type: 'success',
-              timer: 2000
+              timer: 2000,
             });
             $('.fp-report-post', post).prop('disabled', false);
-          }).catch(error => {
+          }).catch((error) => {
             swal.close();
             $('.fp-report-post', post).prop('disabled', false);
             const data = {
               message: `There was an error reporting your post: ${error}`,
-              timeout: 5000
+              timeout: 5000,
             };
             this.toast[0].MaterialSnackbar.showSnackbar(data);
           });
@@ -346,7 +346,7 @@ friendlyPix.Post = class {
         confirmButtonText: 'Yes, delete it!',
         closeOnConfirm: false,
         showLoaderOnConfirm: true,
-        allowEscapeKey: true
+        allowEscapeKey: true,
       }, () => {
         $('.fp-delete-post', post).prop('disabled', true);
         friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
@@ -354,16 +354,16 @@ friendlyPix.Post = class {
             title: 'Deleted!',
             text: 'Your post has been deleted.',
             type: 'success',
-            timer: 2000
+            timer: 2000,
           });
           $('.fp-delete-post', post).prop('disabled', false);
           page(`/user/${this.auth.currentUser.uid}`);
-        }).catch(error => {
+        }).catch((error) => {
           swal.close();
           $('.fp-delete-post', post).prop('disabled', false);
           const data = {
             message: `There was an error deleting your post: ${error}`,
-            timeout: 5000
+            timeout: 5000,
           };
           this.toast[0].MaterialSnackbar.showSnackbar(data);
         });
@@ -380,7 +380,7 @@ friendlyPix.Post = class {
 
     if (this.auth.currentUser && socialEnabled) {
       // Listen to like status.
-      friendlyPix.firebase.registerToUserLike(postId, isliked => {
+      friendlyPix.firebase.registerToUserLike(postId, (isliked) => {
         if (isliked) {
           $('.fp-liked', post).show();
           $('.fp-not-liked', post).hide();
@@ -402,7 +402,7 @@ friendlyPix.Post = class {
     }
 
     // Listen to number of Likes.
-    friendlyPix.firebase.registerForLikesCount(postId, nbLikes => {
+    friendlyPix.firebase.registerForLikesCount(postId, (nbLikes) => {
       if (nbLikes > 0) {
         $('.fp-likes', post).show();
         $('.fp-likes', post).text(nbLikes + ' like' + (nbLikes === 1 ? '' : 's'));

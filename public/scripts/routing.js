@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles the pages/routing.
  */
 friendlyPix.Router = class {
-
   /**
    * Initializes the Friendly Pix controller/router.
    * @constructor
@@ -40,11 +39,11 @@ friendlyPix.Router = class {
       // Configuring routes.
       const pipe = friendlyPix.Router.pipe;
       const displayPage = this.displayPage.bind(this);
-      const loadUser = userId => friendlyPix.userPage.loadUser(userId);
+      const loadUser = (userId) => friendlyPix.userPage.loadUser(userId);
       const showHomeFeed = () => friendlyPix.feed.showHomeFeed();
       const showGeneralFeed = () => friendlyPix.feed.showGeneralFeed();
       const clearFeed = () => friendlyPix.feed.clear();
-      const showPost = postId => friendlyPix.post.loadPost(postId);
+      const showPost = (postId) => friendlyPix.post.loadPost(postId);
 
       page('/', pipe(showHomeFeed, null, true),
           pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));

@@ -46,7 +46,7 @@ function sendEmail(snap, context) {
   const commentConsoleUrl = `https://console.firebase.google.com/project/${projectID}/database/${projectID}/data/comments/${postId}/${commentId}`;
   const ref = commentId ? `/comments/${postId}/${commentId}` : `/posts/${postId}`;
 
-  return Promise.all([admin.database().ref(ref).once('value'), admin.auth().getUser(uid)]).then(responses => {
+  return Promise.all([admin.database().ref(ref).once('value'), admin.auth().getUser(uid)]).then((responses) => {
     const reportedData = responses[0].val();
     const user = responses[1];
     const data = {
@@ -64,7 +64,7 @@ function sendEmail(snap, context) {
            ${commentId ? 'Comment' : 'Post'} console URL: ${commentId ? commentConsoleUrl : postConsoleURL}<br>
            ${commentId ? '' : `Post image thumbnail: <br>
                <a href="${reportedData.thumb_url}"><img style="max-width: 400px" src="${reportedData.thumb_url}"></a><br>`}
-           Text of the ${commentId ? 'comment' : 'post'} reported: <b>${reportedData.text}</b>`
+           Text of the ${commentId ? 'comment' : 'post'} reported: <b>${reportedData.text}</b>`,
     };
 
     if (mailgun) {

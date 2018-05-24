@@ -21,14 +21,13 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles uploads of new pics.
  */
 friendlyPix.Uploader = class {
-
   /**
    * @return {number}
    */
   static get FULL_IMAGE_SPECS() {
     return {
       maxDimension: 1280,
-      quality: 0.9
+      quality: 0.9,
     };
   }
 
@@ -38,7 +37,7 @@ friendlyPix.Uploader = class {
   static get THUMB_IMAGE_SPECS() {
     return {
       maxDimension: 640,
-      quality: 0.7
+      quality: 0.7,
     };
   }
 
@@ -69,8 +68,8 @@ friendlyPix.Uploader = class {
       // Event bindings
       this.addButton.click(() => this.initiatePictureCapture());
       this.addButtonFloating.click(() => this.initiatePictureCapture());
-      this.imageInput.change(e => this.readPicture(e));
-      this.uploadPicForm.submit(e => this.uploadPic(e));
+      this.imageInput.change((e) => this.readPicture(e));
+      this.uploadPicForm.submit((e) => this.uploadPic(e));
       this.imageCaptionInput.keyup(() => this.uploadButton.prop('disabled', !this.imageCaptionInput.val()));
     });
   }
@@ -80,17 +79,17 @@ friendlyPix.Uploader = class {
     // Polyfill for canvas.toBlob().
     if (!HTMLCanvasElement.prototype.toBlob) {
       Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
-        value: function(callback, type, quality) {
-          var binStr = atob(this.toDataURL(type, quality).split(',')[1]);
-          var len = binStr.length;
-          var arr = new Uint8Array(len);
+        value: (callback, type, quality) => {
+          const binStr = atob(this.toDataURL(type, quality).split(',')[1]);
+          const len = binStr.length;
+          const arr = new Uint8Array(len);
 
-          for (var i = 0; i < len; i++) {
+          for (let i = 0; i < len; i++) {
             arr[i] = binStr.charCodeAt(i);
           }
 
           callback(new Blob([arr], {type: type || 'image/png'}));
-        }
+        },
       });
     }
   }
@@ -129,7 +128,7 @@ friendlyPix.Uploader = class {
   readPicture(event) {
     this.clear();
 
-    var file = event.target.files[0]; // FileList object
+    const file = event.target.files[0]; // FileList object
     this.currentFile = file;
 
     // Clear the selection in the file picker input.
@@ -138,8 +137,8 @@ friendlyPix.Uploader = class {
 
     // Only process image files.
     if (file.type.match('image.*')) {
-      var reader = new FileReader();
-      reader.onload = e => this.displayPicture(e.target.result);
+      const reader = new FileReader();
+      reader.onload = (e) => this.displayPicture(e.target.result);
       // Read in the image file as a data URL.
       reader.readAsDataURL(file);
       this.disableUploadUi(false);
@@ -178,10 +177,10 @@ friendlyPix.Uploader = class {
     const fullDeferred = new $.Deferred();
     const thumbDeferred = new $.Deferred();
 
-    const resolveFullBlob = blob => fullDeferred.resolve(blob);
-    const resolveThumbBlob = blob => thumbDeferred.resolve(blob);
+    const resolveFullBlob = (blob) => fullDeferred.resolve(blob);
+    const resolveThumbBlob = (blob) => thumbDeferred.resolve(blob);
 
-    const displayPicture = url => {
+    const displayPicture = (url) => {
       const image = new Image();
       image.src = url;
 
@@ -197,13 +196,13 @@ friendlyPix.Uploader = class {
     };
 
     const reader = new FileReader();
-    reader.onload = e => displayPicture(e.target.result);
+    reader.onload = (e) => displayPicture(e.target.result);
     reader.readAsDataURL(this.currentFile);
 
-    return Promise.all([fullDeferred.promise(), thumbDeferred.promise()]).then(results => {
+    return Promise.all([fullDeferred.promise(), thumbDeferred.promise()]).then((results) => {
       return {
         full: results[0],
-        thumb: results[1]
+        thumb: results[1],
       };
     });
   }
@@ -214,26 +213,26 @@ friendlyPix.Uploader = class {
   uploadPic(e) {
     e.preventDefault();
     this.disableUploadUi(true);
-    var imageCaption = this.imageCaptionInput.val();
+    const imageCaption = this.imageCaptionInput.val();
 
-    this.generateImages().then(pics => {
+    this.generateImages().then((pics) => {
       // Upload the File upload to Cloud Storage and create new post.
       friendlyPix.firebase.uploadNewPic(pics.full, pics.thumb, this.currentFile.name, imageCaption)
-          .then(postId => {
+          .then((postId) => {
             page(`/user/${this.auth.currentUser.uid}`);
-            var data = {
+            const data = {
               message: 'New pic has been posted!',
               actionHandler: () => page(`/post/${postId}`),
               actionText: 'View',
-              timeout: 10000
+              timeout: 10000,
             };
             this.toast[0].MaterialSnackbar.showSnackbar(data);
             this.disableUploadUi(false);
-          }, error => {
+          }, (error) => {
             console.error(error);
-            var data = {
+            const data = {
               message: `There was an error while posting your pic. Sorry!`,
-              timeout: 5000
+              timeout: 5000,
             };
             this.toast[0].MaterialSnackbar.showSnackbar(data);
             this.disableUploadUi(false);

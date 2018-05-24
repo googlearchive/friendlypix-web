@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles the User Profile UI.
  */
 friendlyPix.UserPage = class {
-
   /**
    * Initializes the user's profile UI.
    * @constructor
@@ -109,7 +108,7 @@ friendlyPix.UserPage = class {
 
   setUploadButtonState(enabled) {
     if (enabled) {
-      this.uploadButton.removeAttr('disabled')
+      this.uploadButton.removeAttr('disabled');
       this.mobileUploadButton.removeAttr('disabled');
     } else {
       this.uploadButton.prop('disabled', true);
@@ -122,9 +121,9 @@ friendlyPix.UserPage = class {
    * enables the Submit button if user has consented to data processing.
    */
   initializePrivacySettings() {
-    const uid = firebase.auth().currentUser.uid
+    const uid = firebase.auth().currentUser.uid;
     if (this.savedPrivacySettings === undefined) {
-      friendlyPix.firebase.getPrivacySettings(uid).then(snapshot => {
+      friendlyPix.firebase.getPrivacySettings(uid).then((snapshot) => {
         this.savedPrivacySettings = snapshot.val();
         if (this.savedPrivacySettings) {
           if (this.savedPrivacySettings.data_processing) {
@@ -133,14 +132,14 @@ friendlyPix.UserPage = class {
           }
           if (this.savedPrivacySettings.content) {
             this.allowContent.prop('checked', true);
-            this.uploadButton.removeAttr('disabled')
+            this.uploadButton.removeAttr('disabled');
             this.mobileUploadButton.removeAttr('disabled');
           }
           if (this.savedPrivacySettings.social) {
             this.allowSocial.prop('checked', true);
           }
         }
-      })
+      });
     }
   }
 
@@ -149,11 +148,11 @@ friendlyPix.UserPage = class {
    */
   savePrivacySettings() {
     // uid of signed in user
-    const uid = firebase.auth().currentUser.uid
+    const uid = firebase.auth().currentUser.uid;
     const settings = {
       data_processing: this.allowDataProcessing.prop('checked'),
       content: this.allowContent.prop('checked'),
-      social: this.allowSocial.prop('checked')
+      social: this.allowSocial.prop('checked'),
     };
 
     friendlyPix.firebase.setPrivacySettings(uid, settings);
@@ -190,7 +189,7 @@ friendlyPix.UserPage = class {
    */
   trackFollowStatus() {
     if (this.auth.currentUser) {
-      friendlyPix.firebase.registerToFollowStatusUpdate(this.userId, data => {
+      friendlyPix.firebase.registerToFollowStatusUpdate(this.userId, (data) => {
         this.followCheckbox.prop('checked', data.val() !== null);
         this.followCheckbox.prop('disabled', false);
         this.followLabel.text(data.val() ? 'Following' : 'Follow');
@@ -204,7 +203,7 @@ friendlyPix.UserPage = class {
    */
   trackBlockStatus() {
     if (this.auth.currentUser) {
-      friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, data => {
+      friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, (data) => {
         this.blockCheckbox.prop('checked', data.val() !== null);
         this.blockCheckbox.prop('disabled', false);
         this.blockLabel.text(data.val() ? 'Blocked' : 'Block');
@@ -237,7 +236,7 @@ friendlyPix.UserPage = class {
       this.nextPageButton.prop('disabled', false);
       this.nextPageButton.click(() => {
         this.nextPageButton.prop('disabled', true);
-        nextPage().then(data => {
+        nextPage().then((data) => {
           this.addPosts(data.entries);
           this.toggleNextPageButton(data.nextPage);
         });
@@ -280,7 +279,7 @@ friendlyPix.UserPage = class {
     }
 
     // Load user's profile.
-    friendlyPix.firebase.loadUserProfile(userId).then(snapshot => {
+    friendlyPix.firebase.loadUserProfile(userId).then((snapshot) => {
       const userInfo = snapshot.val();
       if (userInfo) {
         this.userAvatar.css('background-image',
@@ -288,9 +287,9 @@ friendlyPix.UserPage = class {
         this.userUsername.text(userInfo.full_name || 'Anonymous');
         this.userInfoContainer.show();
       } else {
-        var data = {
+        let data = {
           message: 'This user does not exists.',
-          timeout: 5000
+          timeout: 5000,
         };
         this.toast[0].MaterialSnackbar.showSnackbar(data);
         page(`/feed`);
@@ -299,18 +298,18 @@ friendlyPix.UserPage = class {
 
     // Lod user's number of followers.
     friendlyPix.firebase.registerForFollowersCount(userId,
-        nbFollowers => this.nbFollowers.text(nbFollowers));
+        (nbFollowers) => this.nbFollowers.text(nbFollowers));
 
     // Lod user's number of followed users.
     friendlyPix.firebase.registerForFollowingCount(userId,
-        nbFollowed => this.nbFollowing.text(nbFollowed));
+        (nbFollowed) => this.nbFollowing.text(nbFollowed));
 
     // Lod user's number of posts.
     friendlyPix.firebase.registerForPostsCount(userId,
-        nbPosts => this.nbPostsContainer.text(nbPosts));
+        (nbPosts) => this.nbPostsContainer.text(nbPosts));
 
     // Display user's posts.
-    friendlyPix.firebase.getUserFeedPosts(userId).then(data => {
+    friendlyPix.firebase.getUserFeedPosts(userId).then((data) => {
       const postIds = Object.keys(data.entries);
       if (postIds.length === 0) {
         this.noPosts.show();
@@ -329,7 +328,7 @@ friendlyPix.UserPage = class {
     });
 
     // Listen for posts deletions.
-    friendlyPix.firebase.registerForPostsDeletion(postId =>
+    friendlyPix.firebase.registerForPostsDeletion((postId) =>
         $(`.fp-post-${postId}`, this.userPage).remove());
   }
 
@@ -337,11 +336,11 @@ friendlyPix.UserPage = class {
    * Displays the list of followed people.
    */
   displayFollowing() {
-    friendlyPix.firebase.getFollowingProfiles(this.userId).then(profiles => {
+    friendlyPix.firebase.getFollowingProfiles(this.userId).then((profiles) => {
       // Clear previous following list.
       $('.fp-usernamelink', this.followingContainer).remove();
       // Display all following profile cards.
-      Object.keys(profiles).forEach(uid => this.followingContainer.prepend(
+      Object.keys(profiles).forEach((uid) => this.followingContainer.prepend(
           friendlyPix.UserPage.createProfileCardHtml(
               uid, profiles[uid].profile_picture, profiles[uid].full_name)));
       if (Object.keys(profiles).length > 0) {
@@ -404,9 +403,9 @@ friendlyPix.UserPage = class {
     $('.mdl-card', element).css('background-image', `url("${thumbUrl.replace(/"/g, '\\"')}")`);
     // Start listening for comments and likes counts.
     friendlyPix.firebase.registerForLikesCount(postId,
-        nbLikes => $('.likes', element).text(nbLikes));
+        (nbLikes) => $('.likes', element).text(nbLikes));
     friendlyPix.firebase.registerForCommentsCount(postId,
-        nbComments => $('.comments', element).text(nbComments));
+        (nbComments) => $('.comments', element).text(nbComments));
 
     return element;
   }

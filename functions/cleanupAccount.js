@@ -29,7 +29,7 @@ try {
 /**
  * When a user is deleted we delete all its personal data.
  */
-exports.cleanupAccount = functions.auth.user().onDelete(user => {
+exports.cleanupAccount = functions.auth.user().onDelete((user) => {
   const deletedUid = user.uid;
 
   // Gather all path containing user data to delete.
@@ -46,25 +46,25 @@ exports.cleanupAccount = functions.auth.user().onDelete(user => {
 
   // Find all posts to delete.
   const findPosts = admin.database().ref('/posts/').orderByChild('author/uid').equalTo(deletedUid).once('value')
-      .then(snap => {
-        snap.forEach(post => {
+      .then((snap) => {
+        snap.forEach((post) => {
           personalPaths[`/posts/${post.key}`] = null;
         });
       });
 
   // Find all likes to delete.
   const findLikes = admin.database().ref('/likes/').orderByChild(deletedUid).startAt(0).once('value')
-      .then(snap => {
-        snap.forEach(post => {
+      .then((snap) => {
+        snap.forEach((post) => {
           personalPaths[`/likes/${post.key}/${deletedUid}`] = null;
         });
       });
 
   // Find all comments to delete.
-  const findComments = admin.database().ref('/comments/').once('value').then(commentsSnap => {
+  const findComments = admin.database().ref('/comments/').once('value').then((commentsSnap) => {
     const allPostsPromises = [];
-    commentsSnap.forEach(commentList => {
-      const checkPostComments = commentList.ref.orderByChild('author/uid').equalTo(deletedUid).once('value').then(snap => {
+    commentsSnap.forEach((commentList) => {
+      const checkPostComments = commentList.ref.orderByChild('author/uid').equalTo(deletedUid).once('value').then((snap) => {
         if (snap.exists()) {
           personalPaths[`/comments/${commentList.key}/${snap.key}`] = null;
         }
@@ -99,7 +99,7 @@ exports.deleteOldPosts = functions.https.onRequest((req, res) => {
     return null;
   }
 
-  return deleteOldPosts().then(nbPostsDeleted => {
+  return deleteOldPosts().then((nbPostsDeleted) => {
     console.log(`${nbPostsDeleted} old posts deleted`);
     res.send(`${nbPostsDeleted} old posts deleted`);
     return null;
@@ -108,16 +108,16 @@ exports.deleteOldPosts = functions.https.onRequest((req, res) => {
 
 function deleteOldPosts() {
   const timestampThreshold = Date.now() - 2592000000; // 30 * 24 * 3600 * 1000
-  return admin.database().ref('/posts').orderByChild('timestamp').endAt(timestampThreshold).once('value').then(snap => {
+  return admin.database().ref('/posts').orderByChild('timestamp').endAt(timestampThreshold).once('value').then((snap) => {
     const oldPosts = [];
 
-    snap.forEach(postSnap => {
+    snap.forEach((postSnap) => {
       if (postSnap.val().author) {
         oldPosts.push({
           postId: postSnap.key,
           picStorageUri: postSnap.val().picStorageUri,
           thumbStorageUri: postSnap.val().thumbStorageUri,
-          authorUid: postSnap.val().author.uid
+          authorUid: postSnap.val().author.uid,
         });
       }
     });
@@ -157,7 +157,7 @@ function deletePost(oldPosts) {
     const deleteThumbFromStorage = admin.storage().bucket().file(thumbFileName).delete();
     return Promise.all([deleteFromDatabase, deletePicFromStorage, deleteThumbFromStorage]);
   }
-  return deleteFromDatabase.catch(error => {
+  return deleteFromDatabase.catch((error) => {
     console.error('Deletion of old post', postId, 'failed:', error);
     return null;
   });
@@ -182,7 +182,7 @@ exports.deleteInactiveAccounts = functions.https.onRequest((req, res) => {
 
   let nbAccounts = 0;
   // Fetch all user details.
-  return getInactiveUsers().then(inactiveUsers => {
+  return getInactiveUsers().then((inactiveUsers) => {
     console.log('Number of inactive users to delete:', inactiveUsers.length);
     nbAccounts = inactiveUsers.length;
 
@@ -206,7 +206,7 @@ function deleteInactiveUser(inactiveUsers) {
     return admin.auth().deleteUser(userToDelete.uid).then(() => {
       console.log('Deleted user account', userToDelete.uid, 'because of inactivity');
       return null;
-    }).catch(error => {
+    }).catch((error) => {
       console.error('Deletion of inactive user account', userToDelete.uid, 'failed:', error);
       return null;
     });
@@ -218,10 +218,10 @@ function deleteInactiveUser(inactiveUsers) {
  * Returns the list of all inactive users.
  */
 function getInactiveUsers(users = [], nextPageToken) {
-  return admin.auth().listUsers(1000, nextPageToken).then(result => {
+  return admin.auth().listUsers(1000, nextPageToken).then((result) => {
     // Find users that have not signed in in the last 30 days.
     const inactiveUsers = result.users.filter(
-      user => Date.parse(user.metadata.lastSignInTime) < (Date.now() - 2592000000 /* 30 * 24 * 3600 * 1000 */));
+      (user) => Date.parse(user.metadata.lastSignInTime) < (Date.now() - 2592000000 /* 30 * 24 * 3600 * 1000 */));
 
     // Concat with list of previously found inactive users if there was more than 1000 users.
     users = users.concat(inactiveUsers);

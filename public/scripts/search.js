@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles the Friendly Pix search feature.
  */
 friendlyPix.Search = class {
-
   /**
    * The minimum number of characters to trigger a search.
    * @return {number}
@@ -64,7 +63,7 @@ friendlyPix.Search = class {
     const searchString = this.searchField.val().toLowerCase().trim();
     if (searchString.length >= friendlyPix.Search.MIN_CHARACTERS) {
       friendlyPix.firebase.searchUsers(searchString, friendlyPix.Search.NB_RESULTS_LIMIT).then(
-          results => {
+          (results) => {
             this.searchResults.empty();
             const peopleIds = Object.keys(results);
             if (peopleIds.length > 0) {
@@ -73,7 +72,7 @@ friendlyPix.Search = class {
                 $('html').unbind('click');
                 this.searchResults.fadeOut();
               });
-              peopleIds.forEach(peopleId => {
+              peopleIds.forEach((peopleId) => {
                 const profile = results[peopleId];
                 this.searchResults.append(
                     friendlyPix.Search.createSearchResultHtml(peopleId, profile));

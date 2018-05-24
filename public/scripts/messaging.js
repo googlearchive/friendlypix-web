@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles notifications.
  */
 friendlyPix.Messaging = class {
-
   /**
    * Inititializes the notifications utility.
    * @constructor
@@ -45,7 +44,7 @@ friendlyPix.Messaging = class {
       this.enableNotificationsCheckbox.change(() => this.onEnableNotificationsChange());
       this.auth.onAuthStateChanged(() => this.trackNotificationsEnabledStatus());
       this.messaging.onTokenRefresh(() => this.saveToken());
-      this.messaging.onMessage(payload => this.onMessage(payload));
+      this.messaging.onMessage((payload) => this.onMessage(payload));
     });
   }
 
@@ -53,7 +52,7 @@ friendlyPix.Messaging = class {
    * Saves the token to the database if available. If not request permissions.
    */
   saveToken() {
-    this.messaging.getToken().then(currentToken => {
+    this.messaging.getToken().then((currentToken) => {
       if (currentToken) {
         friendlyPix.firebase.saveNotificationToken(currentToken).then(() => {
           console.log('Notification Token saved to database');
@@ -61,7 +60,7 @@ friendlyPix.Messaging = class {
       } else {
         this.requestPermission();
       }
-    }).catch(err => {
+    }).catch((err) => {
       console.error('Unable to get messaging token.', err);
     });
   }
@@ -74,7 +73,7 @@ friendlyPix.Messaging = class {
     this.messaging.requestPermission().then(() => {
       console.log('Notification permission granted.');
       this.saveToken();
-    }).catch(err => {
+    }).catch((err) => {
       console.error('Unable to get permission to notify.', err);
     });
   }
@@ -93,7 +92,7 @@ friendlyPix.Messaging = class {
         message: payload.notification.body,
         actionHandler: () => page(`/user/${userId}`),
         actionText: 'Profile',
-        timeout: 10000
+        timeout: 10000,
       };
       this.toast[0].MaterialSnackbar.showSnackbar(data);
     }
@@ -114,7 +113,7 @@ friendlyPix.Messaging = class {
    */
   trackNotificationsEnabledStatus() {
     if (this.auth.currentUser) {
-      friendlyPix.firebase.registerToNotificationEnabledStatusUpdate(data => {
+      friendlyPix.firebase.registerToNotificationEnabledStatusUpdate((data) => {
         this.enableNotificationsCheckbox.prop('checked', data.val() !== null);
         this.enableNotificationsCheckbox.prop('disabled', false);
         this.enableNotificationsLabel.text(data.val() ? 'Notifications Enabled' : 'Enable Notifications');

@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles the user auth flows and updating the UI depending on the auth state.
  */
 friendlyPix.Auth = class {
-
   /**
    * Returns a Promise that completes when auth is ready.
    * @return Promise
@@ -69,7 +68,7 @@ friendlyPix.Auth = class {
       this.updateAll.click(() => this.updateAllAccounts());
     });
 
-    this.auth.onAuthStateChanged(user => this.onAuthStateChanged(user));
+    this.auth.onAuthStateChanged((user) => this.onAuthStateChanged(user));
   }
 
   /**
@@ -97,7 +96,7 @@ friendlyPix.Auth = class {
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
-        friendlyPix.firebase.getPrivacySettings(user.uid).then(snapshot => {
+        friendlyPix.firebase.getPrivacySettings(user.uid).then((snapshot) => {
           const settings = snapshot.val();
           // display privacy modal if there are no privacy preferences
           if (!settings) {
@@ -109,7 +108,7 @@ friendlyPix.Auth = class {
               this.mobileUploadButton.prop('disabled', false);
             }
           }
-        })
+        });
         friendlyPix.firebase.updatePublicProfile();
       }
     });
@@ -118,7 +117,7 @@ friendlyPix.Auth = class {
   deleteAccount() {
     this.auth.currentUser.delete().then(() => {
       window.alert('Account deleted');
-    }).catch(error => {
+    }).catch((error) => {
       if (error.code === 'auth/requires-recent-login') {
         window.alert(
           'You need to have recently signed-in to delete your account.\n' +
@@ -132,7 +131,7 @@ friendlyPix.Auth = class {
     const updateAllProfiles = firebase.functions().httpsCallable('updateAllProfiles');
     updateAllProfiles().then(() => {
       window.alert('Profiles update Finished successfully.');
-    }).catch(error => {
+    }).catch((error) => {
       console.error('Error updating user profiles.', error);
       window.alert('Error updating user profiles: ' + error.message);
     });

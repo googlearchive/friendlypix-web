@@ -33,13 +33,13 @@ const fs = require('fs');
  * When an image is uploaded we check if it is flagged as Adult or Violence by the Cloud Vision
  * API and if it is we blur it using ImageMagick.
  */
-exports.default = functions.storage.object().onFinalize(object => {
+exports.default = functions.storage.object().onFinalize((object) => {
   const image = {
-    source: {imageUri: `gs://${object.bucket}/${object.name}`}
+    source: {imageUri: `gs://${object.bucket}/${object.name}`},
   };
 
   // Check the image content using the Cloud Vision API.
-  return vision.safeSearchDetection(image).then(batchAnnotateImagesResponse => {
+  return vision.safeSearchDetection(image).then((batchAnnotateImagesResponse) => {
     console.log('SafeSearch results on image', batchAnnotateImagesResponse);
     const safeSearchResult = batchAnnotateImagesResponse[0].safeSearchAnnotation;
     const Likelihood = Vision.types.Likelihood;
@@ -80,7 +80,7 @@ function blurImage(filePath, bucketName, metadata) {
     // Uploading the Blurred image.
     return bucket.upload(tempLocalFile, {
       destination: filePath,
-      metadata: {metadata: metadata} // Keeping custom metadata.
+      metadata: {metadata: metadata}, // Keeping custom metadata.
     });
   }).then(() => {
     console.log('Blurred image uploaded to Storage at', filePath);
@@ -112,13 +112,13 @@ function refreshImages(uid, postId, size) {
   const deleteApp = () => app.delete().catch(() => null);
 
   const imageUrlRef = app.database().ref(`/posts/${postId}/${size}_url`);
-  return imageUrlRef.once('value').then(snap => {
+  return imageUrlRef.once('value').then((snap) => {
     const picUrl = snap.val();
     return imageUrlRef.set(`${picUrl}&blurred`).then(() => {
       console.log('Blurred image URL updated.');
       return deleteApp().then(() => null);
     });
-  }).catch(err => {
+  }).catch((err) => {
     return deleteApp().then(() => Promise.reject(err));
   });
 }

@@ -36,7 +36,7 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
   console.log('We have a new follower UID:', followerUid, 'for user:', followerUid);
 
   // Check if the user has notifications enabled.
-  return followedUserRef.child('/notificationEnabled').once('value').then(enabledSnap => {
+  return followedUserRef.child('/notificationEnabled').once('value').then((enabledSnap) => {
     const notificationsEnabled = enabledSnap.val();
     if (!notificationsEnabled) {
       return console.log('The user has not enabled notifications.');
@@ -44,7 +44,7 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
     console.log('User has notifications enabled.');
 
     // Check if we already sent that notification.
-    return followedUserRef.child(`/notificationsSent/${followerUid}`).once('value').then(snap => {
+    return followedUserRef.child(`/notificationsSent/${followerUid}`).once('value').then((snap) => {
       if (snap.val()) {
         return console.log('Already sent a notification to', followedUid, 'for this follower.');
       }
@@ -56,7 +56,7 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
       // Get the follower profile.
       const getFollowerProfilePromise = admin.auth().getUser(followerUid);
 
-      return Promise.all([getNotificationTokensPromise, getFollowerProfilePromise]).then(results => {
+      return Promise.all([getNotificationTokensPromise, getFollowerProfilePromise]).then((results) => {
         const tokensSnapshot = results[0];
         const follower = results[1];
 
@@ -75,8 +75,8 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
             title: 'You have a new follower!',
             body: `${displayName} is now following you.`,
             icon: profilePic || '/images/silhouette.jpg',
-            click_action: `https://friendly-pix.com/user/${followerUid}`
-          }
+            click_action: `https://friendly-pix.com/user/${followerUid}`,
+          },
         };
 
         // Listing all device tokens of the user to notify.
@@ -89,7 +89,7 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
           });
 
         // Send notifications to all tokens.
-        const notificationPromise = admin.messaging().sendToDevice(tokens, payload).then(response => {
+        const notificationPromise = admin.messaging().sendToDevice(tokens, payload).then((response) => {
           // For each message check if there was an error.
           const tokensToRemove = {};
           response.results.forEach((result, index) => {

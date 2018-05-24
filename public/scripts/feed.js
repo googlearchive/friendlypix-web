@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Handles the Home and Feed UI.
  */
 friendlyPix.Feed = class {
-
   /**
    * Initializes the Friendly Pix feeds.
    * @constructor
@@ -83,7 +82,7 @@ friendlyPix.Feed = class {
       const loadMorePosts = () => {
         this.nextPageButton.prop('disabled', true);
         console.log('Loading next page of posts.');
-        nextPage().then(data => {
+        nextPage().then((data) => {
           this.addPosts(data.entries);
           this.toggleNextPageButton(data.nextPage);
         });
@@ -127,7 +126,7 @@ friendlyPix.Feed = class {
     this.clear();
 
     // Load initial batch of posts.
-    friendlyPix.firebase.getPosts().then(data => {
+    friendlyPix.firebase.getPosts().then((data) => {
       // Listen for new posts.
       const latestPostId = Object.keys(data.entries)[Object.keys(data.entries).length - 1];
       friendlyPix.firebase.subscribeToGeneralFeed(
@@ -139,7 +138,7 @@ friendlyPix.Feed = class {
     });
 
     // Listen for posts deletions.
-    friendlyPix.firebase.registerForPostsDeletion(postId => this.onPostDeleted(postId));
+    friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
   }
 
   /**
@@ -153,7 +152,7 @@ friendlyPix.Feed = class {
       // Make sure the home feed is updated with followed users's new posts.
       friendlyPix.firebase.updateHomeFeeds().then(() => {
         // Load initial batch of posts.
-        friendlyPix.firebase.getHomeFeedPosts().then(data => {
+        friendlyPix.firebase.getHomeFeedPosts().then((data) => {
           const postIds = Object.keys(data.entries);
           if (postIds.length === 0) {
             this.noPostsMessage.fadeIn();
@@ -174,7 +173,7 @@ friendlyPix.Feed = class {
         friendlyPix.firebase.startHomeFeedLiveUpdaters();
 
         // Listen for posts deletions.
-        friendlyPix.firebase.registerForPostsDeletion(postId => this.onPostDeleted(postId));
+        friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
       });
     }
   }
@@ -233,7 +232,7 @@ friendlyPix.Feed = class {
     friendlyPix.firebase.cancelAllSubscriptions();
 
     // Stops all timers if any.
-    this.posts.forEach(post => post.clear());
+    this.posts.forEach((post) => post.clear());
     this.posts = [];
   }
 };

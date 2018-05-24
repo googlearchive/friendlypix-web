@@ -44,7 +44,7 @@ function moderateText(change) {
     return snap.ref.update({
       text: moderatedMessage,
       sanitized: true,
-      moderated: comment.text !== moderatedMessage
+      moderated: comment.text !== moderatedMessage,
     });
   }
   return null;

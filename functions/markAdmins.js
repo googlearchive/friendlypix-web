@@ -24,9 +24,9 @@ try {
 /**
  * Mark the hardcoded list of users as admins.
  */
-exports.default = functions.database.ref('/admins/{index}').onCreate(snap => {
+exports.default = functions.database.ref('/admins/{index}').onCreate((snap) => {
   const adminEmail = snap.val().email;
-  return admin.auth().getUserByEmail(adminEmail).then(user => {
+  return admin.auth().getUserByEmail(adminEmail).then((user) => {
     return admin.auth().setCustomUserClaims(user.uid, {admin: true}).then(() => {
       console.log(`User ${adminEmail} successfully marked as an admin.`);
       return snap.ref.update({email: user.email, uid: user.uid, status: 'OK', timestamp: admin.database.ServerValue.TIMESTAMP}).then(() => {
@@ -34,7 +34,7 @@ exports.default = functions.database.ref('/admins/{index}').onCreate(snap => {
         return null;
       });
     });
-  }).catch(error => {
+  }).catch((error) => {
     console.error(`There was an error marking user ${adminEmail} as an admin.`, error);
     return snap.ref.update({error: error}).then(() => {
       console.log(`Error message saved in database for ${adminEmail}.`);
@@ -46,14 +46,14 @@ exports.default = functions.database.ref('/admins/{index}').onCreate(snap => {
 /**
  * Mark the hardcoded list of users as admins.
  */
-exports.removeAdmins = functions.database.ref('/admins/{index}').onDelete(snap => {
+exports.removeAdmins = functions.database.ref('/admins/{index}').onDelete((snap) => {
   const adminEmail = snap.val().email;
-  return admin.auth().getUserByEmail(adminEmail).then(user => {
+  return admin.auth().getUserByEmail(adminEmail).then((user) => {
     return admin.auth().setCustomUserClaims(user.uid, {admin: null}).then(() => {
       console.log(`User ${adminEmail} successfully unmarked as an admin.`);
       return null;
     });
-  }).catch(error => {
+  }).catch((error) => {
     console.error(`There was an error un-marking user ${adminEmail} as an admin.`, error);
     return null;
   });

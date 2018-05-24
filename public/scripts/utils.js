@@ -21,7 +21,6 @@ window.friendlyPix = window.friendlyPix || {};
  * Set of utilities to handle Material Design Lite elements.
  */
 friendlyPix.MaterialUtils = class {
-
   /**
    * Refreshes the UI state of the given Material Design Checkbox / Switch element.
    */

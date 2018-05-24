@@ -20,7 +20,7 @@ const Filter = require('bad-words');
 const badWordsFilter = new Filter();
 
 // Sanitizes the given text if needed by replacing bad words with '*'.
-exports.sanitizeText = text => {
+exports.sanitizeText = (text) => {
   // Re-capitalize if the user is Shouting.
   if (isShouting(text)) {
     console.log('User is shouting. Fixing sentence case...');
