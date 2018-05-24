@@ -88,14 +88,25 @@
   <h3 class="fp-logo"><img src="/images/icon-120x120.png"> Friendly Pix</h3>
   <div class="fp-caption">The friendliest way to share your pics</div>
   <div class="fp-signed-out-only fp-initially-hidden">
-    <div id="firebaseui-auth-container" class="fp-signed-out-only fp-initially-hidden"></div>
-    <a class="fp-skip" href="/feed">skip sign in</a>
+    <div id="firebaseui-auth-container" class="fp-non-eu fp-signed-out-only fp-initially-hidden"></div>
+    <a class="fp-non-eu fp-skip" href="/feed">skip sign in</a>
   </div>
-  <div class="fp-note fp-signed-out-only fp-initially-hidden">
+  <div class="fp-non-eu fp-note fp-signed-out-only fp-initially-hidden">
     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="fp-pre-consent">
       <input type="checkbox" id="fp-pre-consent" class="mdl-checkbox__input">
-      <span class="mdl-checkbox__label">I understand FriendlyPix is an application aimed at showcasing the <a href="https://firebase.developers.google.com/docs">Firebase</a> platform capabilities, and should not be used with private or sensitive information. All FriendlyPix data and inactive accounts are regularly removed. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.</span>
+      <span class="mdl-checkbox__label">I understand <a href="https://github.com/firebase/friendlypix-web">FriendlyPix</a> is an application aimed at showcasing the <a href="https://firebase.google.com/docs">Firebase</a> platform capabilities, and should not be used with private or sensitive information. All FriendlyPix data and inactive accounts are regularly removed. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.</span>
     </label>
+  </div>
+  <a class="fp-eu fp-initially-hidden" href="/feed">
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-color--green-600 mdl-color-text--white">
+      View posts
+    </button>
+  </a>
+  <div class="fp-eu fp-note fp-signed-out-only fp-initially-hidden">
+    <a href="https://github.com/firebase/friendlypix-web">FriendlyPix</a> is an application aimed at showcasing the <a href="https://firebase.google.com/docs">Firebase</a> platform capabilities, and should not be used with private or sensitive information. All FriendlyPix data and inactive accounts are regularly removed. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.
+  </div>
+  <div class="fp-eu fp-note fp-signed-out-only fp-initially-hidden">
+    Unfortunately, this hosted version of the FriendlyPix sample app is not fully available in your location (based on your IP address). You can view a limited version of the sample app, or to experience all the features, deploy your own instance. Instructions can be found on the <a href="https://github.com/firebase/friendlypix-web">GitHub repository</a>.
   </div>
 </section>
 
@@ -123,7 +134,7 @@
 
       <!-- Signed-in User Info -->
       <div class="mdl-cell--hide-phone">
-        <a href="/"><button class="fp-sign-in-button fp-signed-out-only mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign in</button></a>
+        <a class="fp-non-eu" href="/"><button class="fp-sign-in-button fp-signed-out-only mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign in</button></a>
         <div class="fp-signed-in-user-container mdl-cell--hide-phone fp-signed-in-only">
           <a class="fp-usernamelink mdl-button mdl-js-button">
             <div class="fp-avatar"></div>
@@ -169,7 +180,7 @@
 
   <!-- Drawer menu -->
   <div class="mdl-cell--hide-desktop mdl-cell--hide-tablet mdl-layout__drawer">
-    <a href="/" class="fp-signed-out-only"><button class="fp-sign-in-button mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign in</button></a>
+    <a href="/" class="fp-non-eu fp-signed-out-only"><button class="fp-sign-in-button mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign in</button></a>
     <div class="fp-signed-in-user-container mdl-color--light-blue-700 fp-signed-in-only">
       <a class="fp-usernamelink">
         <div class="fp-avatar"></div>
@@ -558,6 +569,7 @@
 </script>
 
 <!-- Friendly Pix ES5 scripts -->
+<script src="/scripts-es5/ipfilter.js"></script>
 <script src="/scripts-es5/utils.js"></script>
 <script src="/scripts-es5/firebase.js"></script>
 <script src="/scripts-es5/auth.js"></script>
@@ -571,7 +583,9 @@
 
 <!-- Friendly Pix ES2015 scripts -->
 <!-- Uncomment and replace scripts above to serve ES2015 scripts directly. Mainly for testing. -->
-<!-- <script src="/scripts/utils.js"></script>
+<!-- 
+<script src="/scripts/ipfilter.js"></script>
+<script src="/scripts/utils.js"></script>
 <script src="/scripts/firebase.js"></script>
 <script src="/scripts/auth.js"></script>
 <script src="/scripts/search.js"></script>

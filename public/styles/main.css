@@ -943,3 +943,7 @@ a {
 .mdl-dialog {
   width: 40%;
 }
+
+.fp-non-eu, .fp-eu {
+  display: none !important;
+}
