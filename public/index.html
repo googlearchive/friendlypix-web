@@ -72,7 +72,7 @@
     window.addEventListener('error', function(err) {
       gtag('event', 'exception', {
         'exDescription': err.message,
-        'exLocation': e.filename + ':  ' + e.lineno
+        'exLocation': err.filename + ':  ' + err.lineno
       });
     });
   </script>
