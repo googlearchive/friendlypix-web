@@ -22,7 +22,7 @@ Friendly Pix is built using Javascript, [Firebase](https://firebase.google.com/d
     ```bash
     firebase functions:config:set mailgun.domain=friendly-pix.com mailgun.key=key-XXXXXXXXXXXXXXXX
     ```
-1. [Optional] To enable IP-based geolocation filters, [Enable the Geolocation API](https://console.cloud.google.com/apis/library/geolocation.googleapis.com/?project=_), the [Geocoding API](https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com/?project=_) and the [Maps JavaScript API](https://console.cloud.google.com/apis/library/maps-backend.googleapis.com/?project=_)
+1. [Optional] To enable IP-based geolocation filters, [Enable the Geolocation API](https://console.cloud.google.com/apis/library/geolocation.googleapis.com/?project=_) and the [Geocoding API](https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com/?project=_)
 
 
 ## Start a local development server

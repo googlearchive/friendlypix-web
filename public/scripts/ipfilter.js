@@ -25,16 +25,6 @@ friendlyPix.IpFilter = class {
     return firebase.app().options.apiKey;
   }
 
-  // Returns a promise that resolves with true if the user is in a Privacy Shield covered country.
-  get isUserInPrivacyShield() {
-    return this.isPrivacyShieldCountryDeferred.promise();
-  }
-
-  // Returns a promise that resolves with true if the user is in a Privacy Shield covered country.
-  get userCountry() {
-    return this.userCountryDeferred.promise();
-  }
-
   static get privacyShieldCountries() {
     return ['CH', 'AT', 'IT', 'BE', 'LV', 'BG', 'LT', 'HR', 'LX', 'CY', 'MT', 'CZ', 'NL', 'DK',
         'PL', 'EE', 'PT', 'FI', 'RO', 'FR', 'SK', 'DE', 'SI', 'GR', 'ES', 'HU', 'SE', 'IE', 'GB'];
@@ -49,27 +39,21 @@ friendlyPix.IpFilter = class {
     this.isPrivacyShieldCountryDeferred = new $.Deferred();
     this.userCountryDeferred = new $.Deferred();
 
-    const js = document.createElement('script');
-    js.type = 'text/javascript';
-    js.src = `https://maps.googleapis.com/maps/api/js?key=${friendlyPix.IpFilter.apiKey}&callback=friendlyPix.ipfilter.onScriptReady`;
-    document.head.appendChild(js);
-
-    this.isUserInPrivacyShield.then((isEu) => {
-      if (isEu) {
-        $('.fp-eu').removeClass('fp-eu');
-      } else {
-        $('.fp-non-eu').removeClass('fp-non-eu');
-      }
-    }, () => {
+    friendlyPix.IpFilter.findLatLonFromIP().then((latlng) => {
+      friendlyPix.IpFilter.getCountryCodeFromLatLng(latlng.lat, latlng.lng).then((countryCode) => {
+        if (friendlyPix.IpFilter.privacyShieldCountries.includes(countryCode)) {
+          $('.fp-eu').removeClass('fp-eu');
+        } else {
+          $('.fp-non-eu').removeClass('fp-non-eu');
+        }
+      });
+    }).catch(() => {
       $('.fp-non-eu').removeClass('fp-non-eu');
     });
   }
 
-  onScriptReady() {
-    // Firebase SDK
-    this.geocoder = new google.maps.Geocoder;
-
-    try {
+  static findLatLonFromIP() {
+    return new Promise((resolve, reject) => {
       $.ajax({
         url: `https://www.googleapis.com/geolocation/v1/geolocate?key=${friendlyPix.IpFilter.apiKey}`,
         type: 'POST',
@@ -77,35 +61,42 @@ friendlyPix.IpFilter = class {
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         success: (data) => {
-          console.log('User location:', data);
-          this.geocoder.geocode({'location': {lat: data.location.lat, lng: data.location.lng}}, (results) => {
-            console.log('reverse geocode:', results[0].address_components);
-            let countryCode = null;
-            results.some((address) => {
-              address.address_components.some((component) => {
-                if (component.types.includes('country')) {
-                  countryCode = component.short_name;
-                  return true;
-                }
-              });
-              if (countryCode) {
-                return true;
-              }
-            });
-            console.log('Found User\'s Country Code using IP address:', countryCode);
-            if (countryCode) {
-              this.userCountryDeferred.resolve(countryCode);
-              this.isPrivacyShieldCountryDeferred.resolve(friendlyPix.IpFilter.privacyShieldCountries.includes(countryCode));
-            } else {
-              throw new Error('Country not found in location information', data);
-            }
-          });
+          if (data && data.location) {
+            resolve({lat: data.location.lat, lng: data.location.lng});
+          } else {
+            reject('No location object in geolocate API response.');
+          }
+        },
+        error: (err) => {
+          reject(err);
         },
       });
-    } catch (e) {
-      this.isPrivacyShieldCountryDeferred.reject(e);
-      this.userCountryDeferred.reject(e);
-    }
+    });
+  }
+
+  static getCountryCodeFromLatLng(lat, lng) {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${friendlyPix.IpFilter.apiKey}`,
+        type: 'GET',
+        data: JSON.stringify({considerIp: true}),
+        dataType: 'json',
+        success: (data) => {
+          console.log('reverse geocode:', data.results[0].address_components);
+          data.results.some((address) => {
+            address.address_components.some((component) => {
+              if (component.types.includes('country')) {
+                return resolve(component.short_name);
+              }
+            });
+          });
+          reject('Country not found in location information.');
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
+    });
   }
 };
 
