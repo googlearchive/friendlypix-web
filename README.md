@@ -4,7 +4,7 @@ Friendly Pix Web is a sample app demonstrating how to build a JavaScript/Web app
 
 Friendly Pix is a place where you can share photos, follow friends, comment on photos...
 
-To see it in action, have a look at: [friendly-pix.com](https://friendly-pix.com)
+To see it in action, have a look at [friendly-pix.com](https://friendly-pix.com)
 
 
 ## Few words on dependencies
