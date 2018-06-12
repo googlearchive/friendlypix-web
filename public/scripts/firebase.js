@@ -26,7 +26,7 @@ friendlyPix.Firebase = class {
    * @return {number}
    */
   static get POSTS_PAGE_SIZE() {
-    return 5;
+    return 3;
   }
 
   /**
