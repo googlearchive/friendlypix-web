@@ -35,9 +35,11 @@ friendlyPix.IpFilter = class {
    * @constructor
    */
   constructor() {
-    // Result in a Promise.
-    this.isPrivacyShieldCountryDeferred = new $.Deferred();
-    this.userCountryDeferred = new $.Deferred();
+    // Bypass the IP filter if the special has fragment is used.
+    if (window.location.hash === '#noIpFilter') {
+      $('.fp-non-eu').removeClass('fp-non-eu');
+      return;
+    }
 
     friendlyPix.IpFilter.findLatLonFromIP().then((latlng) => {
       friendlyPix.IpFilter.getCountryCodeFromLatLng(latlng.lat, latlng.lng).then((countryCode) => {
