@@ -19,7 +19,7 @@ html, body {
 }
 a {
   text-decoration: underline;
-  color: #039BE5;
+  color: #0070a7;
 }
 .mdl-menu a {
   text-decoration: none;
@@ -593,7 +593,7 @@ a {
 }
 .fp-post .fp-time {
   float: right;
-  color: #999;
+  color: #888;
   margin-top: 8px;
   font-size: 14px;
   margin-right: 5px;
