@@ -38,7 +38,7 @@ friendlyPix.IpFilter = class {
    */
   constructor() {
     // Bypass the IP filter if the special has fragment is used.
-    if (window.location.hash === '#noIpFilter') {
+    if (window.location.hash === '#noipfilter') {
       $('.fp-non-eu').removeClass('fp-non-eu');
       return;
     }
@@ -96,14 +96,10 @@ friendlyPix.IpFilter = class {
           });
           reject('Country not found in location information.');
         },
-        error: (err) => {
-          reject(err);
-        },
+        error: reject,
       });
     });
   }
 };
 
-$(document).ready(() => {
-  friendlyPix.ipfilter = new friendlyPix.IpFilter();
-});
+friendlyPix.ipfilter = new friendlyPix.IpFilter();
