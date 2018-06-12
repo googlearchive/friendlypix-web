@@ -18,7 +18,9 @@
 window.friendlyPix = window.friendlyPix || {};
 
 /**
- * Filters some features depending on the user location.
+ * Detect's the user location based on IP address.
+ * You can use this class to enable special features depending on the user's location.
+ * For instance displaying a Cookie usage disclaimer for Europeans.
  */
 friendlyPix.IpFilter = class {
   static get apiKey() {
@@ -102,4 +104,6 @@ friendlyPix.IpFilter = class {
   }
 };
 
-friendlyPix.ipfilter = new friendlyPix.IpFilter();
+$(document).ready(() => {
+  friendlyPix.ipfilter = new friendlyPix.IpFilter();
+});

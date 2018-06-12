@@ -44,16 +44,14 @@ friendlyPix.Search = class {
     // Firebase SDK.
     this.database = firebase.database();
 
-    $(document).ready(() => {
-      // DOM Elements pointers.
-      this.searchField = $('#searchQuery');
-      this.searchResults = $('#fp-searchResults');
+    // DOM Elements pointers.
+    this.searchField = $('#searchQuery');
+    this.searchResults = $('#fp-searchResults');
 
-      // Event bindings.
-      this.searchField.keyup(() => this.displaySearchResults());
-      this.searchField.focus(() => this.displaySearchResults());
-      this.searchField.click(() => this.displaySearchResults());
-    });
+    // Event bindings.
+    this.searchField.keyup(() => this.displaySearchResults());
+    this.searchField.focus(() => this.displaySearchResults());
+    this.searchField.click(() => this.displaySearchResults());
   }
 
   /**
@@ -100,4 +98,6 @@ friendlyPix.Search = class {
   }
 };
 
-friendlyPix.search = new friendlyPix.Search();
+$(document).ready(() => {
+  friendlyPix.search = new friendlyPix.Search();
+});

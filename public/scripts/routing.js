@@ -26,39 +26,37 @@ friendlyPix.Router = class {
    * @constructor
    */
   constructor() {
-    $(document).ready(() => {
-      // Dom elements.
-      this.pagesElements = $('[id^=page-]');
-      this.splashLogin = $('#login', '#page-splash');
+    // Dom elements.
+    this.pagesElements = $('[id^=page-]');
+    this.splashLogin = $('#login', '#page-splash');
 
-      // Make sure /add is never opened on website load.
-      if (window.location.pathname === '/add') {
-        page('/');
-      }
+    // Make sure /add is never opened on website load.
+    if (window.location.pathname === '/add') {
+      page('/');
+    }
 
-      // Configuring routes.
-      const pipe = friendlyPix.Router.pipe;
-      const displayPage = this.displayPage.bind(this);
-      const loadUser = (userId) => friendlyPix.userPage.loadUser(userId);
-      const showHomeFeed = () => friendlyPix.feed.showHomeFeed();
-      const showGeneralFeed = () => friendlyPix.feed.showGeneralFeed();
-      const clearFeed = () => friendlyPix.feed.clear();
-      const showPost = (postId) => friendlyPix.post.loadPost(postId);
+    // Configuring routes.
+    const pipe = friendlyPix.Router.pipe;
+    const displayPage = this.displayPage.bind(this);
+    const loadUser = (userId) => friendlyPix.userPage.loadUser(userId);
+    const showHomeFeed = () => friendlyPix.feed.showHomeFeed();
+    const showGeneralFeed = () => friendlyPix.feed.showGeneralFeed();
+    const clearFeed = () => friendlyPix.feed.clear();
+    const showPost = (postId) => friendlyPix.post.loadPost(postId);
 
-      page('/', pipe(showHomeFeed, null, true),
-          pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
-      page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
-      page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
-      page('/post/:postId/admin', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post', admin: true}));
-      page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
-      page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
-      page('/terms', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'terms'}));
-      page('/add', pipe(displayPage, {pageId: 'add', onlyAuthed: true}));
-      page('*', () => page('/'));
+    page('/', pipe(showHomeFeed, null, true),
+        pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
+    page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
+    page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
+    page('/post/:postId/admin', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post', admin: true}));
+    page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
+    page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
+    page('/terms', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'terms'}));
+    page('/add', pipe(displayPage, {pageId: 'add', onlyAuthed: true}));
+    page('*', () => page('/'));
 
-      // Start routing.
-      page();
-    });
+    // Start routing.
+    page();
   }
 
   /**
@@ -171,4 +169,6 @@ friendlyPix.Router = class {
   }
 };
 
-friendlyPix.router = new friendlyPix.Router();
+$(document).ready(() => {
+  friendlyPix.router = new friendlyPix.Router();
+});

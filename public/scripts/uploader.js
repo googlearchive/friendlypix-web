@@ -53,25 +53,23 @@ friendlyPix.Uploader = class {
 
     this.addPolyfills();
 
-    $(document).ready(() => {
-      // DOM Elements
-      this.addButton = $('#add');
-      this.addButtonFloating = $('#add-floating');
-      this.imageInput = $('#fp-mediacapture');
-      this.overlay = $('.fp-overlay', '#page-add');
-      this.newPictureContainer = $('#newPictureContainer');
-      this.uploadButton = $('.fp-upload');
-      this.imageCaptionInput = $('#imageCaptionInput');
-      this.uploadPicForm = $('#uploadPicForm');
-      this.toast = $('.mdl-js-snackbar');
+    // DOM Elements
+    this.addButton = $('#add');
+    this.addButtonFloating = $('#add-floating');
+    this.imageInput = $('#fp-mediacapture');
+    this.overlay = $('.fp-overlay', '#page-add');
+    this.newPictureContainer = $('#newPictureContainer');
+    this.uploadButton = $('.fp-upload');
+    this.imageCaptionInput = $('#imageCaptionInput');
+    this.uploadPicForm = $('#uploadPicForm');
+    this.toast = $('.mdl-js-snackbar');
 
-      // Event bindings
-      this.addButton.click(() => this.initiatePictureCapture());
-      this.addButtonFloating.click(() => this.initiatePictureCapture());
-      this.imageInput.change((e) => this.readPicture(e));
-      this.uploadPicForm.submit((e) => this.uploadPic(e));
-      this.imageCaptionInput.keyup(() => this.uploadButton.prop('disabled', !this.imageCaptionInput.val()));
-    });
+    // Event bindings
+    this.addButton.click(() => this.initiatePictureCapture());
+    this.addButtonFloating.click(() => this.initiatePictureCapture());
+    this.imageInput.change((e) => this.readPicture(e));
+    this.uploadPicForm.submit((e) => this.uploadPic(e));
+    this.imageCaptionInput.keyup(() => this.uploadButton.prop('disabled', !this.imageCaptionInput.val()));
   }
 
   // Adds polyfills required for the Uploader.
@@ -260,4 +258,6 @@ friendlyPix.Uploader = class {
   }
 };
 
-friendlyPix.uploader = new friendlyPix.Uploader();
+$(document).ready(() => {
+  friendlyPix.uploader = new friendlyPix.Uploader();
+});

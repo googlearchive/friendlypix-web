@@ -32,20 +32,18 @@ friendlyPix.Messaging = class {
     this.storage = firebase.storage();
     this.messaging = firebase.messaging();
 
-    $(document).ready(() => {
-      // DOM Elements
-      this.enableNotificationsContainer = $('.fp-notifications');
-      this.enableNotificationsCheckbox = $('#notifications');
-      this.enableNotificationsLabel = $('.mdl-switch__label', this.enableNotificationsContainer);
+    // DOM Elements
+    this.enableNotificationsContainer = $('.fp-notifications');
+    this.enableNotificationsCheckbox = $('#notifications');
+    this.enableNotificationsLabel = $('.mdl-switch__label', this.enableNotificationsContainer);
 
-      this.toast = $('.mdl-js-snackbar');
+    this.toast = $('.mdl-js-snackbar');
 
-      // Event bindings
-      this.enableNotificationsCheckbox.change(() => this.onEnableNotificationsChange());
-      this.auth.onAuthStateChanged(() => this.trackNotificationsEnabledStatus());
-      this.messaging.onTokenRefresh(() => this.saveToken());
-      this.messaging.onMessage((payload) => this.onMessage(payload));
-    });
+    // Event bindings
+    this.enableNotificationsCheckbox.change(() => this.onEnableNotificationsChange());
+    this.auth.onAuthStateChanged(() => this.trackNotificationsEnabledStatus());
+    this.messaging.onTokenRefresh(() => this.saveToken());
+    this.messaging.onMessage((payload) => this.onMessage(payload));
   }
 
   /**
@@ -54,7 +52,7 @@ friendlyPix.Messaging = class {
   saveToken() {
     this.messaging.getToken().then((currentToken) => {
       if (currentToken) {
-        friendlyPix.firebase.saveNotificationToken(currentToken).then(() => {
+        return friendlyPix.firebase.saveNotificationToken(currentToken).then(() => {
           console.log('Notification Token saved to database');
         });
       } else {
@@ -127,4 +125,6 @@ friendlyPix.Messaging = class {
   }
 };
 
-friendlyPix.messaging = new friendlyPix.Messaging();
+$(document).ready(() => {
+  friendlyPix.messaging = new friendlyPix.Messaging();
+});

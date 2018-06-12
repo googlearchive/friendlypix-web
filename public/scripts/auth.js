@@ -40,33 +40,31 @@ friendlyPix.Auth = class {
     this.auth = firebase.auth();
     this._waitForAuthPromiseResolver = new $.Deferred();
 
-    $(document).ready(() => {
-      // Pointers to DOM Elements
-      const signedInUserContainer = $('.fp-signed-in-user-container');
-      this.signedInUserAvatar = $('.fp-avatar', signedInUserContainer);
-      this.signedInUsername = $('.fp-username', signedInUserContainer);
-      this.signOutButton = $('.fp-sign-out');
-      this.deleteAccountButton = $('.fp-delete-account');
-      this.usernameLink = $('.fp-usernamelink');
-      this.updateAll = $('.fp-update-all');
-      this.uploadButton = $('button#add');
-      this.mobileUploadButton = $('button#add-floating');
-      this.preConsentCheckbox = $('#fp-pre-consent');
+    // Pointers to DOM Elements
+    const signedInUserContainer = $('.fp-signed-in-user-container');
+    this.signedInUserAvatar = $('.fp-avatar', signedInUserContainer);
+    this.signedInUsername = $('.fp-username', signedInUserContainer);
+    this.signOutButton = $('.fp-sign-out');
+    this.deleteAccountButton = $('.fp-delete-account');
+    this.usernameLink = $('.fp-usernamelink');
+    this.updateAll = $('.fp-update-all');
+    this.uploadButton = $('button#add');
+    this.mobileUploadButton = $('button#add-floating');
+    this.preConsentCheckbox = $('#fp-pre-consent');
 
-      // Event bindings
-      this.preConsentCheckbox.change(() => {
-        const checked = this.preConsentCheckbox.is(':checked');
-        const IDPButtons = $('.firebaseui-idp-button');
-        if (checked) {
-          IDPButtons.removeAttr('disabled');
-        } else {
-          IDPButtons.attr('disabled', 'disabled');
-        }
-      });
-      this.signOutButton.click(() => this.auth.signOut());
-      this.deleteAccountButton.click(() => this.deleteAccount());
-      this.updateAll.click(() => this.updateAllAccounts());
+    // Event bindings
+    this.preConsentCheckbox.change(() => {
+      const checked = this.preConsentCheckbox.is(':checked');
+      const IDPButtons = $('.firebaseui-idp-button');
+      if (checked) {
+        IDPButtons.removeAttr('disabled');
+      } else {
+        IDPButtons.attr('disabled', 'disabled');
+      }
     });
+    this.signOutButton.click(() => this.auth.signOut());
+    this.deleteAccountButton.click(() => this.deleteAccount());
+    this.updateAll.click(() => this.updateAllAccounts());
 
     this.auth.onAuthStateChanged((user) => this.onAuthStateChanged(user));
   }
@@ -126,16 +124,8 @@ friendlyPix.Auth = class {
       }
     });
   }
-
-  updateAllAccounts() {
-    const updateAllProfiles = firebase.functions().httpsCallable('updateAllProfiles');
-    updateAllProfiles().then(() => {
-      window.alert('Profiles update Finished successfully.');
-    }).catch((error) => {
-      console.error('Error updating user profiles.', error);
-      window.alert('Error updating user profiles: ' + error.message);
-    });
-  }
 };
 
-friendlyPix.auth = new friendlyPix.Auth();
+$(document).ready(() => {
+  friendlyPix.auth = new friendlyPix.Auth();
+});

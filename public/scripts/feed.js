@@ -34,17 +34,15 @@ friendlyPix.Feed = class {
     // Firebase SDK.
     this.auth = firebase.auth();
 
-    $(document).ready(() => {
-      // Pointers to DOM elements.
-      this.pageFeed = $('#page-feed');
-      this.feedImageContainer = $('.fp-image-container', this.pageFeed);
-      this.noPostsMessage = $('.fp-no-posts', this.pageFeed);
-      this.nextPageButton = $('.fp-next-page-button button');
-      this.newPostsButton = $('.fp-new-posts-button button');
+    // Pointers to DOM elements.
+    this.pageFeed = $('#page-feed');
+    this.feedImageContainer = $('.fp-image-container', this.pageFeed);
+    this.noPostsMessage = $('.fp-no-posts', this.pageFeed);
+    this.nextPageButton = $('.fp-next-page-button button');
+    this.newPostsButton = $('.fp-new-posts-button button');
 
-      // Event bindings.
-      this.newPostsButton.click(() => this.showNewPosts());
-    });
+    // Event bindings.
+    this.newPostsButton.click(() => this.showNewPosts());
   }
 
   /**
@@ -237,4 +235,6 @@ friendlyPix.Feed = class {
   }
 };
 
-friendlyPix.feed = new friendlyPix.Feed();
+$(document).ready(() => {
+  friendlyPix.feed = new friendlyPix.Feed();
+});

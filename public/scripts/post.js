@@ -34,14 +34,12 @@ friendlyPix.Post = class {
     this.storage = firebase.storage();
     this.auth = firebase.auth();
 
-    $(document).ready(() => {
-      this.postPage = $('#page-post');
-      // Pointers to DOM elements.
-      this.postElement = $(friendlyPix.Post.createPostHtml(postId));
-      friendlyPix.MaterialUtils.upgradeTextFields(this.postElement);
-      this.toast = $('.mdl-js-snackbar');
-      this.theatre = $('.fp-theatre');
-    });
+    this.postPage = $('#page-post');
+    // Pointers to DOM elements.
+    this.postElement = $(friendlyPix.Post.createPostHtml(postId));
+    friendlyPix.MaterialUtils.upgradeTextFields(this.postElement);
+    this.toast = $('.mdl-js-snackbar');
+    this.theatre = $('.fp-theatre');
   }
 
   /**
@@ -472,7 +470,7 @@ friendlyPix.Post = class {
     commentId = friendlyPix.MaterialUtils.escapeHtml(commentId);
     try {
       const element = $(`
-        <div id="comment-${commentId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
+        <div id="comment-${commentId ? commentId : postId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
           <span class="fp-text">${$('<div>').text(text).html()}</span>
           <!-- Drop Down Menu -->
@@ -544,9 +542,9 @@ friendlyPix.Post = class {
   }
 };
 
-friendlyPix.post = new friendlyPix.Post();
-
 $(document).ready(() => {
+  friendlyPix.post = new friendlyPix.Post();
+
   // We add the Post element to the single post page.
   $('.fp-image-container', friendlyPix.post.postPage).append(friendlyPix.post.postElement);
 });

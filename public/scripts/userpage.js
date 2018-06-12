@@ -30,56 +30,54 @@ friendlyPix.UserPage = class {
     this.database = firebase.database();
     this.auth = firebase.auth();
 
-    $(document).ready(() => {
-      // DOM Elements.
-      this.userPage = $('#page-user-info');
-      this.userAvatar = $('.fp-user-avatar');
-      this.toast = $('.mdl-js-snackbar');
-      this.userUsername = $('.fp-user-username');
-      this.userInfoContainer = $('.fp-user-container');
-      this.followContainer = $('.fp-follow');
-      this.noPosts = $('.fp-no-posts', this.userPage);
-      this.followLabel = $('.mdl-switch__label', this.followContainer);
-      this.followCheckbox = $('#follow');
-      this.blockContainer = $('.fp-block');
-      this.blockLabel = $('.mdl-switch__label', this.blockContainer);
-      this.blockCheckbox = $('#block');
-      this.nbPostsContainer = $('.fp-user-nbposts', this.userPage);
-      this.nbFollowers = $('.fp-user-nbfollowers', this.userPage);
-      this.nbFollowing = $('.fp-user-nbfollowing', this.userPage);
-      this.nbFollowingContainer = $('.fp-user-nbfollowing-container', this.userPage);
-      this.followingContainer = $('.fp-user-following', this.userPage);
-      this.nextPageButton = $('.fp-next-page-button button');
-      this.closeFollowingButton = $('.fp-close-following', this.userPage);
-      this.userInfoPageImageContainer = $('.fp-image-container', this.userPage);
+    // DOM Elements.
+    this.userPage = $('#page-user-info');
+    this.userAvatar = $('.fp-user-avatar');
+    this.toast = $('.mdl-js-snackbar');
+    this.userUsername = $('.fp-user-username');
+    this.userInfoContainer = $('.fp-user-container');
+    this.followContainer = $('.fp-follow');
+    this.noPosts = $('.fp-no-posts', this.userPage);
+    this.followLabel = $('.mdl-switch__label', this.followContainer);
+    this.followCheckbox = $('#follow');
+    this.blockContainer = $('.fp-block');
+    this.blockLabel = $('.mdl-switch__label', this.blockContainer);
+    this.blockCheckbox = $('#block');
+    this.nbPostsContainer = $('.fp-user-nbposts', this.userPage);
+    this.nbFollowers = $('.fp-user-nbfollowers', this.userPage);
+    this.nbFollowing = $('.fp-user-nbfollowing', this.userPage);
+    this.nbFollowingContainer = $('.fp-user-nbfollowing-container', this.userPage);
+    this.followingContainer = $('.fp-user-following', this.userPage);
+    this.nextPageButton = $('.fp-next-page-button button');
+    this.closeFollowingButton = $('.fp-close-following', this.userPage);
+    this.userInfoPageImageContainer = $('.fp-image-container', this.userPage);
 
-      // DOM Elements for Privacy Consent Modal
-      this.privacyDialogButton = $('.privacy-dialog-link');
-      this.privacyDialog = $('#privacy-dialog');
-      this.privacyDialogSave = $('.privacy-save');
-      this.allowDataProcessing = $('#allow-data');
-      this.allowContent = $('#allow-content');
-      this.allowSocial = $('#allow-social');
+    // DOM Elements for Privacy Consent Modal
+    this.privacyDialogButton = $('.privacy-dialog-link');
+    this.privacyDialog = $('#privacy-dialog');
+    this.privacyDialogSave = $('.privacy-save');
+    this.allowDataProcessing = $('#allow-data');
+    this.allowContent = $('#allow-content');
+    this.allowSocial = $('#allow-social');
 
-      this.uploadButton = $('button#add');
-      this.mobileUploadButton = $('button#add-floating');
+    this.uploadButton = $('button#add');
+    this.mobileUploadButton = $('button#add-floating');
 
-      // Event bindings.
-      this.followCheckbox.change(() => this.onFollowChange());
-      this.blockCheckbox.change(() => this.onBlockChange());
-      this.auth.onAuthStateChanged(() => this.trackFollowStatus());
-      this.auth.onAuthStateChanged(() => this.trackBlockStatus());
-      this.nbFollowingContainer.click(() => this.displayFollowing());
-      this.closeFollowingButton.click(() => {
-        this.followingContainer.hide();
-        this.nbFollowingContainer.removeClass('is-active');
-      });
-
-      // Event bindings for Privacy Consent Dialog
-      this.privacyDialogButton.click(() => this.showPrivacyDialog());
-      this.privacyDialogSave.click(() => this.savePrivacySettings());
-      this.allowDataProcessing.change(() => this.toggleSubmitStates());
+    // Event bindings.
+    this.followCheckbox.change(() => this.onFollowChange());
+    this.blockCheckbox.change(() => this.onBlockChange());
+    this.auth.onAuthStateChanged(() => this.trackFollowStatus());
+    this.auth.onAuthStateChanged(() => this.trackBlockStatus());
+    this.nbFollowingContainer.click(() => this.displayFollowing());
+    this.closeFollowingButton.click(() => {
+      this.followingContainer.hide();
+      this.nbFollowingContainer.removeClass('is-active');
     });
+
+    // Event bindings for Privacy Consent Dialog
+    this.privacyDialogButton.click(() => this.showPrivacyDialog());
+    this.privacyDialogSave.click(() => this.savePrivacySettings());
+    this.allowDataProcessing.change(() => this.toggleSubmitStates());
   }
 
   /**
@@ -423,4 +421,6 @@ friendlyPix.UserPage = class {
   }
 };
 
-friendlyPix.userPage = new friendlyPix.UserPage();
+$(document).ready(() => {
+  friendlyPix.userPage = new friendlyPix.UserPage();
+});
