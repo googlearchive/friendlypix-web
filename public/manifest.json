@@ -17,9 +17,15 @@
     "src": "/images/icon-192x192.png",
     "sizes": "192x192",
     "type": "image/png"
+  }, {
+    "src": "/images/icon-512x512.png",
+    "sizes": "512x512",
+    "type": "image/png"
   }],
   "start_url": "/index.html",
   "display": "standalone",
   "orientation": "portrait",
+  "background_color": "#0288d1",
+  "theme_color": "#039be5",
   "gcm_sender_id": "103953800507"
 }
