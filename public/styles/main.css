@@ -941,7 +941,8 @@ a {
 }
 
 .mdl-dialog {
-  width: 40%;
+  width: 90%;
+  max-width: 500px;
 }
 
 .fp-non-eu, .fp-eu {
