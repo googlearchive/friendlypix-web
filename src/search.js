@@ -15,12 +15,12 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
 
 /**
  * Handles the Friendly Pix search feature.
  */
-friendlyPix.Search = class {
+export default class Search {
   /**
    * The minimum number of characters to trigger a search.
    * @return {number}
@@ -41,9 +41,6 @@ friendlyPix.Search = class {
    * Initializes the Friendly Pix search bar.
    */
   constructor() {
-    // Firebase SDK.
-    this.database = firebase.database();
-
     // DOM Elements pointers.
     this.searchField = $('#searchQuery');
     this.searchResults = $('#fp-searchResults');
@@ -59,8 +56,8 @@ friendlyPix.Search = class {
    */
   displaySearchResults() {
     const searchString = this.searchField.val().toLowerCase().trim();
-    if (searchString.length >= friendlyPix.Search.MIN_CHARACTERS) {
-      friendlyPix.firebase.searchUsers(searchString, friendlyPix.Search.NB_RESULTS_LIMIT).then(
+    if (searchString.length >= Search.MIN_CHARACTERS) {
+      window.friendlyPix.firebase.searchUsers(searchString, Search.NB_RESULTS_LIMIT).then(
           (results) => {
             this.searchResults.empty();
             const peopleIds = Object.keys(results);
@@ -73,7 +70,7 @@ friendlyPix.Search = class {
               peopleIds.forEach((peopleId) => {
                 const profile = results[peopleId];
                 this.searchResults.append(
-                    friendlyPix.Search.createSearchResultHtml(peopleId, profile));
+                    Search.createSearchResultHtml(peopleId, profile));
               });
             } else {
               this.searchResults.fadeOut();
@@ -97,7 +94,3 @@ friendlyPix.Search = class {
         </a>`;
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.search = new friendlyPix.Search();
-});

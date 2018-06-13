@@ -46,18 +46,8 @@
   <meta name="msapplication-TileColor" content="#3372DF">
   <meta name="msapplication-navbutton-color" content="#303F9F">
 
-  <!-- Material Design Lite  -->
-  <link rel="stylesheet" href="/libs/material-design-lite/material.min.css">
-  <script defer src="/libs/material-design-lite/material.min.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
-  <!-- Firebaseui styling -->
-  <link rel="stylesheet" type="text/css" href="/libs/firebaseui/dist/firebaseui.css">
-
   <!-- Styling -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,300">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amaranth:700">
-  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body class="fp-auth-state-unknown">
 
@@ -66,7 +56,7 @@
 
 <!-- Splash screen -->
 <section id="page-splash">
-  <h3 class="fp-logo"><img src="/images/icon-120x120.png" alt="Friendly Pix Logo"> Friendly Pix</h3>
+  <h3 class="fp-logo"><img src="/images/icon-128x128.png" alt="Friendly Pix Logo"> Friendly Pix</h3>
   <div class="fp-caption">The friendliest way to share your pics</div>
   <div class="fp-signed-out-only fp-initially-hidden">
     <div id="firebaseui-auth-container" class="fp-non-eu fp-signed-out-only fp-initially-hidden"></div>
@@ -98,7 +88,7 @@
     <div class="mdl-layout__header-row fp-titlebar">
 
       <!-- Logo -->
-      <h3 class="fp-logo"><a href="/feed"><img src="/images/icon-120x120.png" alt="Friendly Pix Logo"> Friendly Pix</a></h3>
+      <h3 class="fp-logo"><a href="/feed"><img src="/images/icon-128x128.png" alt="Friendly Pix Logo"> Friendly Pix</a></h3>
       <div class="mdl-layout-spacer"></div>
 
       <!-- Search bar -->
@@ -493,117 +483,7 @@
   </main>
 </div>
 
-<!-- Page.js -->
-<script src="/libs/page/page.js"></script>
-
-<!-- jQuery -->
-<script src="/libs/jquery/dist/jquery.min.js"></script>
-
-<!-- Latinize -->
-<script src="/libs/latinize/latinize.js"></script>
-
-<!-- SweetAlert -->
-<script src="/libs/sweetalert/dist/sweetalert.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/libs/sweetalert/dist/sweetalert.css">
-
-<!-- Import and configure the Firebase SDK -->
-<!-- These scripts are made available when the app is served or deployed on Firebase Hosting -->
-<!-- If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup -->
-<script src="/__/firebase/5.0.4/firebase-app.js"></script>
-<script src="/__/firebase/5.0.4/firebase-auth.js"></script>
-<script src="/__/firebase/5.0.4/firebase-database.js"></script>
-<script src="/__/firebase/5.0.4/firebase-storage.js"></script>
-<script src="/__/firebase/5.0.4/firebase-messaging.js"></script>
-<script src="/__/firebase/init.js"></script>
-
-<!-- Firebase UI for Auth -->
-<script src="/libs/firebaseui/dist/firebaseui.js"></script>
-<script type="text/javascript">
-  var signInFlow = 'popup';
-  // For iOS full screen apps we use the redirect auth mode.
-  if (('standalone' in window.navigator)
-      && window.navigator.standalone){
-    signInFlow = 'redirect';
-  }
-
-  // FirebaseUI config.
-  var uiConfig = {
-    'signInFlow': signInFlow,
-    'signInOptions': [
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID
-    ],
-    'callbacks': {
-      'uiShown': function() {
-        const intervalId = setInterval(() => {
-          const IDPButtons = $('.firebaseui-idp-button');
-          const nbIDPButtonDisplayed = IDPButtons.length;
-          if (nbIDPButtonDisplayed > 0) {
-            clearInterval(intervalId);
-            if (!$('#fp-pre-consent').is(':checked')) {
-              IDPButtons.attr('disabled', 'disabled');
-            }
-          }
-        }, 1);
-      }
-    }
-  };
-  var firebaseUi = new firebaseui.auth.AuthUI(firebase.auth());
-</script>
-
 <!-- Friendly Pix ES5 scripts -->
-<script src="/scripts-es5/ipfilter.js"></script>
-<script src="/scripts-es5/utils.js"></script>
-<script src="/scripts-es5/firebase.js"></script>
-<script src="/scripts-es5/auth.js"></script>
-<script src="/scripts-es5/search.js"></script>
-<script src="/scripts-es5/uploader.js"></script>
-<script src="/scripts-es5/messaging.js"></script>
-<script src="/scripts-es5/userpage.js"></script>
-<script src="/scripts-es5/post.js"></script>
-<script src="/scripts-es5/feed.js"></script>
-<script src="/scripts-es5/routing.js"></script>
-
-<!-- Friendly Pix ES2015 scripts -->
-<!-- Uncomment and replace scripts above to serve ES2015 scripts directly. Mainly for testing. -->
-<!-- 
-<script src="/scripts/ipfilter.js"></script>
-<script src="/scripts/utils.js"></script>
-<script src="/scripts/firebase.js"></script>
-<script src="/scripts/auth.js"></script>
-<script src="/scripts/search.js"></script>
-<script src="/scripts/uploader.js"></script>
-<script src="/scripts/messaging.js"></script>
-<script src="/scripts/userpage.js"></script>
-<script src="/scripts/post.js"></script>
-<script src="/scripts/feed.js"></script>
-<script src="/scripts/routing.js"></script> -->
-
-<!-- Google Analytics -->
-<script src="https://www.googletagmanager.com/gtag/js?id=UA-25993200-10"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-25993200-10');
-
-  // Track basic JavaScript errors
-  window.addEventListener('error', function(err) {
-    gtag('event', 'exception', {
-      'exDescription': err.message,
-      'exLocation': err.filename + ':  ' + err.lineno
-    });
-  });
-</script>
-
-<script>
-  // Check that service workers are registered
-  if ('serviceWorker' in navigator) {
-    // Use the window load event to keep the page load performant
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-  </script>
+<script src="/bundle.js"></script>
 </body>
 </html>

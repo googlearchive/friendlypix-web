@@ -15,21 +15,24 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/messaging';
+import MaterialUtils from './utils';
+import page from 'page';
 
 /**
  * Handles notifications.
  */
-friendlyPix.Messaging = class {
+export default class Messaging {
   /**
    * Inititializes the notifications utility.
    * @constructor
    */
   constructor() {
     // Firebase SDK
-    this.database = firebase.database();
     this.auth = firebase.auth();
-    this.storage = firebase.storage();
     this.messaging = firebase.messaging();
 
     // DOM Elements
@@ -52,7 +55,7 @@ friendlyPix.Messaging = class {
   saveToken() {
     this.messaging.getToken().then((currentToken) => {
       if (currentToken) {
-        return friendlyPix.firebase.saveNotificationToken(currentToken).then(() => {
+        return window.friendlyPix.firebase.saveNotificationToken(currentToken).then(() => {
           console.log('Notification Token saved to database');
         });
       } else {
@@ -103,7 +106,7 @@ friendlyPix.Messaging = class {
     const checked = this.enableNotificationsCheckbox.prop('checked');
     this.enableNotificationsCheckbox.prop('disabled', true);
 
-    return friendlyPix.firebase.toggleNotificationEnabled(checked);
+    return window.friendlyPix.firebase.toggleNotificationEnabled(checked);
   }
 
   /**
@@ -111,11 +114,11 @@ friendlyPix.Messaging = class {
    */
   trackNotificationsEnabledStatus() {
     if (this.auth.currentUser) {
-      friendlyPix.firebase.registerToNotificationEnabledStatusUpdate((data) => {
+      window.friendlyPix.firebase.registerToNotificationEnabledStatusUpdate((data) => {
         this.enableNotificationsCheckbox.prop('checked', data.val() !== null);
         this.enableNotificationsCheckbox.prop('disabled', false);
         this.enableNotificationsLabel.text(data.val() ? 'Notifications Enabled' : 'Enable Notifications');
-        friendlyPix.MaterialUtils.refreshSwitchState(this.enableNotificationsContainer);
+        MaterialUtils.refreshSwitchState(this.enableNotificationsContainer);
 
         if (data.val()) {
           this.saveToken();
@@ -124,7 +127,3 @@ friendlyPix.Messaging = class {
     }
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.messaging = new friendlyPix.Messaging();
-});

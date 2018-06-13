@@ -15,12 +15,17 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import MaterialUtils from './utils';
+import swal from 'sweetalert';
+import page from 'page';
 
 /**
  * Handles the single post UI.
  */
-friendlyPix.Post = class {
+export default class Post {
   /**
    * Initializes the single post's UI.
    * @constructor
@@ -30,16 +35,18 @@ friendlyPix.Post = class {
     this.timers = [];
 
     // Firebase SDK.
-    this.database = firebase.database();
-    this.storage = firebase.storage();
     this.auth = firebase.auth();
 
-    this.postPage = $('#page-post');
     // Pointers to DOM elements.
-    this.postElement = $(friendlyPix.Post.createPostHtml(postId));
-    friendlyPix.MaterialUtils.upgradeTextFields(this.postElement);
+    this.postElement = $(Post.createPostHtml(postId));
+    MaterialUtils.upgradeTextFields(this.postElement);
     this.toast = $('.mdl-js-snackbar');
     this.theatre = $('.fp-theatre');
+
+    // Adds the element to the main UI if thisis the first time this is called.
+    if ($('.fp-image-container', '#page-post').children().length === 0) {
+      $('.fp-image-container', '#page-post').append(this.postElement);
+    }
   }
 
   /**
@@ -47,7 +54,7 @@ friendlyPix.Post = class {
    */
   loadPost(postId) {
     // Load the posts information.
-    friendlyPix.firebase.getPostData(postId).then((snapshot) => {
+    window.friendlyPix.firebase.getPostData(postId).then((snapshot) => {
       const post = snapshot.val();
       // Clear listeners and previous post data.
       this.clear();
@@ -78,7 +85,7 @@ friendlyPix.Post = class {
     this.timers = [];
 
     // Remove Firebase listeners.
-    friendlyPix.firebase.cancelAllSubscriptions();
+    window.friendlyPix.firebase.cancelAllSubscriptions();
   }
 
   /**
@@ -96,27 +103,27 @@ friendlyPix.Post = class {
    */
   displayComment(comment, postId, commentId, prepend = true) {
     const newElement = this.createComment(comment.author, comment.text, postId,
-        commentId, comment.author.uid === friendlyPix.auth.userId);
+        commentId, comment.author.uid === window.friendlyPix.auth.userId);
     if (prepend) {
       $('.fp-comments', this.postElement).prepend(newElement);
     } else {
       $('.fp-comments', this.postElement).append(newElement);
     }
-    friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
+    MaterialUtils.upgradeDropdowns(this.postElement);
 
     // Subscribe to updates of the comment.
-    friendlyPix.firebase.subscribeToComment(postId, commentId, (snap) => {
+    window.friendlyPix.firebase.subscribeToComment(postId, commentId, (snap) => {
       const updatedComment = snap.val();
       if (updatedComment) {
         const updatedElement = this.createComment(updatedComment.author,
           updatedComment.text, postId, commentId,
-          updatedComment.author.uid === friendlyPix.auth.userId);
+          updatedComment.author.uid === window.friendlyPix.auth.userId);
         const element = $('#comment-' + commentId);
         element.replaceWith(updatedElement);
       } else {
         $('#comment-' + commentId).remove();
       }
-      friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
+      MaterialUtils.upgradeDropdowns(this.postElement);
     });
   }
 
@@ -147,7 +154,7 @@ friendlyPix.Post = class {
   fillPostData(postId, thumbUrl, imageText, author = {}, timestamp, thumbStorageUri, picStorageUri, picUrl) {
     const post = this.postElement;
 
-    friendlyPix.MaterialUtils.upgradeDropdowns(this.postElement);
+    MaterialUtils.upgradeDropdowns(this.postElement);
 
     // Fills element's author profile.
     $('.fp-usernamelink', post).attr('href', `/user/${author.uid}`);
@@ -159,12 +166,12 @@ friendlyPix.Post = class {
     this._setupThumb(thumbUrl, picUrl);
 
     // Make sure we update if the thumb or pic URL changes.
-    friendlyPix.firebase.registerForThumbChanges(postId, (thumbUrl) => {
+    window.friendlyPix.firebase.registerForThumbChanges(postId, (thumbUrl) => {
       this._setupThumb(thumbUrl, picUrl);
     });
 
     if (this.auth.currentUser) {
-      friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then((snapshot) => {
+      window.friendlyPix.firebase.getPrivacySettings(this.auth.currentUser.uid).then((snapshot) => {
         let socialEnabled = false;
         if (snapshot.val() !== null) {
           socialEnabled = snapshot.val().social;
@@ -233,10 +240,10 @@ friendlyPix.Post = class {
     const post = this.postElement;
 
     $('.fp-time', post).attr('href', `/post/${postId}`);
-    $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp));
+    $('.fp-time', post).text(Post.getTimeText(timestamp));
     // Update the time counter every minutes.
     this.timers.push(setInterval(
-        () => $('.fp-time', post).text(friendlyPix.Post.getTimeText(timestamp)), 60000));
+        () => $('.fp-time', post).text(Post.getTimeText(timestamp)), 60000));
   }
 
   /**
@@ -251,14 +258,14 @@ friendlyPix.Post = class {
     $('.fp-first-comment', post).append(this.createComment(author, imageText));
 
     // Load first page of comments and listen to new comments.
-    friendlyPix.firebase.getComments(postId).then((data) => {
+    window.friendlyPix.firebase.getComments(postId).then((data) => {
       $('.fp-comments', post).empty();
       this.displayComments(postId, data.entries);
       this.displayNextPageButton(postId, data.nextPage);
 
       // Display any new comments.
       const commentIds = Object.keys(data.entries);
-      friendlyPix.firebase.subscribeToComments(postId, (commentId, commentData) => {
+      window.friendlyPix.firebase.subscribeToComments(postId, (commentId, commentData) => {
         this.displayComment(commentData, postId, commentId, false);
       }, commentIds ? commentIds[commentIds.length - 1] : 0);
     });
@@ -272,7 +279,7 @@ friendlyPix.Post = class {
         if (!commentText || commentText.length === 0) {
           return;
         }
-        friendlyPix.firebase.addComment(postId, commentText);
+        window.friendlyPix.firebase.addComment(postId, commentText);
         $(`.mdl-textfield__input`, post).val('');
       });
       const ran = Math.floor(Math.random() * 10000000);
@@ -304,9 +311,9 @@ friendlyPix.Post = class {
           closeOnConfirm: true,
           showLoaderOnConfirm: true,
           allowEscapeKey: true,
-        }, () => {
+        }).then(() => {
           $('.fp-report-post', post).prop('disabled', true);
-          friendlyPix.firebase.reportPost(postId).then(() => {
+          window.friendlyPix.firebase.reportPost(postId).then(() => {
             swal({
               title: 'Reported!',
               text: 'This post has been reported. Please allow some time before an admin reviews it.',
@@ -353,9 +360,9 @@ friendlyPix.Post = class {
         closeOnConfirm: false,
         showLoaderOnConfirm: true,
         allowEscapeKey: true,
-      }, () => {
+      }).then(() => {
         $('.fp-delete-post', post).prop('disabled', true);
-        friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
+        window.friendlyPix.firebase.deletePost(postId, picStorageUri, thumbStorageUri).then(() => {
           swal({
             title: 'Deleted!',
             text: 'Your post has been deleted.',
@@ -386,7 +393,7 @@ friendlyPix.Post = class {
 
     if (this.auth.currentUser && socialEnabled) {
       // Listen to like status.
-      friendlyPix.firebase.registerToUserLike(postId, (isliked) => {
+      window.friendlyPix.firebase.registerToUserLike(postId, (isliked) => {
         if (isliked) {
           $('.fp-liked', post).show();
           $('.fp-not-liked', post).hide();
@@ -398,9 +405,9 @@ friendlyPix.Post = class {
 
       // Add event listeners.
       $('.fp-liked', post).off('click');
-      $('.fp-liked', post).click(() => friendlyPix.firebase.updateLike(postId, false));
+      $('.fp-liked', post).click(() => window.friendlyPix.firebase.updateLike(postId, false));
       $('.fp-not-liked', post).off('click');
-      $('.fp-not-liked', post).click(() => friendlyPix.firebase.updateLike(postId, true));
+      $('.fp-not-liked', post).click(() => window.friendlyPix.firebase.updateLike(postId, true));
     } else {
       $('.fp-liked', post).hide();
       $('.fp-not-liked', post).hide();
@@ -408,7 +415,7 @@ friendlyPix.Post = class {
     }
 
     // Listen to number of Likes.
-    friendlyPix.firebase.registerForLikesCount(postId, (nbLikes) => {
+    window.friendlyPix.firebase.registerForLikesCount(postId, (nbLikes) => {
       if (nbLikes > 0) {
         $('.fp-likes', post).show();
         $('.fp-likes', post).text(nbLikes + ' like' + (nbLikes === 1 ? '' : 's'));
@@ -467,7 +474,7 @@ friendlyPix.Post = class {
    * Returns the HTML for a post's comment.
    */
   createComment(author = {}, text, postId, commentId, isOwner = false) {
-    commentId = friendlyPix.MaterialUtils.escapeHtml(commentId);
+    commentId = MaterialUtils.escapeHtml(commentId);
     try {
       const element = $(`
         <div id="comment-${commentId ? commentId : postId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
@@ -485,7 +492,7 @@ friendlyPix.Post = class {
         </div>`);
       $('.fp-delete-comment', element).click(() => {
         if (window.confirm('Delete the comment?')) {
-          friendlyPix.firebase.deleteComment(postId, commentId).then(() => {
+          window.friendlyPix.firebase.deleteComment(postId, commentId).then(() => {
             element.text('this comment has been deleted');
             element.addClass('fp-comment-deleted');
           });
@@ -493,7 +500,7 @@ friendlyPix.Post = class {
       });
       $('.fp-report-comment', element).click(() => {
         if (window.confirm('Report this comment for inappropriate content?')) {
-          friendlyPix.firebase.reportComment(postId, commentId).then(() => {
+          window.friendlyPix.firebase.reportComment(postId, commentId).then(() => {
             element.text('this comment has been flagged for review.');
             element.addClass('fp-comment-deleted');
           });
@@ -502,7 +509,7 @@ friendlyPix.Post = class {
       $('.fp-edit-comment', element).click(() => {
         const newComment = window.prompt('Edit the comment?', text);
         if (newComment !== null && newComment !== '') {
-          friendlyPix.firebase.editComment(postId, commentId, newComment).then(() => {
+          window.friendlyPix.firebase.editComment(postId, commentId, newComment).then(() => {
             $('.fp-text', element).text(newComment);
           });
         }
@@ -541,10 +548,3 @@ friendlyPix.Post = class {
     return timeText;
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.post = new friendlyPix.Post();
-
-  // We add the Post element to the single post page.
-  $('.fp-image-container', friendlyPix.post.postPage).append(friendlyPix.post.postElement);
-});

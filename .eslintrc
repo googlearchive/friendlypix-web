@@ -4,8 +4,9 @@
     "browser": true
   },
   "parserOptions": {
-   "ecmaVersion": 6
- },
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
   "rules": {
     "camelcase": 0,
     "default-case": 0,
@@ -28,18 +29,7 @@
     "no-negated-condition": 0
   },
   "globals": {
-    "$": true,
-    "firebaseUi": true,
-    "uiConfig": true,
-    "jQuery": true,
-    "swal": true,
-    "latinize": true,
-    "componentHandler": true,
-    "friendlyPix": true,
-    "page": true,
     "ga": true,
-    "firebase": true,
-    "gapi": true,
     "importScripts": true
   }
 }

@@ -17,3 +17,8 @@ firebase-debug.log
 functions/node_modules/**
 package-lock.json
 functions/package-lock.json
+public/fonts
+bundle.js.map
+bundle.js
+styles.css
+styles.css.map

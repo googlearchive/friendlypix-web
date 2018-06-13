@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "result": {
+    "apiKey": "AIzaSyB68Xv3hSXuT3sOgXmz8loD1Ies1_R-57w",
+    "databaseURL": "https://friendlypix-prod.firebaseio.com",
+    "storageBucket": "friendlypix-prod.appspot.com",
+    "authDomain": "friendlypix-prod.firebaseapp.com",
+    "messagingSenderId": "776587047450",
+    "projectId": "friendlypix-prod"
+  }
+}

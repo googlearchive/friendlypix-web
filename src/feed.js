@@ -15,12 +15,16 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import Post from './post';
+import MaterialUtils from './utils';
 
 /**
  * Handles the Home and Feed UI.
  */
-friendlyPix.Feed = class {
+export default class Feed {
   /**
    * Initializes the Friendly Pix feeds.
    * @constructor
@@ -54,7 +58,7 @@ friendlyPix.Feed = class {
     for (let i = postIds.length - 1; i >= 0; i--) {
       this.noPostsMessage.hide();
       const postData = posts[postIds[i]];
-      const post = new friendlyPix.Post(postIds[i]);
+      const post = new Post(postIds[i]);
       this.posts.push(post);
       const postElement = post.postElement;
       // If a post with similar ID is already in the feed we replace it instead of appending.
@@ -87,7 +91,7 @@ friendlyPix.Feed = class {
       };
       this.nextPageButton.show();
       // Enable infinite Scroll.
-      friendlyPix.MaterialUtils.onEndScroll(100).then(loadMorePosts);
+      MaterialUtils.onEndScroll(100).then(loadMorePosts);
       this.nextPageButton.prop('disabled', false);
       this.nextPageButton.click(loadMorePosts);
     } else {
@@ -108,7 +112,7 @@ friendlyPix.Feed = class {
     for (let i = 0; i < postKeys.length; i++) {
       this.noPostsMessage.hide();
       const post = newPosts[postKeys[i]];
-      const postElement = new friendlyPix.Post(postKeys[i]);
+      const postElement = new Post(postKeys[i]);
       this.posts.push(postElement);
       this.feedImageContainer.prepend(postElement.postElement);
       postElement.fillPostData(postKeys[i], post.thumb_url ||
@@ -124,10 +128,10 @@ friendlyPix.Feed = class {
     this.clear();
 
     // Load initial batch of posts.
-    friendlyPix.firebase.getPosts().then((data) => {
+    window.friendlyPix.firebase.getPosts().then((data) => {
       // Listen for new posts.
       const latestPostId = Object.keys(data.entries)[Object.keys(data.entries).length - 1];
-      friendlyPix.firebase.subscribeToGeneralFeed(
+      window.friendlyPix.firebase.subscribeToGeneralFeed(
           (postId, postValue) => this.addNewPost(postId, postValue), latestPostId);
 
       // Adds fetched posts and next page button if necessary.
@@ -136,7 +140,7 @@ friendlyPix.Feed = class {
     });
 
     // Listen for posts deletions.
-    friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
+    window.friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
   }
 
   /**
@@ -148,16 +152,16 @@ friendlyPix.Feed = class {
 
     if (this.auth.currentUser) {
       // Make sure the home feed is updated with followed users's new posts.
-      friendlyPix.firebase.updateHomeFeeds().then(() => {
+      window.friendlyPix.firebase.updateHomeFeeds().then(() => {
         // Load initial batch of posts.
-        friendlyPix.firebase.getHomeFeedPosts().then((data) => {
+        window.friendlyPix.firebase.getHomeFeedPosts().then((data) => {
           const postIds = Object.keys(data.entries);
           if (postIds.length === 0) {
             this.noPostsMessage.fadeIn();
           }
           // Listen for new posts.
           const latestPostId = postIds[postIds.length - 1];
-          friendlyPix.firebase.subscribeToHomeFeed(
+          window.friendlyPix.firebase.subscribeToHomeFeed(
               (postId, postValue) => {
                 this.addNewPost(postId, postValue);
               }, latestPostId);
@@ -168,10 +172,10 @@ friendlyPix.Feed = class {
         });
 
         // Add new posts from followers live.
-        friendlyPix.firebase.startHomeFeedLiveUpdaters();
+        window.friendlyPix.firebase.startHomeFeedLiveUpdaters();
 
         // Listen for posts deletions.
-        friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
+        window.friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
       });
     }
   }
@@ -218,7 +222,7 @@ friendlyPix.Feed = class {
     this.nextPageButton.unbind('click');
 
     // Stops then infinite scrolling listeners.
-    friendlyPix.MaterialUtils.stopOnEndScrolls();
+    MaterialUtils.stopOnEndScrolls();
 
     // Clears the list of upcoming posts to display.
     this.newPosts = {};
@@ -227,14 +231,10 @@ friendlyPix.Feed = class {
     this.noPostsMessage.hide();
 
     // Remove Firebase listeners.
-    friendlyPix.firebase.cancelAllSubscriptions();
+    window.friendlyPix.firebase.cancelAllSubscriptions();
 
     // Stops all timers if any.
     this.posts.forEach((post) => post.clear());
     this.posts = [];
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.feed = new friendlyPix.Feed();
-});

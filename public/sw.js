@@ -18,7 +18,7 @@ if (workbox) {
 
   workbox.routing.registerRoute(
     // Cache HTML files
-  /.*\.html/,
+    /.*\.html/,
     // Use cache but update in the background ASAP
     workbox.strategies.staleWhileRevalidate({
       // Use a custom cache name
@@ -28,11 +28,24 @@ if (workbox) {
 
   workbox.routing.registerRoute(
     // Cache HTML files
-  /[^\.]*/,
+    /[^\.]*/,
     // Use cache but update in the background ASAP
     workbox.strategies.staleWhileRevalidate({
       // Use a custom cache name
       cacheName: 'html-cache',
+    })
+  );
+
+  workbox.routing.registerRoute(
+    // Cache font files
+    /.*\.(?:woff|woff2|eot|ttf)/,
+    workbox.strategies.cacheFirst({
+      cacheName: 'font-cache',
+      plugins: [
+        new workbox.expiration.Plugin({
+          maxEntries: 30,
+        }),
+      ],
     })
   );
 

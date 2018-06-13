@@ -15,14 +15,15 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
 
 /**
  * Detect's the user location based on IP address.
  * You can use this class to enable special features depending on the user's location.
  * For instance displaying a Cookie usage disclaimer for Europeans.
  */
-friendlyPix.IpFilter = class {
+export default class IpFilter {
   static get apiKey() {
     return firebase.app().options.apiKey;
   }
@@ -33,19 +34,18 @@ friendlyPix.IpFilter = class {
   }
 
   /**
-   * Initializes Friendly Pix's Ip Filter.
-   * @constructor
+   * Starts the Filter.
    */
-  constructor() {
+  static filterEuContries() {
     // Bypass the IP filter if the special has fragment is used.
     if (window.location.hash === '#noipfilter') {
       $('.fp-non-eu').removeClass('fp-non-eu');
       return;
     }
 
-    friendlyPix.IpFilter.findLatLonFromIP().then((latlng) => {
-      friendlyPix.IpFilter.getCountryCodeFromLatLng(latlng.lat, latlng.lng).then((countryCode) => {
-        if (friendlyPix.IpFilter.privacyShieldCountries.includes(countryCode)) {
+    IpFilter.findLatLonFromIP().then((latlng) => {
+      IpFilter.getCountryCodeFromLatLng(latlng.lat, latlng.lng).then((countryCode) => {
+        if (IpFilter.privacyShieldCountries.includes(countryCode)) {
           $('.fp-eu').removeClass('fp-eu');
         } else {
           $('.fp-non-eu').removeClass('fp-non-eu');
@@ -59,7 +59,7 @@ friendlyPix.IpFilter = class {
   static findLatLonFromIP() {
     return new Promise((resolve, reject) => {
       $.ajax({
-        url: `https://www.googleapis.com/geolocation/v1/geolocate?key=${friendlyPix.IpFilter.apiKey}`,
+        url: `https://www.googleapis.com/geolocation/v1/geolocate?key=${IpFilter.apiKey}`,
         type: 'POST',
         data: JSON.stringify({considerIp: true}),
         contentType: 'application/json; charset=utf-8',
@@ -81,7 +81,7 @@ friendlyPix.IpFilter = class {
   static getCountryCodeFromLatLng(lat, lng) {
     return new Promise((resolve, reject) => {
       $.ajax({
-        url: `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${friendlyPix.IpFilter.apiKey}`,
+        url: `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${IpFilter.apiKey}`,
         type: 'GET',
         data: JSON.stringify({considerIp: true}),
         dataType: 'json',
@@ -101,5 +101,3 @@ friendlyPix.IpFilter = class {
     });
   }
 };
-
-friendlyPix.ipfilter = new friendlyPix.IpFilter();

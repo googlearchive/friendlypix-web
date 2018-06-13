@@ -9,7 +9,7 @@ To see it in action, have a look at [friendly-pix.com](https://friendly-pix.com)
 
 ## Few words on dependencies
 
-Friendly Pix is built using Javascript, [Firebase](https://firebase.google.com/docs/web/setup) and jQuery. The Auth flow is built using [Firebase-UI](https://github.com/firebase/firebaseui-web). Javascript dependencies are managed using [bower](http://bower.io/) and Build/Deploy tools dependencies are managed using [npm](https://www.npmjs.com/). Also Friendly Pix is written in ES2015 so for wide browser support we'll transpile the code to ES5 using [BabelJs](http://babeljs.io). Additionally server-side micro-services are built on [Cloud Functions for Firebase](https://firebase.google.com/docs/functions).
+Friendly Pix is built using JavaScript, [Firebase](https://firebase.google.com/docs/web/setup) and jQuery. The Auth flow is using [Firebase-UI](https://github.com/firebase/firebaseui-web). Javascript Runtime dependencies as well as Build and deploy dependecies are managed using [npm](http://npmjs.com/). Also Friendly Pix is written in ES2015 using Modules so for wide browser support we pack and transpile the code to ES5 using [Webpack](https://webpack.js.org/). Additionally server-side micro-services are built on [Cloud Functions for Firebase](https://firebase.google.com/docs/functions).
 
 
 ## Create and configure your Firebase Project
@@ -41,7 +41,7 @@ Then open [http://localhost:5000](http://localhost:5000)
 
 > Note 1: On new projects, the Realtime Database and Cloud Storage come with default Security rules that prevent all read and writes. You'll need to deploy the security rules and Cloud Functions once first. For this run: `firebase deploy --only database,storage`
 
-> Note 2: Cloud Functions cannot yet be ran locally. Deploy them once first if you want these features active (such as image and text moderation). For this run: `firebase deploy --only functions,`
+> Note 2: Cloud Functions cannot yet be ran locally. Deploy them once first if you want these features active (such as image and text moderation). For this run: `firebase deploy --only functions`
 
 
 ## Deploy the app

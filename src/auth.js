@@ -15,12 +15,16 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import firebaseui from 'firebaseui';
+import Router from './routing';
 
 /**
  * Handles the user auth flows and updating the UI depending on the auth state.
  */
-friendlyPix.Auth = class {
+export default class Auth {
   /**
    * Returns a Promise that completes when auth is ready.
    * @return Promise
@@ -36,7 +40,6 @@ friendlyPix.Auth = class {
    */
   constructor() {
     // Firebase SDK
-    this.database = firebase.database();
     this.auth = firebase.auth();
     this._waitForAuthPromiseResolver = new $.Deferred();
 
@@ -51,6 +54,9 @@ friendlyPix.Auth = class {
     this.uploadButton = $('button#add');
     this.mobileUploadButton = $('button#add-floating');
     this.preConsentCheckbox = $('#fp-pre-consent');
+
+    // Configure Firebase UI.
+    this.configureFirebaseUi();
 
     // Event bindings
     this.preConsentCheckbox.change(() => {
@@ -69,21 +75,53 @@ friendlyPix.Auth = class {
     this.auth.onAuthStateChanged((user) => this.onAuthStateChanged(user));
   }
 
+  configureFirebaseUi() {
+    // Confgiure and add the FirebaseUI Widget
+    let signInFlow = 'popup';
+    // For iOS full screen apps we use the redirect auth mode.
+    if (('standalone' in window.navigator)
+        && window.navigator.standalone) {
+      signInFlow = 'redirect';
+    }
+
+    // FirebaseUI config.
+    this.uiConfig = {
+      'signInFlow': signInFlow,
+      'signInOptions': [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      ],
+      'callbacks': {
+        'uiShown': function() {
+          const intervalId = setInterval(() => {
+            const IDPButtons = $('.firebaseui-idp-button');
+            const nbIDPButtonDisplayed = IDPButtons.length;
+            if (nbIDPButtonDisplayed > 0) {
+              clearInterval(intervalId);
+              if (!$('#fp-pre-consent').is(':checked')) {
+                IDPButtons.attr('disabled', 'disabled');
+              }
+            }
+          }, 1);
+        },
+      },
+    };
+    this.firebaseUi = new firebaseui.auth.AuthUI(firebase.auth());
+  }
+
   /**
    * Displays the signed-in user information in the UI or hides it and displays the
    * "Sign-In" button if the user isn't signed-in.
    */
   onAuthStateChanged(user) {
-    if (window.friendlyPix.router) {
-      window.friendlyPix.router.reloadPage();
-    }
+    Router.reloadPage();
+
     this._waitForAuthPromiseResolver.resolve();
     $(document).ready(() => {
       document.body.classList.remove('fp-auth-state-unknown');
       if (!user) {
         this.userId = null;
         this.signedInUserAvatar.css('background-image', '');
-        firebaseUi.start('#firebaseui-auth-container', uiConfig);
+        this.firebaseUi.start('#firebaseui-auth-container', this.uiConfig);
         document.body.classList.remove('fp-signed-in');
         document.body.classList.add('fp-signed-out');
       } else {
@@ -94,11 +132,11 @@ friendlyPix.Auth = class {
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
-        friendlyPix.firebase.getPrivacySettings(user.uid).then((snapshot) => {
+        window.friendlyPix.firebase.getPrivacySettings(user.uid).then((snapshot) => {
           const settings = snapshot.val();
           // display privacy modal if there are no privacy preferences
           if (!settings) {
-            friendlyPix.userPage.showPrivacyDialog();
+            window.friendlyPix.userPage.showPrivacyDialog();
           } else {
             if (settings.content === true) {
               // enable upload buttons
@@ -107,7 +145,7 @@ friendlyPix.Auth = class {
             }
           }
         });
-        friendlyPix.firebase.updatePublicProfile();
+        window.friendlyPix.firebase.updatePublicProfile();
       }
     });
   }
@@ -125,7 +163,3 @@ friendlyPix.Auth = class {
     });
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.auth = new friendlyPix.Auth();
-});

@@ -15,12 +15,16 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/database';
+import 'firebase/storage';
+import latinize from 'latinize';
 
 /**
  * Handles all Firebase interactions.
  */
-friendlyPix.Firebase = class {
+export default class Firebase {
   /**
    * Number of posts loaded initially and per page for the feeds.
    * @return {number}
@@ -87,7 +91,7 @@ friendlyPix.Firebase = class {
    */
   getComments(postId) {
     return this._getPaginatedFeed(`/comments/${postId}`,
-        friendlyPix.Firebase.COMMENTS_PAGE_SIZE, null, false);
+        Firebase.COMMENTS_PAGE_SIZE, null, false);
   }
 
   /**
@@ -109,7 +113,7 @@ friendlyPix.Firebase = class {
    * `null` if there is no next page.
    */
   getPosts() {
-    return this._getPaginatedFeed('/posts/', friendlyPix.Firebase.POSTS_PAGE_SIZE);
+    return this._getPaginatedFeed('/posts/', Firebase.POSTS_PAGE_SIZE);
   }
 
   /**
@@ -133,7 +137,7 @@ friendlyPix.Firebase = class {
    */
   getHomeFeedPosts() {
     return this._getPaginatedFeed(`/feed/${this.auth.currentUser.uid}`,
-        friendlyPix.Firebase.POSTS_PAGE_SIZE, null, true);
+        Firebase.POSTS_PAGE_SIZE, null, true);
   }
 
   /**
@@ -157,7 +161,7 @@ friendlyPix.Firebase = class {
    */
   getUserFeedPosts(uid) {
     return this._getPaginatedFeed(`/people/${uid}/posts`,
-        friendlyPix.Firebase.USER_PAGE_POSTS_PAGE_SIZE, null, true);
+        Firebase.USER_PAGE_POSTS_PAGE_SIZE, null, true);
   }
 
   /**
@@ -772,5 +776,3 @@ friendlyPix.Firebase = class {
     this.firebaseRefs.push(postsRef);
   }
 };
-
-friendlyPix.firebase = new friendlyPix.Firebase();

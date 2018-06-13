@@ -15,16 +15,17 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
 
 /**
  * Set of utilities to handle Material Design Lite elements.
  */
-friendlyPix.MaterialUtils = class {
+export default class MaterialUtils {
   /**
    * Refreshes the UI state of the given Material Design Checkbox / Switch element.
    */
   static refreshSwitchState(element) {
+    const jQuery = $;
     if (element instanceof jQuery) {
       element = element[0];
     }

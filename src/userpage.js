@@ -15,19 +15,22 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import page from 'page';
+import MaterialUtils from './utils';
 
 /**
  * Handles the User Profile UI.
  */
-friendlyPix.UserPage = class {
+export default class UserPage {
   /**
    * Initializes the user's profile UI.
    * @constructor
    */
   constructor() {
     // Firebase SDK.
-    this.database = firebase.database();
     this.auth = firebase.auth();
 
     // DOM Elements.
@@ -158,7 +161,7 @@ friendlyPix.UserPage = class {
       friendlyPix.firebase.removeFromSearch(uid);
     }
     this.privacyDialog.get(0).close();
-    window.friendlyPix.router.reloadPage();
+    friendlyPix.router.reloadPage();
     this.setUploadButtonState(this.allowContent.prop('checked'));
   }
 
@@ -191,7 +194,7 @@ friendlyPix.UserPage = class {
         this.followCheckbox.prop('checked', data.val() !== null);
         this.followCheckbox.prop('disabled', false);
         this.followLabel.text(data.val() ? 'Following' : 'Follow');
-        friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
+        MaterialUtils.refreshSwitchState(this.followContainer);
       });
     }
   }
@@ -205,7 +208,7 @@ friendlyPix.UserPage = class {
         this.blockCheckbox.prop('checked', data.val() !== null);
         this.blockCheckbox.prop('disabled', false);
         this.blockLabel.text(data.val() ? 'Blocked' : 'Block');
-        friendlyPix.MaterialUtils.refreshSwitchState(this.blockContainer);
+        MaterialUtils.refreshSwitchState(this.blockContainer);
       });
     }
   }
@@ -217,7 +220,7 @@ friendlyPix.UserPage = class {
     const postIds = Object.keys(posts);
     for (let i = postIds.length - 1; i >= 0; i--) {
       this.userInfoPageImageContainer.append(
-          friendlyPix.UserPage.createImageCard(postIds[i],
+          UserPage.createImageCard(postIds[i],
               posts[postIds[i]].thumb_url || posts[postIds[i]].url, posts[postIds[i]].text));
       this.noPosts.hide();
     }
@@ -261,7 +264,7 @@ friendlyPix.UserPage = class {
       this.blockContainer.hide();
       friendlyPix.messaging.enableNotificationsContainer.show();
       friendlyPix.messaging.enableNotificationsCheckbox.prop('disabled', true);
-      friendlyPix.MaterialUtils.refreshSwitchState(friendlyPix.messaging.enableNotificationsContainer);
+      MaterialUtils.refreshSwitchState(friendlyPix.messaging.enableNotificationsContainer);
       friendlyPix.messaging.trackNotificationsEnabledStatus();
     } else {
       friendlyPix.messaging.enableNotificationsContainer.hide();
@@ -269,7 +272,7 @@ friendlyPix.UserPage = class {
       this.followCheckbox.prop('disabled', true);
       this.blockContainer.show();
       this.blockContainer.prop('disabled', true);
-      friendlyPix.MaterialUtils.refreshSwitchState(this.followContainer);
+      MaterialUtils.refreshSwitchState(this.followContainer);
       // Start live tracking the state of the "Follow" Checkbox.
       this.trackFollowStatus();
       // Start live tracking the state of the "Block" Checkbox.
@@ -315,7 +318,7 @@ friendlyPix.UserPage = class {
       friendlyPix.firebase.subscribeToUserFeed(userId,
         (postId, postValue) => {
           this.userInfoPageImageContainer.prepend(
-              friendlyPix.UserPage.createImageCard(postId,
+              UserPage.createImageCard(postId,
                   postValue.thumb_url || postValue.url, postValue.text));
           this.noPosts.hide();
         }, postIds[postIds.length - 1]);
@@ -339,7 +342,7 @@ friendlyPix.UserPage = class {
       $('.fp-usernamelink', this.followingContainer).remove();
       // Display all following profile cards.
       Object.keys(profiles).forEach((uid) => this.followingContainer.prepend(
-          friendlyPix.UserPage.createProfileCardHtml(
+          UserPage.createProfileCardHtml(
               uid, profiles[uid].profile_picture, profiles[uid].full_name)));
       if (Object.keys(profiles).length > 0) {
         this.followingContainer.show();
@@ -373,7 +376,7 @@ friendlyPix.UserPage = class {
     $('.fp-usernamelink', this.followingContainer).remove();
 
     // Stops then infinite scrolling listeners.
-    friendlyPix.MaterialUtils.stopOnEndScrolls();
+    MaterialUtils.stopOnEndScrolls();
 
     // Hide the "No posts" message.
     this.noPosts.hide();
@@ -412,7 +415,7 @@ friendlyPix.UserPage = class {
    * Returns an image Card element for the image with the given URL.
    */
   static createProfileCardHtml(uid, profilePic = '/images/silhouette.jpg', fullName = 'Anonymous') {
-    fullName = friendlyPix.MaterialUtils.escapeHtml(fullName);
+    fullName = MaterialUtils.escapeHtml(fullName);
     return `
         <a class="fp-usernamelink mdl-button mdl-js-button" href="/user/${uid}">
             <div class="fp-avatar" style="background-image: url('${profilePic}')"></div>
@@ -420,7 +423,3 @@ friendlyPix.UserPage = class {
         </a>`;
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.userPage = new friendlyPix.UserPage();
-});

@@ -15,12 +15,16 @@
  */
 'use strict';
 
-window.friendlyPix = window.friendlyPix || {};
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import MaterialUtils from './utils';
+import page from 'page';
 
 /**
  * Handles the pages/routing.
  */
-friendlyPix.Router = class {
+export default class Router {
   /**
    * Initializes the Friendly Pix controller/router.
    * @constructor
@@ -36,13 +40,13 @@ friendlyPix.Router = class {
     }
 
     // Configuring routes.
-    const pipe = friendlyPix.Router.pipe;
+    const pipe = Router.pipe;
     const displayPage = this.displayPage.bind(this);
-    const loadUser = (userId) => friendlyPix.userPage.loadUser(userId);
-    const showHomeFeed = () => friendlyPix.feed.showHomeFeed();
-    const showGeneralFeed = () => friendlyPix.feed.showGeneralFeed();
-    const clearFeed = () => friendlyPix.feed.clear();
-    const showPost = (postId) => friendlyPix.post.loadPost(postId);
+    const loadUser = (userId) => window.friendlyPix.userPage.loadUser(userId);
+    const showHomeFeed = () => window.friendlyPix.feed.showHomeFeed();
+    const showGeneralFeed = () => window.friendlyPix.feed.showGeneralFeed();
+    const clearFeed = () => window.friendlyPix.feed.clear();
+    const showPost = (postId) => window.friendlyPix.post.loadPost(postId);
 
     page('/', pipe(showHomeFeed, null, true), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
     page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
@@ -67,9 +71,9 @@ friendlyPix.Router = class {
     const onlyAuthed = attributes.onlyAuthed;
     const admin = attributes.admin;
     if (admin) {
-      friendlyPix.Router.enableAdminMode();
+      Router.enableAdminMode();
     } else {
-      friendlyPix.Router.disableAdminMode();
+      Router.disableAdminMode();
     }
 
     if (onlyAuthed) {
@@ -90,7 +94,7 @@ friendlyPix.Router = class {
       pageId = 'splash';
       this.splashLogin.show();
     }
-    friendlyPix.Router.setLinkAsActive(context.canonicalPath);
+    Router.setLinkAsActive(context.canonicalPath);
     this.pagesElements.each(function(index, element) {
       if (element.id === 'page-' + pageId) {
         $(element).show();
@@ -100,14 +104,14 @@ friendlyPix.Router = class {
         $(element).hide();
       }
     });
-    friendlyPix.MaterialUtils.closeDrawer();
-    friendlyPix.Router.scrollToTop();
+    MaterialUtils.closeDrawer();
+    Router.scrollToTop();
   }
 
   /**
    * Reloads the current page.
    */
-  reloadPage() {
+  static reloadPage() {
     let path = window.location.pathname;
     if (path === '') {
       path = '/';
@@ -167,7 +171,3 @@ friendlyPix.Router = class {
     $(`[href="${canonicalPath}"]`).addClass('is-active');
   }
 };
-
-$(document).ready(() => {
-  friendlyPix.router = new friendlyPix.Router();
-});
