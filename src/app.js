@@ -33,7 +33,7 @@ import 'material-design-lite';
 import 'dialog-polyfill';
 
 // Styling
-import 'material-icons/iconfont/material-icons.scss';
+import 'material-design-icons/iconfont/material-icons.css';
 import 'typeface-roboto/index.css';
 import 'typeface-amaranth/index.css';
 import 'material-design-lite/material.min.css';
