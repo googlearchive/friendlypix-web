@@ -22,3 +22,4 @@ bundle.js.map
 bundle.js
 styles.css
 styles.css.map
+src/firebase-config.json
