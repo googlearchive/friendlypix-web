@@ -25,3 +25,5 @@ public/firebase-messaging-sw.js.map
 public/css
 public/js
 public/index.html
+public/workbox
+public/workbox-sw.js

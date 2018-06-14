@@ -22,6 +22,8 @@ const PurifyCSSPlugin = require('purifycss-webpack');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlCriticalPlugin = require('html-critical-webpack-plugin');
+const {GenerateSW} = require('workbox-webpack-plugin');
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
@@ -34,10 +36,9 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'public'),
       filename: (entrypoint) => {
-        // console.log('XXX', a);
         if (entrypoint.chunk.name === 'app') {
           return 'js/bundle.[hash].js';
-        } else {
+        } else if (entrypoint.chunk.name === 'sw') {
           return 'firebase-messaging-sw.js';
         }
       },
@@ -48,6 +49,7 @@ module.exports = (env, argv) => {
     stats: 'errors-only', // lets you precisely control what bundle information gets displayed
     devServer: {
       contentBase: path.join(__dirname, 'public'), // boolean | string | array, static file location
+      filename: /js\/bundle\..*\.js$/,
       compress: true, // enable gzip compression
       historyApiFallback: true, // true for index.html upon 404, object for multiple paths
       inline: true,
@@ -81,7 +83,7 @@ module.exports = (env, argv) => {
             {
               loader: 'file-loader',
               options: {
-                name: 'fonts/[name].[ext]',
+                name: '/fonts/[name].[ext]',
               },
             },
           ],
@@ -117,7 +119,7 @@ module.exports = (env, argv) => {
             path.join(__dirname, 'src/*.js'),
             path.join(__dirname, 'node_modules/firebaseui/dist/firebaseui.js'),
             path.join(__dirname, 'node_modules/material-design-lite/material.js'),
-            path.join(__dirname, 'public/index.html'),
+            path.join(__dirname, 'src/index.html'),
           ]),
         }),
       ],
@@ -125,23 +127,29 @@ module.exports = (env, argv) => {
     plugins: [
       new HtmlWebpackPlugin({
         template: 'src/index.html',
+        chunks: ['app'],
       }),
       new MiniCssExtractPlugin({
         filename: 'css/styles.[hash].css',
       }),
-      // new HtmlCriticalPlugin({
-      //   base: path.join(path.resolve(__dirname), 'dist/'),
-      //   src: 'index.html',
-      //   dest: 'index.html',
-      //   inline: true,
-      //   minify: true,
-      //   extract: true,
-      //   width: 375,
-      //   height: 565,
-      //   penthouse: {
-      //     blockJSRequests: false,
-      //   },
-      // }),
+      new HtmlCriticalPlugin({
+        base: path.join(path.resolve(__dirname), 'public/'),
+        src: 'index.html',
+        dest: 'index.html',
+        inline: true,
+        minify: true,
+        extract: true,
+        width: 375,
+        height: 565,
+        penthouse: {
+          blockJSRequests: false,
+        },
+      }),
+      new GenerateSW({
+        swDest: 'workbox-sw.js',
+        importWorkboxFrom: 'local',
+        importsDirectory: 'workbox',
+      }),
     ],
   };
 };
