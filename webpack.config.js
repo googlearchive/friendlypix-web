@@ -2,6 +2,7 @@ const path = require('path');
 const glob = require('glob-all');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const PurifyCSSPlugin = require('purifycss-webpack');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
   mode: 'production', // "production" | "development" | "none"  // Chosen mode tells webpack to use its built-in optimizations accordingly.
@@ -90,7 +91,12 @@ module.exports = {
   },
   plugins: [
     new ExtractTextPlugin('styles.css'),
-    // Make sure this is after ExtractTextPlugin!
+    new OptimizeCssAssetsPlugin({
+      assetNameRegExp: /styles\.css$/g,
+      cssProcessor: require('cssnano'),
+      cssProcessorOptions: {discardComments: {removeAll: true}},
+      canPrint: true,
+    }),
     new PurifyCSSPlugin({
       // Give paths to parse for rules. These should be absolute!
       paths: glob.sync([
