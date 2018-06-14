@@ -156,12 +156,12 @@ export default class UserPage {
       social: this.allowSocial.prop('checked'),
     };
 
-    friendlyPix.firebase.setPrivacySettings(uid, settings);
+    window.friendlyPix.firebase.setPrivacySettings(uid, settings);
     if (!settings.social) {
-      friendlyPix.firebase.removeFromSearch(uid);
+      window.friendlyPix.firebase.removeFromSearch(uid);
     }
     this.privacyDialog.get(0).close();
-    friendlyPix.router.reloadPage();
+    window.friendlyPix.router.reloadPage();
     this.setUploadButtonState(this.allowContent.prop('checked'));
   }
 
@@ -172,7 +172,7 @@ export default class UserPage {
     const checked = this.followCheckbox.prop('checked');
     this.followCheckbox.prop('disabled', true);
 
-    friendlyPix.firebase.toggleFollowUser(this.userId, checked);
+    window.friendlyPix.firebase.toggleFollowUser(this.userId, checked);
   }
 
   /**
@@ -182,7 +182,7 @@ export default class UserPage {
     const checked = this.blockCheckbox.prop('checked');
     this.blockCheckbox.prop('disabled', true);
 
-    friendlyPix.firebase.toggleBlockUser(this.userId, checked);
+    window.friendlyPix.firebase.toggleBlockUser(this.userId, checked);
   }
 
   /**
@@ -190,7 +190,7 @@ export default class UserPage {
    */
   trackFollowStatus() {
     if (this.auth.currentUser) {
-      friendlyPix.firebase.registerToFollowStatusUpdate(this.userId, (data) => {
+      window.friendlyPix.firebase.registerToFollowStatusUpdate(this.userId, (data) => {
         this.followCheckbox.prop('checked', data.val() !== null);
         this.followCheckbox.prop('disabled', false);
         this.followLabel.text(data.val() ? 'Following' : 'Follow');
@@ -204,7 +204,7 @@ export default class UserPage {
    */
   trackBlockStatus() {
     if (this.auth.currentUser) {
-      friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, (data) => {
+      window.friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, (data) => {
         this.blockCheckbox.prop('checked', data.val() !== null);
         this.blockCheckbox.prop('disabled', false);
         this.blockLabel.text(data.val() ? 'Blocked' : 'Block');
@@ -262,12 +262,12 @@ export default class UserPage {
     if (this.auth.currentUser && userId === this.auth.currentUser.uid) {
       this.followContainer.hide();
       this.blockContainer.hide();
-      friendlyPix.messaging.enableNotificationsContainer.show();
-      friendlyPix.messaging.enableNotificationsCheckbox.prop('disabled', true);
-      MaterialUtils.refreshSwitchState(friendlyPix.messaging.enableNotificationsContainer);
-      friendlyPix.messaging.trackNotificationsEnabledStatus();
+      window.friendlyPix.messaging.enableNotificationsContainer.show();
+      window.friendlyPix.messaging.enableNotificationsCheckbox.prop('disabled', true);
+      MaterialUtils.refreshSwitchState(window.friendlyPix.messaging.enableNotificationsContainer);
+      window.friendlyPix.messaging.trackNotificationsEnabledStatus();
     } else {
-      friendlyPix.messaging.enableNotificationsContainer.hide();
+      window.friendlyPix.messaging.enableNotificationsContainer.hide();
       this.followContainer.show();
       this.followCheckbox.prop('disabled', true);
       this.blockContainer.show();
@@ -280,7 +280,7 @@ export default class UserPage {
     }
 
     // Load user's profile.
-    friendlyPix.firebase.loadUserProfile(userId).then((snapshot) => {
+    window.friendlyPix.firebase.loadUserProfile(userId).then((snapshot) => {
       const userInfo = snapshot.val();
       if (userInfo) {
         this.userAvatar.css('background-image',
@@ -298,24 +298,24 @@ export default class UserPage {
     });
 
     // Lod user's number of followers.
-    friendlyPix.firebase.registerForFollowersCount(userId,
+    window.friendlyPix.firebase.registerForFollowersCount(userId,
         (nbFollowers) => this.nbFollowers.text(nbFollowers));
 
     // Lod user's number of followed users.
-    friendlyPix.firebase.registerForFollowingCount(userId,
+    window.friendlyPix.firebase.registerForFollowingCount(userId,
         (nbFollowed) => this.nbFollowing.text(nbFollowed));
 
     // Lod user's number of posts.
-    friendlyPix.firebase.registerForPostsCount(userId,
+    window.friendlyPix.firebase.registerForPostsCount(userId,
         (nbPosts) => this.nbPostsContainer.text(nbPosts));
 
     // Display user's posts.
-    friendlyPix.firebase.getUserFeedPosts(userId).then((data) => {
+    window.friendlyPix.firebase.getUserFeedPosts(userId).then((data) => {
       const postIds = Object.keys(data.entries);
       if (postIds.length === 0) {
         this.noPosts.show();
       }
-      friendlyPix.firebase.subscribeToUserFeed(userId,
+      window.friendlyPix.firebase.subscribeToUserFeed(userId,
         (postId, postValue) => {
           this.userInfoPageImageContainer.prepend(
               UserPage.createImageCard(postId,
@@ -329,7 +329,7 @@ export default class UserPage {
     });
 
     // Listen for posts deletions.
-    friendlyPix.firebase.registerForPostsDeletion((postId) =>
+    window.friendlyPix.firebase.registerForPostsDeletion((postId) =>
         $(`.fp-post-${postId}`, this.userPage).remove());
   }
 
@@ -337,7 +337,7 @@ export default class UserPage {
    * Displays the list of followed people.
    */
   displayFollowing() {
-    friendlyPix.firebase.getFollowingProfiles(this.userId).then((profiles) => {
+    window.friendlyPix.firebase.getFollowingProfiles(this.userId).then((profiles) => {
       // Clear previous following list.
       $('.fp-usernamelink', this.followingContainer).remove();
       // Display all following profile cards.
@@ -363,7 +363,7 @@ export default class UserPage {
     $('.is-active', this.userInfoPageImageContainer).removeClass('is-active');
 
     // Cancel all Firebase listeners.
-    friendlyPix.firebase.cancelAllSubscriptions();
+    window.friendlyPix.firebase.cancelAllSubscriptions();
 
     // Hides the "Load Next Page" button.
     this.nextPageButton.hide();
@@ -403,9 +403,9 @@ export default class UserPage {
     // Display the thumbnail.
     $('.mdl-card', element).css('background-image', `url("${thumbUrl.replace(/"/g, '\\"')}")`);
     // Start listening for comments and likes counts.
-    friendlyPix.firebase.registerForLikesCount(postId,
+    window.friendlyPix.firebase.registerForLikesCount(postId,
         (nbLikes) => $('.likes', element).text(nbLikes));
-    friendlyPix.firebase.registerForCommentsCount(postId,
+    window.friendlyPix.firebase.registerForCommentsCount(postId,
         (nbComments) => $('.comments', element).text(nbComments));
 
     return element;
