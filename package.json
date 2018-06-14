@@ -1,16 +1,21 @@
 {
   "scripts": {
-    "build": "npm run createfirebaseconf; npm install && webpack && echo 'Done. Ready to deploy.'",
-    "serve": "npm install && bower install && concurrently \"firebase serve\" \"babel -w public/scripts -s --retain-lines -d public/scripts-es5\"",
+    "clean": "rm -rf public/js public/css public/index.html src/firebase-config.json",
+    "build": "npm run clean; npm run createfirebaseconf && npm install && webpack -p && echo 'Done. Ready to deploy.'",
+    "serve": "npm run createfirebaseconf && webpack-dev-server --hot --inline",
     "createfirebaseconf": "firebase setup:web --json > ./src/firebase-config.json"
   },
   "devDependencies": {
+    "@webpack-cli/serve": "0.0.8",
+    "@webpack-cli/utils": "0.0.8",
     "ajv": "^5.5.2",
     "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-es2015": "^6.6.0",
+    "base64-inline-loader": "^1.1.1",
     "bower": "^1.8.2",
     "concurrently": "^3.5.1",
+    "css-hot-loader": "^1.3.9",
     "css-loader": "^0.28.11",
     "cssnano": "^3.10.0",
     "eslint": "^4.19.1",
@@ -18,6 +23,9 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "firebase-tools": "^3.18.0",
     "glob-all": "^3.1.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.0",
     "node-sass": "^4.9.0",
     "optimize-css-assets-webpack-plugin": "^4.0.2",
     "purify-css": "^1.2.5",
@@ -25,8 +33,10 @@
     "sass-loader": "^7.0.3",
     "string-replace-loader": "^2.1.1",
     "style-loader": "^0.21.0",
+    "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.4"
+    "webpack-cli": "^3.0.4",
+    "webpack-dev-server": "^3.1.4"
   },
   "private": true,
   "dependencies": {

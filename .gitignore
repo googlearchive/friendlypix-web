@@ -20,3 +20,8 @@ bundle.js
 styles.css
 styles.css.map
 src/firebase-config.json
+public/firebase-messaging-sw.js
+public/firebase-messaging-sw.js.map
+public/css
+public/js
+public/index.html
