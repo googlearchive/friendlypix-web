@@ -14,6 +14,13 @@
     "rewrites": [{
       "source": "**",
       "destination": "/index.html"
+    }],
+    "headers": [{
+      "source" : "**/*.@(png|js|css|woff2)",
+      "headers" : [ {
+        "key" : "Cache-Control",
+        "value" : "max-age=864000"
+      } ]
     }]
   }
 }
