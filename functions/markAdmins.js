@@ -24,20 +24,42 @@ try {
 /**
  * Mark the hardcoded list of users as admins.
  */
-exports.default = functions.database.ref('/admins/{index}').onCreate((snap) => {
-  const adminEmail = snap.val().email;
+exports.byEmail = functions.database.ref('/admins/{index}/email').onCreate((snap) => {
+  const adminEmail = snap.val();
   return admin.auth().getUserByEmail(adminEmail).then((user) => {
     return admin.auth().setCustomUserClaims(user.uid, {admin: true}).then(() => {
       console.log(`User ${adminEmail} successfully marked as an admin.`);
-      return snap.ref.update({email: user.email, uid: user.uid, status: 'OK', timestamp: admin.database.ServerValue.TIMESTAMP}).then(() => {
+      return snap.ref.parent.update({email: user.email || null, uid: user.uid, status: 'OK', timestamp: admin.database.ServerValue.TIMESTAMP}).then(() => {
         console.log(`Timestamp saved in database for ${adminEmail}.`);
         return null;
       });
     });
   }).catch((error) => {
     console.error(`There was an error marking user ${adminEmail} as an admin.`, error);
-    return snap.ref.update({error: error}).then(() => {
+    return snap.ref.parent.update({error: error}).then(() => {
       console.log(`Error message saved in database for ${adminEmail}.`);
+      return null;
+    });
+  });
+});
+
+/**
+ * Mark the hardcoded list of users as admins.
+ */
+exports.byId = functions.database.ref('/admins/{index}/uid').onCreate((snap) => {
+  const uid = snap.val();
+  return admin.auth().getUser(uid).then((user) => {
+    return admin.auth().setCustomUserClaims(user.uid, {admin: true}).then(() => {
+      console.log(`User ${uid} successfully marked as an admin.`);
+      return snap.ref.parent.update({email: user.email || null, uid: user.uid, status: 'OK', timestamp: admin.database.ServerValue.TIMESTAMP}).then(() => {
+        console.log(`Timestamp saved in database for ${uid}.`);
+        return null;
+      });
+    });
+  }).catch((error) => {
+    console.error(`There was an error marking user ${uid} as an admin.`, error);
+    return snap.ref.parent.update({error: error}).then(() => {
+      console.log(`Error message saved in database for ${uid}.`);
       return null;
     });
   });

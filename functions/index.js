@@ -69,8 +69,15 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendEmailOnPost
 /**
  * Mark some users as admins.
  */
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'markAdmins') {
-  exports.markAdmins = require('./markAdmins').default;
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'markAdminsByEmail') {
+  exports.markAdminsByEmail = require('./markAdmins').byEmail;
+}
+
+/**
+ * Mark some users as admins.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'markAdminsById') {
+  exports.markAdminsById = require('./markAdmins').byId;
 }
 
 /**
