@@ -55,7 +55,7 @@ module.exports = (env, argv) => {
       historyApiFallback: true, // true for index.html upon 404, object for multiple paths
       inline: true,
       port: 5000,
-      hot: true, // hot module replacement. Depends on HotModuleReplacementPlugin
+      hot: false, // hot module replacement. Depends on HotModuleReplacementPlugin
       https: false, // true for self-signed, object for cert authority
       noInfo: true, // only errors & warns on hot reload
     },
@@ -68,7 +68,6 @@ module.exports = (env, argv) => {
         {
           test: /\.(sa|sc|c)ss$/,
           use: [
-            devMode ? 'css-hot-loader' : 'style-loader',
             MiniCssExtractPlugin.loader,
             'css-loader',
             'sass-loader',
@@ -143,7 +142,7 @@ module.exports = (env, argv) => {
           blockJSRequests: false,
         },
       }),
-      devMode ? () => {} : new GenerateSW({
+      new GenerateSW({
         swDest: 'workbox-sw.js',
         importWorkboxFrom: 'local',
         importsDirectory: 'workbox',
