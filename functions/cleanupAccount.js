@@ -151,8 +151,12 @@ function deletePost(oldPosts) {
   const deleteFromDatabase = admin.database().ref().update(updateObj);
 
   if (picStorageUri) {
-    const picFileName = picStorageUri.split('appspot.com/')[1];
-    const thumbFileName = thumbStorageUri.split('appspot.com/')[1];
+    const picFileName = picStorageUri;
+    const thumbFileName = thumbStorageUri;
+    if (picStorageUr.startsWith('gs:/')) {
+      picFileName = picStorageUri.split('appspot.com/')[1];
+      thumbFileName = thumbStorageUri.split('appspot.com/')[1];
+    }
     const deletePicFromStorage = admin.storage().bucket().file(picFileName).delete();
     const deleteThumbFromStorage = admin.storage().bucket().file(thumbFileName).delete();
     return Promise.all([deleteFromDatabase, deletePicFromStorage, deleteThumbFromStorage]);
