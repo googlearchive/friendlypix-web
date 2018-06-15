@@ -89,6 +89,7 @@ export default class Auth {
       'signInFlow': signInFlow,
       'signInOptions': [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       ],
       'callbacks': {
         'uiShown': function() {
