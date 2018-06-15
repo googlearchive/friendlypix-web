@@ -35,6 +35,7 @@ module.exports = (env, argv) => {
     },
     output: {
       path: path.resolve(__dirname, 'public'),
+      publicPath: '/',
       filename: (entrypoint) => {
         if (entrypoint.chunk.name === 'app') {
           return 'js/bundle.[hash].js';
@@ -53,7 +54,7 @@ module.exports = (env, argv) => {
       compress: true, // enable gzip compression
       historyApiFallback: true, // true for index.html upon 404, object for multiple paths
       inline: true,
-      port: 8080,
+      port: 5000,
       hot: true, // hot module replacement. Depends on HotModuleReplacementPlugin
       https: false, // true for self-signed, object for cert authority
       noInfo: true, // only errors & warns on hot reload
@@ -62,16 +63,12 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.html$/,
-          use: [
-            {
-              loader: 'html-loader',
-            },
-          ],
+          use: 'html-loader',
         },
         {
           test: /\.(sa|sc|c)ss$/,
           use: [
-            'css-hot-loader',
+            devMode ? 'css-hot-loader' : 'style-loader',
             MiniCssExtractPlugin.loader,
             'css-loader',
             'sass-loader',
@@ -83,7 +80,9 @@ module.exports = (env, argv) => {
             {
               loader: 'file-loader',
               options: {
-                name: '/fonts/[name].[ext]',
+                name: '[name].[ext]',
+                publicPath: '/fonts',
+                outputPath: 'fonts',
               },
             },
           ],
@@ -107,9 +106,8 @@ module.exports = (env, argv) => {
           sourceMap: true,
         }),
         new OptimizeCssAssetsPlugin({
-          assetNameRegExp: /css\/styles\..*\.css$/g,
           cssProcessor: require('cssnano'),
-          cssProcessorOptions: {discardComments: {removeAll: true}},
+          cssProcessorOptions: {preset: 'default'},
           canPrint: true,
           sourceMap: true,
         }),
@@ -126,26 +124,26 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: 'src/index.html',
+        template: './src/index.html',
         chunks: ['app'],
       }),
       new MiniCssExtractPlugin({
         filename: 'css/styles.[hash].css',
       }),
-      new HtmlCriticalPlugin({
-        base: path.join(path.resolve(__dirname), 'public/'),
+      devMode ? () => {} : new HtmlCriticalPlugin({
+        base: path.resolve(__dirname, 'public'),
         src: 'index.html',
         dest: 'index.html',
         inline: true,
         minify: true,
-        extract: true,
-        width: 375,
-        height: 565,
+        extract: false,
+        width: 411,
+        height: 731,
         penthouse: {
           blockJSRequests: false,
         },
       }),
-      new GenerateSW({
+      devMode ? () => {} : new GenerateSW({
         swDest: 'workbox-sw.js',
         importWorkboxFrom: 'local',
         importsDirectory: 'workbox',
