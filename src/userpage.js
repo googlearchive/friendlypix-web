@@ -19,7 +19,7 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import page from 'page';
-import MaterialUtils from './utils';
+import MaterialUtils from './MaterialUtils';
 
 /**
  * Handles the User Profile UI.
@@ -29,7 +29,10 @@ export default class UserPage {
    * Initializes the user's profile UI.
    * @constructor
    */
-  constructor() {
+  constructor(firebaseHelper, messaging) {
+    this.firebaseHelper = firebaseHelper;
+    this.messaging = messaging;
+
     // Firebase SDK.
     this.auth = firebase.auth();
 
@@ -55,17 +58,6 @@ export default class UserPage {
     this.closeFollowingButton = $('.fp-close-following', this.userPage);
     this.userInfoPageImageContainer = $('.fp-image-container', this.userPage);
 
-    // DOM Elements for Privacy Consent Modal
-    this.privacyDialogButton = $('.privacy-dialog-link');
-    this.privacyDialog = $('#privacy-dialog');
-    this.privacyDialogSave = $('.privacy-save');
-    this.allowDataProcessing = $('#allow-data');
-    this.allowContent = $('#allow-content');
-    this.allowSocial = $('#allow-social');
-
-    this.uploadButton = $('button#add');
-    this.mobileUploadButton = $('button#add-floating');
-
     // Event bindings.
     this.followCheckbox.change(() => this.onFollowChange());
     this.blockCheckbox.change(() => this.onBlockChange());
@@ -76,93 +68,6 @@ export default class UserPage {
       this.followingContainer.hide();
       this.nbFollowingContainer.removeClass('is-active');
     });
-
-    // Event bindings for Privacy Consent Dialog
-    this.privacyDialogButton.click(() => this.showPrivacyDialog());
-    this.privacyDialogSave.click(() => this.savePrivacySettings());
-    this.allowDataProcessing.change(() => this.toggleSubmitStates());
-  }
-
-  /**
-   * Sets initial state of Privacy Dialog.
-   */
-  showPrivacyDialog() {
-    this.initializePrivacySettings();
-    // Prevent the escape key from dismissing the dialog
-    this.privacyDialog.keydown(function(e) {
-      if (e.keyCode == 27) return false;
-    });
-    this.privacyDialog.get(0).showModal();
-  }
-
-  /**
-   * Disable the submit button for the privacy settings until data privacy
-   * policy is agreed to.
-   */
-  toggleSubmitStates() {
-    if (this.allowDataProcessing.is(':checked')) {
-      this.privacyDialogSave.removeAttr('disabled');
-    } else {
-      this.privacyDialogSave.attr('disabled', true);
-    }
-  }
-
-  setUploadButtonState(enabled) {
-    if (enabled) {
-      this.uploadButton.removeAttr('disabled');
-      this.mobileUploadButton.removeAttr('disabled');
-    } else {
-      this.uploadButton.prop('disabled', true);
-      this.mobileUploadButton.prop('disabled', true);
-    }
-  }
-
-  /**
-   * Fetches previously saved privacy settings if they exist and
-   * enables the Submit button if user has consented to data processing.
-   */
-  initializePrivacySettings() {
-    const uid = firebase.auth().currentUser.uid;
-    if (this.savedPrivacySettings === undefined) {
-      friendlyPix.firebase.getPrivacySettings(uid).then((snapshot) => {
-        this.savedPrivacySettings = snapshot.val();
-        if (this.savedPrivacySettings) {
-          if (this.savedPrivacySettings.data_processing) {
-            this.allowDataProcessing.prop('checked', true);
-            this.privacyDialogSave.removeAttr('disabled');
-          }
-          if (this.savedPrivacySettings.content) {
-            this.allowContent.prop('checked', true);
-            this.uploadButton.removeAttr('disabled');
-            this.mobileUploadButton.removeAttr('disabled');
-          }
-          if (this.savedPrivacySettings.social) {
-            this.allowSocial.prop('checked', true);
-          }
-        }
-      });
-    }
-  }
-
-  /**
-   * Saves new privacy settings and closes the privacy dialog.
-   */
-  savePrivacySettings() {
-    // uid of signed in user
-    const uid = firebase.auth().currentUser.uid;
-    const settings = {
-      data_processing: this.allowDataProcessing.prop('checked'),
-      content: this.allowContent.prop('checked'),
-      social: this.allowSocial.prop('checked'),
-    };
-
-    window.friendlyPix.firebase.setPrivacySettings(uid, settings);
-    if (!settings.social) {
-      window.friendlyPix.firebase.removeFromSearch(uid);
-    }
-    this.privacyDialog.get(0).close();
-    window.friendlyPix.router.reloadPage();
-    this.setUploadButtonState(this.allowContent.prop('checked'));
   }
 
   /**
@@ -172,7 +77,7 @@ export default class UserPage {
     const checked = this.followCheckbox.prop('checked');
     this.followCheckbox.prop('disabled', true);
 
-    window.friendlyPix.firebase.toggleFollowUser(this.userId, checked);
+    this.firebaseHelper.toggleFollowUser(this.userId, checked);
   }
 
   /**
@@ -182,7 +87,7 @@ export default class UserPage {
     const checked = this.blockCheckbox.prop('checked');
     this.blockCheckbox.prop('disabled', true);
 
-    window.friendlyPix.firebase.toggleBlockUser(this.userId, checked);
+    this.firebaseHelper.toggleBlockUser(this.userId, checked);
   }
 
   /**
@@ -190,7 +95,7 @@ export default class UserPage {
    */
   trackFollowStatus() {
     if (this.auth.currentUser) {
-      window.friendlyPix.firebase.registerToFollowStatusUpdate(this.userId, (data) => {
+      this.firebaseHelper.registerToFollowStatusUpdate(this.userId, (data) => {
         this.followCheckbox.prop('checked', data.val() !== null);
         this.followCheckbox.prop('disabled', false);
         this.followLabel.text(data.val() ? 'Following' : 'Follow');
@@ -204,7 +109,7 @@ export default class UserPage {
    */
   trackBlockStatus() {
     if (this.auth.currentUser) {
-      window.friendlyPix.firebase.registerToBlockedStatusUpdate(this.userId, (data) => {
+      this.firebaseHelper.registerToBlockedStatusUpdate(this.userId, (data) => {
         this.blockCheckbox.prop('checked', data.val() !== null);
         this.blockCheckbox.prop('disabled', false);
         this.blockLabel.text(data.val() ? 'Blocked' : 'Block');
@@ -220,7 +125,7 @@ export default class UserPage {
     const postIds = Object.keys(posts);
     for (let i = postIds.length - 1; i >= 0; i--) {
       this.userInfoPageImageContainer.append(
-          UserPage.createImageCard(postIds[i],
+          this.createImageCard(postIds[i],
               posts[postIds[i]].thumb_url || posts[postIds[i]].url, posts[postIds[i]].text));
       this.noPosts.hide();
     }
@@ -262,12 +167,12 @@ export default class UserPage {
     if (this.auth.currentUser && userId === this.auth.currentUser.uid) {
       this.followContainer.hide();
       this.blockContainer.hide();
-      window.friendlyPix.messaging.enableNotificationsContainer.show();
-      window.friendlyPix.messaging.enableNotificationsCheckbox.prop('disabled', true);
-      MaterialUtils.refreshSwitchState(window.friendlyPix.messaging.enableNotificationsContainer);
-      window.friendlyPix.messaging.trackNotificationsEnabledStatus();
+      this.messaging.enableNotificationsContainer.show();
+      this.messaging.enableNotificationsCheckbox.prop('disabled', true);
+      MaterialUtils.refreshSwitchState(this.messaging.enableNotificationsContainer);
+      this.messaging.trackNotificationsEnabledStatus();
     } else {
-      window.friendlyPix.messaging.enableNotificationsContainer.hide();
+      this.messaging.enableNotificationsContainer.hide();
       this.followContainer.show();
       this.followCheckbox.prop('disabled', true);
       this.blockContainer.show();
@@ -280,7 +185,7 @@ export default class UserPage {
     }
 
     // Load user's profile.
-    window.friendlyPix.firebase.loadUserProfile(userId).then((snapshot) => {
+    this.firebaseHelper.loadUserProfile(userId).then((snapshot) => {
       const userInfo = snapshot.val();
       if (userInfo) {
         this.userAvatar.css('background-image',
@@ -298,27 +203,27 @@ export default class UserPage {
     });
 
     // Lod user's number of followers.
-    window.friendlyPix.firebase.registerForFollowersCount(userId,
+    this.firebaseHelper.registerForFollowersCount(userId,
         (nbFollowers) => this.nbFollowers.text(nbFollowers));
 
     // Lod user's number of followed users.
-    window.friendlyPix.firebase.registerForFollowingCount(userId,
+    this.firebaseHelper.registerForFollowingCount(userId,
         (nbFollowed) => this.nbFollowing.text(nbFollowed));
 
     // Lod user's number of posts.
-    window.friendlyPix.firebase.registerForPostsCount(userId,
+    this.firebaseHelper.registerForPostsCount(userId,
         (nbPosts) => this.nbPostsContainer.text(nbPosts));
 
     // Display user's posts.
-    window.friendlyPix.firebase.getUserFeedPosts(userId).then((data) => {
+    this.firebaseHelper.getUserFeedPosts(userId).then((data) => {
       const postIds = Object.keys(data.entries);
       if (postIds.length === 0) {
         this.noPosts.show();
       }
-      window.friendlyPix.firebase.subscribeToUserFeed(userId,
+      this.firebaseHelper.subscribeToUserFeed(userId,
         (postId, postValue) => {
           this.userInfoPageImageContainer.prepend(
-              UserPage.createImageCard(postId,
+              this.createImageCard(postId,
                   postValue.thumb_url || postValue.url, postValue.text));
           this.noPosts.hide();
         }, postIds[postIds.length - 1]);
@@ -329,7 +234,7 @@ export default class UserPage {
     });
 
     // Listen for posts deletions.
-    window.friendlyPix.firebase.registerForPostsDeletion((postId) =>
+    this.firebaseHelper.registerForPostsDeletion((postId) =>
         $(`.fp-post-${postId}`, this.userPage).remove());
   }
 
@@ -337,7 +242,7 @@ export default class UserPage {
    * Displays the list of followed people.
    */
   displayFollowing() {
-    window.friendlyPix.firebase.getFollowingProfiles(this.userId).then((profiles) => {
+    this.firebaseHelper.getFollowingProfiles(this.userId).then((profiles) => {
       // Clear previous following list.
       $('.fp-usernamelink', this.followingContainer).remove();
       // Display all following profile cards.
@@ -363,7 +268,7 @@ export default class UserPage {
     $('.is-active', this.userInfoPageImageContainer).removeClass('is-active');
 
     // Cancel all Firebase listeners.
-    window.friendlyPix.firebase.cancelAllSubscriptions();
+    this.firebaseHelper.cancelAllSubscriptions();
 
     // Hides the "Load Next Page" button.
     this.nextPageButton.hide();
@@ -385,7 +290,7 @@ export default class UserPage {
   /**
    * Returns an image Card element for the image with the given URL.
    */
-  static createImageCard(postId, thumbUrl, text) {
+  createImageCard(postId, thumbUrl, text) {
     const element = $(`
           <a class="fp-image mdl-cell mdl-cell--12-col mdl-cell--4-col-tablet
                     mdl-cell--4-col-desktop mdl-grid mdl-grid--no-spacing">
@@ -403,9 +308,9 @@ export default class UserPage {
     // Display the thumbnail.
     $('.mdl-card', element).css('background-image', `url("${thumbUrl.replace(/"/g, '\\"')}")`);
     // Start listening for comments and likes counts.
-    window.friendlyPix.firebase.registerForLikesCount(postId,
+    this.firebaseHelper.registerForLikesCount(postId,
         (nbLikes) => $('.likes', element).text(nbLikes));
-    window.friendlyPix.firebase.registerForCommentsCount(postId,
+    this.firebaseHelper.registerForCommentsCount(postId,
         (nbComments) => $('.comments', element).text(nbComments));
 
     return element;

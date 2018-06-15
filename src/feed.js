@@ -18,8 +18,8 @@
 import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import Post from './post';
-import MaterialUtils from './utils';
+import Post from './Post';
+import MaterialUtils from './MaterialUtils';
 
 /**
  * Handles the Home and Feed UI.
@@ -29,7 +29,9 @@ export default class Feed {
    * Initializes the Friendly Pix feeds.
    * @constructor
    */
-  constructor() {
+  constructor(firebaseHelper) {
+    this.firebaseHelper = firebaseHelper;
+
     // List of all posts on the page.
     this.posts = [];
     // Map of posts that can be displayed.
@@ -58,7 +60,7 @@ export default class Feed {
     for (let i = postIds.length - 1; i >= 0; i--) {
       this.noPostsMessage.hide();
       const postData = posts[postIds[i]];
-      const post = new Post(postIds[i]);
+      const post = new Post(this.firebaseHelper, postIds[i]);
       this.posts.push(post);
       const postElement = post.postElement;
       // If a post with similar ID is already in the feed we replace it instead of appending.
@@ -112,7 +114,7 @@ export default class Feed {
     for (let i = 0; i < postKeys.length; i++) {
       this.noPostsMessage.hide();
       const post = newPosts[postKeys[i]];
-      const postElement = new Post(postKeys[i]);
+      const postElement = new Post(this.firebaseHelper, postKeys[i]);
       this.posts.push(postElement);
       this.feedImageContainer.prepend(postElement.postElement);
       postElement.fillPostData(postKeys[i], post.thumb_url ||
@@ -128,10 +130,10 @@ export default class Feed {
     this.clear();
 
     // Load initial batch of posts.
-    window.friendlyPix.firebase.getPosts().then((data) => {
+    this.firebaseHelper.getPosts().then((data) => {
       // Listen for new posts.
       const latestPostId = Object.keys(data.entries)[Object.keys(data.entries).length - 1];
-      window.friendlyPix.firebase.subscribeToGeneralFeed(
+      this.firebaseHelper.subscribeToGeneralFeed(
           (postId, postValue) => this.addNewPost(postId, postValue), latestPostId);
 
       // Adds fetched posts and next page button if necessary.
@@ -140,7 +142,7 @@ export default class Feed {
     });
 
     // Listen for posts deletions.
-    window.friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
+    this.firebaseHelper.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
   }
 
   /**
@@ -152,16 +154,16 @@ export default class Feed {
 
     if (this.auth.currentUser) {
       // Make sure the home feed is updated with followed users's new posts.
-      window.friendlyPix.firebase.updateHomeFeeds().then(() => {
+      this.firebaseHelper.updateHomeFeeds().then(() => {
         // Load initial batch of posts.
-        window.friendlyPix.firebase.getHomeFeedPosts().then((data) => {
+        this.firebaseHelper.getHomeFeedPosts().then((data) => {
           const postIds = Object.keys(data.entries);
           if (postIds.length === 0) {
             this.noPostsMessage.fadeIn();
           }
           // Listen for new posts.
           const latestPostId = postIds[postIds.length - 1];
-          window.friendlyPix.firebase.subscribeToHomeFeed(
+          this.firebaseHelper.subscribeToHomeFeed(
               (postId, postValue) => {
                 this.addNewPost(postId, postValue);
               }, latestPostId);
@@ -172,10 +174,10 @@ export default class Feed {
         });
 
         // Add new posts from followers live.
-        window.friendlyPix.firebase.startHomeFeedLiveUpdaters();
+        this.firebaseHelper.startHomeFeedLiveUpdaters();
 
         // Listen for posts deletions.
-        window.friendlyPix.firebase.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
+        this.firebaseHelper.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
       });
     }
   }
@@ -231,7 +233,7 @@ export default class Feed {
     this.noPostsMessage.hide();
 
     // Remove Firebase listeners.
-    window.friendlyPix.firebase.cancelAllSubscriptions();
+    this.firebaseHelper.cancelAllSubscriptions();
 
     // Stops all timers if any.
     this.posts.forEach((post) => post.clear());

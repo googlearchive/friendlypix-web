@@ -40,7 +40,9 @@ export default class Search {
   /**
    * Initializes the Friendly Pix search bar.
    */
-  constructor() {
+  constructor(firebaseHelper) {
+    this.firebaseHelper = firebaseHelper;
+
     // DOM Elements pointers.
     this.searchField = $('#searchQuery');
     this.searchResults = $('#fp-searchResults');
@@ -57,7 +59,7 @@ export default class Search {
   displaySearchResults() {
     const searchString = this.searchField.val().toLowerCase().trim();
     if (searchString.length >= Search.MIN_CHARACTERS) {
-      window.friendlyPix.firebase.searchUsers(searchString, Search.NB_RESULTS_LIMIT).then(
+      this.firebaseHelper.searchUsers(searchString, Search.NB_RESULTS_LIMIT).then(
           (results) => {
             this.searchResults.empty();
             const peopleIds = Object.keys(results);

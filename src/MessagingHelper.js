@@ -19,7 +19,7 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/messaging';
-import MaterialUtils from './utils';
+import MaterialUtils from './MaterialUtils';
 import page from 'page';
 
 /**
@@ -30,7 +30,9 @@ export default class Messaging {
    * Inititializes the notifications utility.
    * @constructor
    */
-  constructor() {
+  constructor(firebaseHelper) {
+    this.firebaseHelper = firebaseHelper;
+
     // Firebase SDK
     this.auth = firebase.auth();
     this.messaging = firebase.messaging();
@@ -55,7 +57,7 @@ export default class Messaging {
   saveToken() {
     this.messaging.getToken().then((currentToken) => {
       if (currentToken) {
-        return window.friendlyPix.firebase.saveNotificationToken(currentToken).then(() => {
+        return this.firebaseHelper.saveNotificationToken(currentToken).then(() => {
           console.log('Notification Token saved to database');
         });
       } else {
@@ -106,7 +108,7 @@ export default class Messaging {
     const checked = this.enableNotificationsCheckbox.prop('checked');
     this.enableNotificationsCheckbox.prop('disabled', true);
 
-    return window.friendlyPix.firebase.toggleNotificationEnabled(checked);
+    return this.firebaseHelper.toggleNotificationEnabled(checked);
   }
 
   /**
@@ -114,7 +116,7 @@ export default class Messaging {
    */
   trackNotificationsEnabledStatus() {
     if (this.auth.currentUser) {
-      window.friendlyPix.firebase.registerToNotificationEnabledStatusUpdate((data) => {
+      this.firebaseHelper.registerToNotificationEnabledStatusUpdate((data) => {
         this.enableNotificationsCheckbox.prop('checked', data.val() !== null);
         this.enableNotificationsCheckbox.prop('disabled', false);
         this.enableNotificationsLabel.text(data.val() ? 'Notifications Enabled' : 'Enable Notifications');

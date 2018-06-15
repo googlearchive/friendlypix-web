@@ -24,7 +24,7 @@ import latinize from 'latinize';
 /**
  * Handles all Firebase interactions.
  */
-export default class Firebase {
+export default class FirebaseHelper {
   /**
    * Number of posts loaded initially and per page for the feeds.
    * @return {number}
@@ -91,7 +91,7 @@ export default class Firebase {
    */
   getComments(postId) {
     return this._getPaginatedFeed(`/comments/${postId}`,
-        Firebase.COMMENTS_PAGE_SIZE, null, false);
+        FirebaseHelper.COMMENTS_PAGE_SIZE, null, false);
   }
 
   /**
@@ -113,7 +113,7 @@ export default class Firebase {
    * `null` if there is no next page.
    */
   getPosts() {
-    return this._getPaginatedFeed('/posts/', Firebase.POSTS_PAGE_SIZE);
+    return this._getPaginatedFeed('/posts/', FirebaseHelper.POSTS_PAGE_SIZE);
   }
 
   /**
@@ -137,7 +137,7 @@ export default class Firebase {
    */
   getHomeFeedPosts() {
     return this._getPaginatedFeed(`/feed/${this.auth.currentUser.uid}`,
-        Firebase.POSTS_PAGE_SIZE, null, true);
+        FirebaseHelper.POSTS_PAGE_SIZE, null, true);
   }
 
   /**
@@ -161,7 +161,7 @@ export default class Firebase {
    */
   getUserFeedPosts(uid) {
     return this._getPaginatedFeed(`/people/${uid}/posts`,
-        Firebase.USER_PAGE_POSTS_PAGE_SIZE, null, true);
+        FirebaseHelper.USER_PAGE_POSTS_PAGE_SIZE, null, true);
   }
 
   /**
@@ -739,8 +739,15 @@ export default class Firebase {
     updateObj[`/feed/${this.auth.currentUser.uid}/${postId}`] = null;
     const deleteFromDatabase = this.database.ref().update(updateObj);
     if (picStorageUri) {
-      const deletePicFromStorage = this.storage.refFromURL(picStorageUri).delete();
-      const deleteThumbFromStorage = this.storage.refFromURL(thumbStorageUri).delete();
+      let deletePicFromStorage;
+      let deleteThumbFromStorage;
+      if (picStorageUri.startsWith('gs:/')) {
+        deletePicFromStorage = this.storage.refFromURL(picStorageUri).delete();
+        deleteThumbFromStorage = this.storage.refFromURL(thumbStorageUri).delete();
+      } else {
+        deletePicFromStorage = this.storage.ref(picStorageUri).delete();
+        deleteThumbFromStorage = this.storage.ref(thumbStorageUri).delete();
+      }
       return Promise.all([deleteFromDatabase, deletePicFromStorage, deleteThumbFromStorage]);
     }
     return deleteFromDatabase;

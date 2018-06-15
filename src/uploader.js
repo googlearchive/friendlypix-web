@@ -19,7 +19,7 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import page from 'page';
-import MaterialUtils from './utils';
+import MaterialUtils from './MaterialUtils';
 
 /**
  * Handles uploads of new pics.
@@ -49,11 +49,13 @@ export default class Uploader {
    * Inititializes the pics uploader/post creator.
    * @constructor
    */
-  constructor() {
+  constructor(firebaseHelper) {
+    this.firebaseHelper = firebaseHelper;
+
     // Firebase SDK
     this.auth = firebase.auth();
 
-    this.addPolyfills();
+    Uploader.addPolyfills();
 
     // DOM Elements
     this.addButton = $('#add');
@@ -75,7 +77,7 @@ export default class Uploader {
   }
 
   // Adds polyfills required for the Uploader.
-  addPolyfills() {
+  static addPolyfills() {
     // Polyfill for canvas.toBlob().
     if (!HTMLCanvasElement.prototype.toBlob) {
       Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
@@ -217,7 +219,7 @@ export default class Uploader {
 
     this.generateImages().then((pics) => {
       // Upload the File upload to Cloud Storage and create new post.
-      window.friendlyPix.firebase.uploadNewPic(pics.full, pics.thumb, this.currentFile.name, imageCaption)
+      this.firebaseHelper.uploadNewPic(pics.full, pics.thumb, this.currentFile.name, imageCaption)
           .then((postId) => {
             page(`/user/${this.auth.currentUser.uid}`);
             const data = {
@@ -247,7 +249,7 @@ export default class Uploader {
     this.currentFile = null;
 
     // Cancel all Firebase listeners.
-    window.friendlyPix.firebase.cancelAllSubscriptions();
+    this.firebaseHelper.cancelAllSubscriptions();
 
     // Clear previously displayed pic.
     this.newPictureContainer.attr('src', '');

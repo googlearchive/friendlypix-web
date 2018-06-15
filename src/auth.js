@@ -19,7 +19,8 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import firebaseui from 'firebaseui';
-import Router from './routing';
+import Router from './Router';
+import page from 'page';
 
 /**
  * Handles the user auth flows and updating the UI depending on the auth state.
@@ -38,7 +39,10 @@ export default class Auth {
    * Binds the auth related UI components and handles the auth flow.
    * @constructor
    */
-  constructor() {
+  constructor(firebaseHelper, privacySettings) {
+    this.firebaseHelper = firebaseHelper;
+    this.privacySettings = privacySettings;
+
     // Firebase SDK
     this.auth = firebase.auth();
     this._waitForAuthPromiseResolver = new $.Deferred();
@@ -133,11 +137,11 @@ export default class Auth {
             `url("${user.photoURL || '/images/silhouette.jpg'}")`);
         this.signedInUsername.text(user.displayName || 'Anonymous');
         this.usernameLink.attr('href', `/user/${user.uid}`);
-        window.friendlyPix.firebase.getPrivacySettings(user.uid).then((snapshot) => {
+        this.firebaseHelper.getPrivacySettings(user.uid).then((snapshot) => {
           const settings = snapshot.val();
           // display privacy modal if there are no privacy preferences
           if (!settings) {
-            window.friendlyPix.userPage.showPrivacyDialog();
+            this.privacySettings.showPrivacyDialog();
           } else {
             if (settings.content === true) {
               // enable upload buttons
@@ -146,7 +150,7 @@ export default class Auth {
             }
           }
         });
-        window.friendlyPix.firebase.updatePublicProfile();
+        this.firebaseHelper.updatePublicProfile();
       }
     });
   }
@@ -160,6 +164,7 @@ export default class Auth {
           'You need to have recently signed-in to delete your account.\n' +
             'Please sign-in and try again.');
         this.auth.signOut();
+        page('/');
       }
     });
   }
