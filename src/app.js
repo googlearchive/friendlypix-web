@@ -30,7 +30,6 @@ import UserPage from './userpage';
 import Router from './routing';
 import * as analytics from 'universal-ga';
 import 'material-design-lite';
-import 'dialog-polyfill';
 
 // Styling
 import 'material-design-icons/iconfont/material-icons.css';
