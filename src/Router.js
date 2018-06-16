@@ -29,7 +29,7 @@ export default class Router {
    * Initializes the Friendly Pix controller/router.
    * @constructor
    */
-  constructor(userPage, feed, post, auth) {
+  constructor(loadApp, auth) {
     this.auth = auth;
 
     // Dom elements.
@@ -44,11 +44,11 @@ export default class Router {
     // Configuring routes.
     const pipe = Router.pipe;
     const displayPage = this.displayPage.bind(this);
-    const loadUser = (userId) => userPage.loadUser(userId);
-    const showHomeFeed = () => feed.showHomeFeed();
-    const showGeneralFeed = () => feed.showGeneralFeed();
-    const clearFeed = () => feed.clear();
-    const showPost = (postId) => post.loadPost(postId);
+    const loadUser = (userId) => loadApp().then(({userPage}) => userPage.loadUser(userId));
+    const showHomeFeed = () => loadApp().then(({feed}) => feed.showHomeFeed());
+    const showGeneralFeed = () => loadApp().then(({feed}) => feed.showGeneralFeed());
+    const clearFeed = () => loadApp().then(({feed}) => feed.clear());
+    const showPost = (postId) => loadApp().then(({post}) => post.loadPost(postId));
 
     page('/', pipe(showHomeFeed, null, true), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
     page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
@@ -79,7 +79,7 @@ export default class Router {
     }
 
     if (onlyAuthed) {
-      // If the pge can only be displayed if the user is authenticated then we wait or the auth state.
+      // If the page can only be displayed if the user is authenticated then we wait or the auth state.
       this.auth.waitForAuth.then(() => {
         this._displayPage(attributes, context);
       });

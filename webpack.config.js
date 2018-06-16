@@ -30,12 +30,13 @@ module.exports = (env, argv) => {
 
   return {
     entry: {
-      app: './src/app.js',
+      app: './src/app-start.js',
       sw: './src/firebase-messaging-sw.js',
     },
     output: {
       path: path.resolve(__dirname, 'public'),
       publicPath: '/',
+      chunkFilename: 'js/chunk.[id].[hash].js',
       filename: (entrypoint) => {
         if (entrypoint.chunk.name === 'app') {
           return 'js/bundle.[hash].js';
@@ -47,7 +48,7 @@ module.exports = (env, argv) => {
     devtool: devMode ? 'cheap-module-source-map' : 'source-map',
     context: __dirname,
     target: 'web',
-    stats: 'errors-only', // lets you precisely control what bundle information gets displayed
+    stats: 'normal', // lets you precisely control what bundle information gets displayed
     devServer: {
       contentBase: path.join(__dirname, 'public'), // boolean | string | array, static file location
       filename: /js\/bundle\..*\.js$/,

@@ -39,10 +39,7 @@ export default class Auth {
    * Binds the auth related UI components and handles the auth flow.
    * @constructor
    */
-  constructor(firebaseHelper, privacySettings) {
-    this.firebaseHelper = firebaseHelper;
-    this.privacySettings = privacySettings;
-
+  constructor() {
     // Firebase SDK
     this.auth = firebase.auth();
     this._waitForAuthPromiseResolver = new $.Deferred();
@@ -121,38 +118,22 @@ export default class Auth {
     Router.reloadPage();
 
     this._waitForAuthPromiseResolver.resolve();
-    $(document).ready(() => {
-      document.body.classList.remove('fp-auth-state-unknown');
-      if (!user) {
-        this.userId = null;
-        this.signedInUserAvatar.css('background-image', '');
-        this.firebaseUi.start('#firebaseui-auth-container', this.uiConfig);
-        document.body.classList.remove('fp-signed-in');
-        document.body.classList.add('fp-signed-out');
-      } else {
-        document.body.classList.remove('fp-signed-out');
-        document.body.classList.add('fp-signed-in');
-        this.userId = user.uid;
-        this.signedInUserAvatar.css('background-image',
-            `url("${user.photoURL || '/images/silhouette.jpg'}")`);
-        this.signedInUsername.text(user.displayName || 'Anonymous');
-        this.usernameLink.attr('href', `/user/${user.uid}`);
-        this.firebaseHelper.getPrivacySettings(user.uid).then((snapshot) => {
-          const settings = snapshot.val();
-          // display privacy modal if there are no privacy preferences
-          if (!settings) {
-            this.privacySettings.showPrivacyDialog();
-          } else {
-            if (settings.content === true) {
-              // enable upload buttons
-              this.uploadButton.prop('disabled', false);
-              this.mobileUploadButton.prop('disabled', false);
-            }
-          }
-        });
-        this.firebaseHelper.updatePublicProfile();
-      }
-    });
+    document.body.classList.remove('fp-auth-state-unknown');
+    if (!user) {
+      this.userId = null;
+      this.signedInUserAvatar.css('background-image', '');
+      this.firebaseUi.start('#firebaseui-auth-container', this.uiConfig);
+      document.body.classList.remove('fp-signed-in');
+      document.body.classList.add('fp-signed-out');
+    } else {
+      document.body.classList.remove('fp-signed-out');
+      document.body.classList.add('fp-signed-in');
+      this.userId = user.uid;
+      this.signedInUserAvatar.css('background-image',
+          `url("${user.photoURL || '/images/silhouette.jpg'}")`);
+      this.signedInUsername.text(user.displayName || 'Anonymous');
+      this.usernameLink.attr('href', `/user/${user.uid}`);
+    }
   }
 
   deleteAccount() {

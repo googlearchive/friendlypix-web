@@ -15,60 +15,23 @@
  */
 'use strict';
 
-import $ from 'jquery';
-import firebase from 'firebase/app';
-import firebaseConfig from './firebase-config.json';
-import Auth from './Auth';
-import Feed from './Feed';
-import IpFilter from './IpFilter';
 import MessagingHelper from './MessagingHelper';
+import AuthData from './AuthData';
+import Feed from './Feed';
 import Post from './Post';
 import Search from './Search';
 import Uploader from './Uploader';
 import FirebaseHelper from './FirebaseHelper';
 import PrivacySettings from './PrivacySettings';
 import UserPage from './UserPage';
-import Router from './Router';
-import * as analytics from 'universal-ga';
-import 'material-design-lite';
 
-// Styling
-import 'material-design-icons/iconfont/material-icons.css';
-import 'typeface-roboto/index.css';
-import 'typeface-amaranth/index.css';
-import 'material-design-lite/material.min.css';
-import 'firebaseui/dist/firebaseui.css';
-import './app.css';
-
-// Configure Firebase.
-firebase.initializeApp(firebaseConfig.result);
-
-// Starts the IP Filter.
-IpFilter.filterEuContries();
-
-// Load the app.
-$(document).ready(() => {
-  const firebaseHelper = new FirebaseHelper();
-  const privacySettings = new PrivacySettings(firebaseHelper);
-  const auth = new Auth(firebaseHelper, privacySettings);
-  const post = new Post(firebaseHelper);
-  const messagingHelper = new MessagingHelper(firebaseHelper);
-  new Uploader(firebaseHelper);
-  new Search(firebaseHelper);
-  const userPage = new UserPage(firebaseHelper, messagingHelper);
-  const feed = new Feed(firebaseHelper);
-
-  // Starts the router.
-  window.fpRouter = new Router(userPage, feed, post, auth);
-});
-
-// Register the Service Worker that enables offline.
-if ('serviceWorker' in navigator) {
-  // Use the window load event to keep the page load performant
-  $(window).on('load', () => {
-    window.navigator.serviceWorker.register('/workbox-sw.js');
-  });
-}
-
-// Initializae Google Analytics.
-analytics.initialize('UA-25993200-10');
+// Load the core of the app.
+const firebaseHelper = new FirebaseHelper();
+const privacySettings = new PrivacySettings(firebaseHelper);
+const messagingHelper = new MessagingHelper(firebaseHelper);
+export const post = new Post(firebaseHelper);
+export const userPage = new UserPage(firebaseHelper, messagingHelper);
+export const feed = new Feed(firebaseHelper);
+new AuthData(firebaseHelper, privacySettings);
+new Uploader(firebaseHelper);
+new Search(firebaseHelper);
