@@ -17,10 +17,17 @@
     }],
     "headers": [{
       "source" : "**/*.@(png|js|css|woff2)",
-      "headers" : [ {
+      "headers" : [{
         "key" : "Cache-Control",
         "value" : "max-age=864000"
-      } ]
+      }]
+    },
+    {
+      "source" : "workbox-sw.js",
+      "headers" : [{
+        "key" : "Cache-Control",
+        "value" : "max-age=0"
+      }]
     }]
   }
 }
