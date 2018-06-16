@@ -1,4 +1,5 @@
 {
+  "parser": "babel-eslint",
   "extends": "google",
   "env": {
     "browser": true
@@ -8,6 +9,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "strict": 0,
     "camelcase": 0,
     "default-case": 0,
     "max-len": 0,
