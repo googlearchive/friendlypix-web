@@ -141,8 +141,7 @@ export default class Auth {
       window.alert('Account deleted');
     }).catch((error) => {
       if (error.code === 'auth/requires-recent-login') {
-        window.alert(
-          'You need to have recently signed-in to delete your account.\n' +
+        window.alert('You need to have recently signed-in to delete your account.\n' +
             'Please sign-in and try again.');
         this.auth.signOut();
         page('/');
