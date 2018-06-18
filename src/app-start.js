@@ -21,7 +21,6 @@ import firebaseConfig from './firebase-config.json';
 import Auth from './Auth';
 import IpFilter from './IpFilter';
 import Router from './Router';
-import * as analytics from 'universal-ga';
 import 'material-design-lite';
 
 // Styling
@@ -55,5 +54,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Initializae Google Analytics.
-analytics.initialize('UA-25993200-10');
+// Initialize Google Analytics.
+import(/* webpackPrefetch: true */ 'universal-ga').then((analytics) => {
+  analytics.initialize('UA-25993200-10');
+  analytics.pageview('/');
+});
