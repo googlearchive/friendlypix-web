@@ -40,7 +40,7 @@ IpFilter.filterEuContries();
 // Load the app.
 $(document).ready(() => {
   // Now we'll load the rest of the app which is split to speed up initial load.
-  const loadApp = () => import(/* webpackPreload: true */ './app');
+  const loadApp = () => import(/* webpackPrefetch: true */ './app');
   const auth = new Auth();
   // Starts the router.
   window.fpRouter = new Router(loadApp, auth);
