@@ -19,7 +19,7 @@
       "source" : "**/*.@(png|js|css|woff2)",
       "headers" : [{
         "key" : "Cache-Control",
-        "value" : "max-age=864000"
+        "value" : "max-age=31536000"
       }]
     },
     {
