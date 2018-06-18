@@ -256,7 +256,7 @@ export default class Post {
 
     // Creates the initial comment with the post's text.
     $('.fp-first-comment', post).empty();
-    $('.fp-first-comment', post).append(this.createComment(author, imageText));
+    $('.fp-first-comment', post).append(this.createComment(author, imageText, postId));
 
     // Load first page of comments and listen to new comments.
     this.firebaseHelper.getComments(postId).then((data) => {
@@ -462,7 +462,7 @@ export default class Post {
         <div class="fp-post mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet
                     mdl-cell--8-col-desktop mdl-grid mdl-grid--no-spacing">
           <div class="mdl-card mdl-shadow--2dp mdl-cell
-                        mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop">
+                      mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop">
             <div class="fp-header">
               <a class="fp-usernamelink mdl-button mdl-js-button" href="/user/">
                 <div class="fp-avatar"></div>
@@ -470,10 +470,10 @@ export default class Post {
               </a>
               <a href="/post/" class="fp-time">now</a>
               <!-- Drop Down Menu -->
-              <button class="fp-signed-in-only mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="fp-post-menu-${postId}">
+              <button class="fp-signed-in-only mdl-button mdl-js-button mdl-button--icon" id="fp-post-menu-${postId}">
                 <i class="material-icons">more_vert</i>
               </button>
-              <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="fp-post-menu-${postId}">
+              <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-menu--bottom-right" for="fp-post-menu-${postId}">
                 <li class="mdl-menu__item fp-report-post"><i class="material-icons">report</i> Report</li>
                 <li class="mdl-menu__item fp-delete-post"><i class="material-icons">delete</i> Delete post</li>
               </ul>
@@ -503,17 +503,17 @@ export default class Post {
    * Returns the HTML for a post's comment.
    */
   createComment(author = {}, text, postId, commentId, isOwner = false) {
-    commentId = MaterialUtils.escapeHtml(commentId);
+    const escapedId = MaterialUtils.escapeHtml(commentId || postId);
     try {
       const element = $(`
-        <div id="comment-${commentId ? commentId : postId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
+        <div id="comment-${escapedId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
           <span class="fp-text">${$('<div>').text(text).html()}</span>
           <!-- Drop Down Menu -->
-          <button class="fp-edit-delete-comment-container fp-signed-in-only mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="fp-comment-menu-${commentId}">
+          <button class="fp-edit-delete-comment-container fp-signed-in-only mdl-button mdl-js-button mdl-button--icon" id="fp-comment-menu-${escapedId}">
             <i class="material-icons">more_vert</i>
           </button>
-          <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="fp-comment-menu-${commentId}">
+          <ul class="fp-menu-list mdl-menu mdl-js-menu mdl-menu--top-right" for="fp-comment-menu-${escapedId}">
             <li class="mdl-menu__item fp-report-comment"><i class="material-icons">report</i> Report</li>
             <li class="mdl-menu__item fp-edit-comment"><i class="material-icons">mode_edit</i> Edit</li>
             <li class="mdl-menu__item fp-delete-comment"><i class="material-icons">delete</i> Delete comment</li>
