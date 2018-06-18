@@ -35,7 +35,7 @@ import './app.css';
 firebase.initializeApp(firebaseConfig.result);
 
 // Starts the IP Filter.
-IpFilter.filterEuContries();
+IpFilter.filterEuCountries();
 
 // Load the app.
 $(document).ready(() => {

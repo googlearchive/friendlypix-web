@@ -36,7 +36,7 @@ export default class IpFilter {
   /**
    * Starts the Filter.
    */
-  static filterEuContries() {
+  static filterEuCountries() {
     // Bypass the IP filter if the special has fragment is used.
     if (window.location.hash === '#noipfilter') {
       $('.fp-non-eu').removeClass('fp-non-eu');
