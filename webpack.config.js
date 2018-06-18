@@ -102,6 +102,15 @@ module.exports = (env, argv) => {
             replace: '',
           },
         },
+        {
+          test: /material\-icons\.css$/,
+          loader: 'string-replace-loader',
+          include: path.resolve('node_modules/material-design-icons/iconfont/'),
+          query: {
+            search: '@font-face {',
+            replace: '@font-face {font-display: fallback;',
+          },
+        },
       ],
     },
     optimization: {
