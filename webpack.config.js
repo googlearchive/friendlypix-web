@@ -88,6 +88,12 @@ module.exports = (env, argv) => {
           ],
         },
         {
+          test: /\.(jpe?g|png|svg)$/,
+          use: {
+            loader: 'base64-inline-loader',
+          },
+        },
+        {
           test: /firebaseui\.css$/,
           loader: 'string-replace-loader',
           include: path.resolve('node_modules/firebaseui/dist/'),
