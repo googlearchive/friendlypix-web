@@ -23,7 +23,7 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlCriticalPlugin = require('html-critical-webpack-plugin');
-const {GenerateSW} = require('workbox-webpack-plugin');
+const {InjectManifest} = require('workbox-webpack-plugin');
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
@@ -143,8 +143,8 @@ module.exports = (env, argv) => {
           blockJSRequests: false,
         },
       }),
-      new GenerateSW({
-        swDest: 'workbox-sw.js',
+      new InjectManifest({
+        swSrc: 'src/workbox-sw.js',
         importWorkboxFrom: 'local',
         importsDirectory: 'workbox',
       }),
