@@ -594,7 +594,7 @@ a {
 }
 .fp-post .fp-time {
   float: right;
-  color: #888;
+  color: #444;
   margin-top: 8px;
   font-size: 14px;
   margin-right: 5px;
@@ -663,7 +663,7 @@ a {
 .fp-post .fp-comments .fp-author,
 .fp-post .fp-first-comment .fp-author {
   text-decoration: none;
-  color: #0288D1;
+  color: #0070a7;
   font-weight: normal;
   padding: 3px 10px 3px 6px;
   margin: 0 -10px 0 -6px;
