@@ -92,7 +92,7 @@
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
 
   <!-- Header section containing logo and menu -->
-  <header class="fp-header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
+  <header class="fp-header mdl-layout__header mdl-color-text--white mdl-color--light-blue-800">
     <div class="mdl-layout__header-row fp-titlebar">
 
       <!-- Logo -->
@@ -140,11 +140,12 @@
     </div>
 
     <!-- Navigation Bar -->
-    <div class="fp-tab mdl-layout__header-row mdl-cell--hide-phone mdl-color--light-blue-600">
+    <div class="fp-tab mdl-layout__header-row mdl-cell--hide-phone mdl-color--light-blue-700">
       <div class="mdl-tab">
         <a href="/" id="fp-menu-home" class="mdl-layout__tab fp-signed-in-only is-active mdl-button mdl-js-button"><i class="material-icons">home</i> Home</a>
         <a href="/feed" id="fp-menu-feed" class="mdl-layout__tab mdl-button mdl-js-button"><i class="material-icons">trending_up</i> Feed</a>
         <input id="fp-mediacapture" type="file" accept="image/*" capture="camera">
+        <label id="fp-mediacapture-label" for="fp-mediacapture">Upload an image</label>
         <button class="fp-signed-in-only mdl-button mdl-js-button mdl-button--fab mdl-cell--hide-tablet mdl-color--amber-400 mdl-shadow--4dp" id="add" disabled>
           <i class="material-icons">file_upload</i>
         </button>

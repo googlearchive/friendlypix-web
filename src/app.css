@@ -238,6 +238,19 @@ a {
   transform: scale(0.0001);
   opacity: 0;
 }
+#fp-mediacapture-label {
+  transform: scale(0.0001);
+  opacity: 0;
+}
+.mdl-button.mdl-layout__tab {
+  color: hsla(0,0%,100%,.8);
+}
+.mdl-color--light-blue-700 {
+  background-color: #0079D0!important;
+}
+.mdl-color--light-blue-800 {
+  background-color: #0070ae!important;
+}
 
 /* Drawer */
 
