@@ -25,7 +25,6 @@ import 'material-design-lite';
 
 // Styling
 import 'material-design-icons/iconfont/material-icons.css';
-import 'typeface-roboto/index.css';
 import 'typeface-amaranth/index.css';
 import 'material-design-lite/material.min.css';
 import 'firebaseui/dist/firebaseui.css';
