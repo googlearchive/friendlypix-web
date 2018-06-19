@@ -32,6 +32,7 @@ import './app.css';
 
 // Configure Firebase.
 firebase.initializeApp(firebaseConfig.result);
+window.firebase = firebase;
 
 // Starts the IP Filter.
 IpFilter.filterEuCountries();
