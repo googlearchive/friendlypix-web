@@ -53,7 +53,6 @@ export default class Router {
     page('/', pipe(showHomeFeed, null, true), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
     page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
     page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
-    page('/post/:postId/admin', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post', admin: true}));
     page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
     page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
     page('/terms', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'terms'}));
@@ -71,12 +70,6 @@ export default class Router {
    */
   displayPage(attributes, context) {
     const onlyAuthed = attributes.onlyAuthed;
-    const admin = attributes.admin;
-    if (admin) {
-      Router.enableAdminMode();
-    } else {
-      Router.disableAdminMode();
-    }
 
     if (onlyAuthed) {
       // If the page can only be displayed if the user is authenticated then we wait or the auth state.
@@ -119,20 +112,6 @@ export default class Router {
       path = '/';
     }
     page(path);
-  }
-
-  /**
-   * Turn the UI into admin mode.
-   */
-  static enableAdminMode() {
-    document.body.classList.add('fp-admin');
-  }
-
-  /**
-   * Switch off admin mode in the UI.
-   */
-  static disableAdminMode() {
-    document.body.classList.remove('fp-admin');
   }
 
   /**

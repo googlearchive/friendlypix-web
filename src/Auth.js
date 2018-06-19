@@ -125,7 +125,9 @@ export default class Auth {
       this.firebaseUi.start('#firebaseui-auth-container', this.uiConfig);
       document.body.classList.remove('fp-signed-in');
       document.body.classList.add('fp-signed-out');
+      Auth.disableAdminMode();
     } else {
+      this.toggleAdminMode();
       document.body.classList.remove('fp-signed-out');
       document.body.classList.add('fp-signed-in');
       this.userId = user.uid;
@@ -134,6 +136,34 @@ export default class Auth {
       this.signedInUsername.text(user.displayName || 'Anonymous');
       this.usernameLink.attr('href', `/user/${user.uid}`);
     }
+  }
+
+  toggleAdminMode() {
+    this.auth.currentUser.getIdToken().then((idToken) => {
+      const isAdmin = JSON.parse(window.atob(idToken.split('.')[1])).admin;
+      if (isAdmin) {
+        Auth.enableAdminMode();
+      } else {
+        Auth.disableAdminMode();
+      }
+    }).catch((e) => {
+      console.error('Error while checking for Admin priviledges', e);
+      Auth.disableAdminMode();
+    });
+  }
+
+  /**
+   * Turn the UI into admin mode.
+   */
+  static enableAdminMode() {
+    document.body.classList.add('fp-admin');
+  }
+
+  /**
+   * Switch off admin mode in the UI.
+   */
+  static disableAdminMode() {
+    document.body.classList.remove('fp-admin');
   }
 
   deleteAccount() {

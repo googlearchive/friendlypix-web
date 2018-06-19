@@ -41,7 +41,7 @@ function sendEmail(snap, context) {
   const uid = context.params.uid;
 
   const userURL = 'https://friendly-pix.com/user/' + uid;
-  const webURL = `https://friendly-pix.com/post/${postId}/admin`;
+  const webURL = `https://friendly-pix.com/post/${postId}`;
   const postConsoleURL = `https://console.firebase.google.com/project/${projectID}/database/${projectID}/data/posts/${postId}`;
   const commentConsoleUrl = `https://console.firebase.google.com/project/${projectID}/database/${projectID}/data/comments/${postId}/${commentId}`;
   const ref = commentId ? `/comments/${postId}/${commentId}` : `/posts/${postId}`;
@@ -56,7 +56,7 @@ function sendEmail(snap, context) {
       text: 'Please Enable HTML Email viewing.',
       html: `Hey FriendlyPix Team,<br><br>
 
-           The user <a href="${userURL}">${user.displayName} (${user.email})</a>
+           The user <a href="${userURL}">${user.displayName} ${user.email ? `(${user.email})` : ''}</a>
            has flagged a ${commentId ? 'comment' : 'post'} on FriendlyPix.
            Make sure to review it asap:<br><br>
            
