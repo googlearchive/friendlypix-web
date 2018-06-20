@@ -19,7 +19,7 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import page from 'page';
-import MaterialUtils from './MaterialUtils';
+import {MaterialUtils, Utils} from './Utils';
 
 /**
  * Handles the User Profile UI.
@@ -189,7 +189,7 @@ export default class UserPage {
       const userInfo = snapshot.val();
       if (userInfo) {
         this.userAvatar.css('background-image',
-            `url("${userInfo.profile_picture || '/images/silhouette.jpg'}")`);
+            `url("${Utils.addSizeToGoogleProfilePic(userInfo.profile_picture) || '/images/silhouette.jpg'}")`);
         this.userUsername.text(userInfo.full_name || 'Anonymous');
         this.userInfoContainer.show();
       } else {
@@ -320,10 +320,10 @@ export default class UserPage {
    * Returns an image Card element for the image with the given URL.
    */
   static createProfileCardHtml(uid, profilePic = '/images/silhouette.jpg', fullName = 'Anonymous') {
-    fullName = MaterialUtils.escapeHtml(fullName);
+    fullName = Utils.escapeHtml(fullName);
     return `
         <a class="fp-usernamelink mdl-button mdl-js-button" href="/user/${uid}">
-            <div class="fp-avatar" style="background-image: url('${profilePic}')"></div>
+            <div class="fp-avatar" style="background-image: url('${Utils.addSizeToGoogleProfilePic(profilePic)}')"></div>
             <div class="fp-username mdl-color-text--black">${fullName}</div>
         </a>`;
   }

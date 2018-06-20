@@ -18,7 +18,7 @@
 import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import MaterialUtils from './MaterialUtils';
+import {MaterialUtils, Utils} from './Utils';
 import swal from 'sweetalert';
 import page from 'page';
 
@@ -160,7 +160,7 @@ export default class Post {
     // Fills element's author profile.
     $('.fp-usernamelink', post).attr('href', `/user/${author.uid}`);
     $('.fp-avatar', post).css('background-image',
-        `url(${author.profile_picture || '/images/silhouette.jpg'})`);
+        `url(${Utils.addSizeToGoogleProfilePic(author.profile_picture) || '/images/silhouette.jpg'})`);
     $('.fp-username', post).text(author.full_name || 'Anonymous');
 
     // Shows the pic's thumbnail.
@@ -503,7 +503,7 @@ export default class Post {
    * Returns the HTML for a post's comment.
    */
   createComment(author = {}, text, postId, commentId, isOwner = false) {
-    const escapedId = MaterialUtils.escapeHtml(commentId || postId);
+    const escapedId = Utils.escapeHtml(commentId || postId);
     try {
       const element = $(`
         <div id="comment-${escapedId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">

@@ -19,7 +19,7 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/messaging';
-import MaterialUtils from './MaterialUtils';
+import {MaterialUtils} from './Utils';
 import page from 'page';
 
 /**

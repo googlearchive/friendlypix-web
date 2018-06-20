@@ -18,8 +18,8 @@
 import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
+import {MaterialUtils} from './Utils';
 import Post from './Post';
-import MaterialUtils from './MaterialUtils';
 
 /**
  * Handles the Home and Feed UI.

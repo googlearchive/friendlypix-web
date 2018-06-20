@@ -19,7 +19,7 @@ import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import page from 'page';
-import MaterialUtils from './MaterialUtils';
+import {MaterialUtils} from './Utils';
 
 /**
  * Handles uploads of new pics.

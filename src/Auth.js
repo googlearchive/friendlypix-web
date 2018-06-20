@@ -21,6 +21,7 @@ import 'firebase/auth';
 import firebaseui from 'firebaseui';
 import Router from './Router';
 import page from 'page';
+import {Utils} from './Utils';
 
 /**
  * Handles the user auth flows and updating the UI depending on the auth state.
@@ -132,7 +133,7 @@ export default class Auth {
       document.body.classList.add('fp-signed-in');
       this.userId = user.uid;
       this.signedInUserAvatar.css('background-image',
-          `url("${user.photoURL || '/images/silhouette.jpg'}")`);
+          `url("${Utils.addSizeToGoogleProfilePic(user.photoURL) || '/images/silhouette.jpg'}")`);
       this.signedInUsername.text(user.displayName || 'Anonymous');
       this.usernameLink.attr('href', `/user/${user.uid}`);
     }

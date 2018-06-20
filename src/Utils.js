@@ -20,7 +20,7 @@ import $ from 'jquery';
 /**
  * Set of utilities to handle Material Design Lite elements.
  */
-export default class MaterialUtils {
+export class MaterialUtils {
   /**
    * Refreshes the UI state of the given Material Design Checkbox / Switch element.
    */
@@ -100,6 +100,19 @@ export default class MaterialUtils {
     const mdlLayoutElement = $('.mdl-layout');
     mdlLayoutElement.unbind('scroll');
   }
+};
+
+export class Utils {
+  /**
+   * Adds a size URL query parameter to the Google profile pic URL.
+   */
+  static addSizeToGoogleProfilePic(url) {
+    console.log(url.indexOf('googleusercontent.com') !== -1, url.indexOf('?') === -1);
+    if (url.indexOf('googleusercontent.com') !== -1 && url.indexOf('?') === -1) {
+      return url + '?sz=150';
+    }
+    return url;
+  }
 
   /**
    * Escapes HTML characters from String.
@@ -111,4 +124,4 @@ export default class MaterialUtils {
     return unsafe.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
-};
+}
