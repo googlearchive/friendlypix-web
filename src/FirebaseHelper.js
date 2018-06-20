@@ -292,7 +292,7 @@ export default class FirebaseHelper {
   updateHomeFeeds() {
     // Make sure we listen on each followed people's posts.
     const followingRef = this.database.ref(`/people/${this.auth.currentUser.uid}/following`);
-    return followingRef.once('value', (followingData) => {
+    return followingRef.once('value').then((followingData) => {
       // Start listening the followed user's posts to populate the home feed.
       const following = followingData.val();
       if (!following) {
@@ -428,7 +428,6 @@ export default class FirebaseHelper {
   removeFromSearch(uid) {
     this.database.ref(`people/${uid}/_search_index`).remove();
   }
-
 
   /**
    * Subscribe to receive updates on a user's post like status.
