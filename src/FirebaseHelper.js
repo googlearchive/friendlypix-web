@@ -304,7 +304,7 @@ export default class FirebaseHelper {
         if (lastSyncedPostId instanceof String) {
           followedUserPostsRef = followedUserPostsRef.orderByKey().startAt(lastSyncedPostId);
         }
-        return followedUserPostsRef.once('value', (postData) => {
+        return followedUserPostsRef.once('value').then((postData) => {
           const updates = {};
           if (!postData.val()) {
             return;
