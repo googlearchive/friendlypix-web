@@ -107,7 +107,6 @@ export class Utils {
    * Adds a size URL query parameter to the Google profile pic URL.
    */
   static addSizeToGoogleProfilePic(url) {
-    console.log(url.indexOf('googleusercontent.com') !== -1, url.indexOf('?') === -1);
     if (url.indexOf('googleusercontent.com') !== -1 && url.indexOf('?') === -1) {
       return url + '?sz=150';
     }
