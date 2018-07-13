@@ -91,13 +91,14 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
           });
 
       // Send notifications to all tokens.
-      const notificationPromise = admin.messaging().sendToDevice(tokens, payload).then(removeBadTokens);
+      const notificationPromise = admin.messaging().sendToDevice(tokens, payload).then(
+          (response) => removeBadTokens(response, tokens));
 
       return Promise.all([notificationPromise, setNotificationsSentTask]);
     });
 
 // Given a response object from the FCM API, remove all invalid tokens.
-async function removeBadTokens(response) {
+async function removeBadTokens(response, tokens) {
   // For each message check if there was an error.
   const tokensToRemove = {};
   response.results.forEach((result, index) => {
@@ -116,7 +117,7 @@ async function removeBadTokens(response) {
   // If there are tokens to cleanup.
   const nbTokensToCleanup = Object.keys(tokensToRemove).length;
   if (nbTokensToCleanup > 0) {
-    await admin.database().ref('/').update(tokensToRemove);
+    await admin.database().ref().update(tokensToRemove);
     console.log(`Removed ${nbTokensToCleanup} unregistered tokens.`);
   }
   console.log(`Successfully sent ${tokens.length - nbTokensToCleanup} notifications.`);
