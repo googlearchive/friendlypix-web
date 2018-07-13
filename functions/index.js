@@ -88,13 +88,6 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeAdmins') 
 }
 
 /**
- * Update all public profiles upon call.
- */
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateAllProfiles') {
-  exports.updateAllProfiles = require('./publicProfiles').updateAllProfiles;
-}
-
-/**
  * Cleanup all old accounts.
  */
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'deleteInactiveAccounts') {
