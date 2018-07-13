@@ -29,7 +29,7 @@ try {
 /**
  * When a user is deleted we delete all its personal data.
  */
-exports.cleanupAccount = functions.auth.user().onDelete((user) => {
+exports.cleanupAccount = functions.runWith({memory: '2GB'}).auth.user().onDelete((user) => {
   const deletedUid = user.uid;
 
   // Gather all path containing user data to delete.
@@ -170,7 +170,7 @@ function deletePost(oldPosts) {
  * The request needs to be authorized by passing a 'key' query parameter in the URL. This key must
  * match a key set as an environment variable using `firebase functions:config:set cron.key="YOUR_KEY"`.
  */
-exports.deleteInactiveAccounts = functions.https.onRequest(async (req, res) => {
+exports.deleteInactiveAccounts = functions.runWith({memory: '2GB'}).https.onRequest(async (req, res) => {
   const key = req.query.key;
 
   // Exit if the keys don't match.
