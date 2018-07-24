@@ -21,7 +21,6 @@ try {
   admin.initializeApp();
 } catch (e) {}
 const mkdirp = require('mkdirp-promise');
-const gcs = require('@google-cloud/storage')();
 const Vision = require('@google-cloud/vision');
 const vision = new Vision();
 const spawn = require('child-process-promise').spawn;
@@ -33,66 +32,60 @@ const fs = require('fs');
  * When an image is uploaded we check if it is flagged as Adult or Violence by the Cloud Vision
  * API and if it is we blur it using ImageMagick.
  */
-exports.default = functions.storage.object().onFinalize((object) => {
+exports.default = functions.runWith({memory: '2GB'}).storage.object().onFinalize(async (object) => {
   const image = {
     source: {imageUri: `gs://${object.bucket}/${object.name}`},
   };
 
   // Check the image content using the Cloud Vision API.
-  return vision.safeSearchDetection(image).then((batchAnnotateImagesResponse) => {
-    console.log('SafeSearch results on image', batchAnnotateImagesResponse);
-    const safeSearchResult = batchAnnotateImagesResponse[0].safeSearchAnnotation;
-    const Likelihood = Vision.types.Likelihood;
+  const batchAnnotateImagesResponse = await vision.safeSearchDetection(image);
+  console.log('SafeSearch results on image', batchAnnotateImagesResponse);
+  const safeSearchResult = batchAnnotateImagesResponse[0].safeSearchAnnotation;
+  const Likelihood = Vision.types.Likelihood;
 
-    if (Likelihood[safeSearchResult.adult] >= Likelihood.LIKELY ||
-        Likelihood[safeSearchResult.violence] >= Likelihood.LIKELY) {
-      return blurImage(object.name, object.bucket, object.metadata).then(() => {
-        const filePathSplit = object.name.split(path.sep);
-        const uid = filePathSplit[0];
-        const size = filePathSplit[1]; // 'thumb' or 'full'
-        const postId = filePathSplit[2];
+  if (Likelihood[safeSearchResult.adult] >= Likelihood.LIKELY ||
+      Likelihood[safeSearchResult.violence] >= Likelihood.LIKELY) {
+    await blurImage(object.name, object.bucket, object.metadata);
+    const filePathSplit = object.name.split(path.sep);
+    const uid = filePathSplit[0];
+    const size = filePathSplit[1]; // 'thumb' or 'full'
+    const postId = filePathSplit[2];
 
-        return refreshImages(uid, postId, size);
-      });
-    }
-    console.log('The image', object.name, 'has been detected as OK.');
-  });
+    return refreshImages(uid, postId, size);
+  }
+  console.log('The image', object.name, 'has been detected as OK.');
 });
 
 /**
  * Blurs the given image located in the given bucket using ImageMagick.
  */
-function blurImage(filePath, bucketName, metadata) {
+async function blurImage(filePath, bucketName, metadata) {
   const tempLocalFile = path.join(os.tmpdir(), filePath);
   const tempLocalDir = path.dirname(tempLocalFile);
-  const bucket = gcs.bucket(bucketName);
+  const bucket = admin.storage().bucket(bucketName);
 
   // Create the temp directory where the storage file will be downloaded.
-  return mkdirp(tempLocalDir).then(() => {
-    // Download file from bucket.
-    return bucket.file(filePath).download({destination: tempLocalFile});
-  }).then(() => {
-    console.log('The file has been downloaded to', tempLocalFile);
-    // Blur the image using ImageMagick.
-    return spawn('convert', [tempLocalFile, '-channel', 'RGBA', '-blur', '0x18', tempLocalFile]);
-  }).then(() => {
-    console.log('Blurred image created at', tempLocalFile);
-    // Uploading the Blurred image.
-    return bucket.upload(tempLocalFile, {
-      destination: filePath,
-      metadata: {metadata: metadata}, // Keeping custom metadata.
-    });
-  }).then(() => {
-    console.log('Blurred image uploaded to Storage at', filePath);
-    fs.unlinkSync(tempLocalFile);
-    console.log('Deleted local file', tempLocalFile);
+  await mkdirp(tempLocalDir);
+  // Download file from bucket.
+  await bucket.file(filePath).download({destination: tempLocalFile});
+  console.log('The file has been downloaded to', tempLocalFile);
+  // Blur the image using ImageMagick.
+  await spawn('convert', [tempLocalFile, '-channel', 'RGBA', '-blur', '0x18', tempLocalFile]);
+  console.log('Blurred image created at', tempLocalFile);
+  // Uploading the Blurred image.
+  await bucket.upload(tempLocalFile, {
+    destination: filePath,
+    metadata: {metadata: metadata}, // Keeping custom metadata.
   });
+  console.log('Blurred image uploaded to Storage at', filePath);
+  fs.unlinkSync(tempLocalFile);
+  console.log('Deleted local file', tempLocalFile);
 }
 
 /**
  * Changes the image URL slightly (add a `&blurred` query parameter) to force a refresh.
  */
-function refreshImages(uid, postId, size) {
+async function refreshImages(uid, postId, size) {
   let app;
   try {
     // Create a Firebase app that will honor security rules for a specific user.
@@ -111,14 +104,15 @@ function refreshImages(uid, postId, size) {
 
   const deleteApp = () => app.delete().catch(() => null);
 
-  const imageUrlRef = app.database().ref(`/posts/${postId}/${size}_url`);
-  return imageUrlRef.once('value').then((snap) => {
+  try {
+    const imageUrlRef = app.database().ref(`/posts/${postId}/${size}_url`);
+    const snap = await imageUrlRef.once('value');
     const picUrl = snap.val();
-    return imageUrlRef.set(`${picUrl}&blurred`).then(() => {
-      console.log('Blurred image URL updated.');
-      return deleteApp().then(() => null);
-    });
-  }).catch((err) => {
-    return deleteApp().then(() => Promise.reject(err));
-  });
+    await imageUrlRef.set(`${picUrl}&blurred`);
+    console.log('Blurred image URL updated.');
+    await deleteApp();
+  } catch (err) {
+    await deleteApp();
+    throw err;
+  }
 }

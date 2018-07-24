@@ -25,26 +25,28 @@ try {
  * Triggers when a user gets a new follower and sends notifications if the user has enabled them.
  * Also avoids sending multiple notifications for the same user by keeping a timestamp of sent notifications.
  */
-exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}').onWrite((change, context) => {
-  const followerUid = context.params.followerUid;
-  const followedUid = context.params.followedUid;
-  // If un-follow we exit the function.
-  if (!change.after.val()) {
-    return console.log('User ', followerUid, 'un-followed user', followedUid);
-  }
-  const followedUserRef = admin.database().ref(`people/${followedUid}`);
-  console.log('We have a new follower UID:', followerUid, 'for user:', followerUid);
+exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}').onWrite(
+    async (change, context) => {
+      const followerUid = context.params.followerUid;
+      const followedUid = context.params.followedUid;
+      // If un-follow we exit the function.
+      if (!change.after.val()) {
+        return console.log('User ', followerUid, 'un-followed user', followedUid);
+      }
+      const followedUserRef = admin.database().ref(`people/${followedUid}`);
+      console.log('We have a new follower UID:', followerUid, 'for user:', followerUid);
 
-  // Check if the user has notifications enabled.
-  return followedUserRef.child('/notificationEnabled').once('value').then((enabledSnap) => {
-    const notificationsEnabled = enabledSnap.val();
-    if (!notificationsEnabled) {
-      return console.log('The user has not enabled notifications.');
-    }
-    console.log('User has notifications enabled.');
+      // Check if the user has notifications enabled.
+      const enabledSnap = await followedUserRef.child('/notificationEnabled').once('value');
+      const notificationsEnabled = enabledSnap.val();
+      if (!notificationsEnabled) {
+        console.log('The user has not enabled notifications.');
+        return;
+      }
+      console.log('User has notifications enabled.');
 
-    // Check if we already sent that notification.
-    return followedUserRef.child(`/notificationsSent/${followerUid}`).once('value').then((snap) => {
+      // Check if we already sent that notification.
+      const snap = followedUserRef.child(`/notificationsSent/${followerUid}`).once('value');
       if (snap.val()) {
         return console.log('Already sent a notification to', followedUid, 'for this follower.');
       }
@@ -56,67 +58,67 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
       // Get the follower profile.
       const getFollowerProfilePromise = admin.auth().getUser(followerUid);
 
-      return Promise.all([getNotificationTokensPromise, getFollowerProfilePromise]).then((results) => {
-        const tokensSnapshot = results[0];
-        const follower = results[1];
+      const results = await Promise.all([getNotificationTokensPromise, getFollowerProfilePromise]);
+      const tokensSnapshot = results[0];
+      const follower = results[1];
 
-        // Check if there are any device tokens.
-        if (!tokensSnapshot.hasChildren()) {
-          return console.log('There are no notification tokens to send to.');
-        }
-        console.log('There are', tokensSnapshot.numChildren(), 'tokens to send notifications to.');
-        console.log('Fetched follower profile', follower);
-        const displayName = follower.displayName;
-        const profilePic = follower.photoURL;
+      // Check if there are any device tokens.
+      if (!tokensSnapshot.hasChildren()) {
+        return console.log('There are no notification tokens to send to.');
+      }
+      console.log('There are', tokensSnapshot.numChildren(), 'tokens to send notifications to.');
+      console.log('Fetched follower profile', follower);
+      const displayName = follower.displayName;
+      const profilePic = follower.photoURL;
 
-        // Notification details.
-        const payload = {
-          notification: {
-            title: 'You have a new follower!',
-            body: `${displayName} is now following you.`,
-            icon: profilePic || '/images/silhouette.jpg',
-            click_action: `https://friendly-pix.com/user/${followerUid}`,
-          },
-        };
+      // Notification details.
+      const payload = {
+        notification: {
+          title: 'You have a new follower!',
+          body: `${displayName} is now following you.`,
+          icon: profilePic || '/images/silhouette.jpg',
+          click_action: `https://friendly-pix.com/user/${followerUid}`,
+        },
+      };
 
-        // Listing all device tokens of the user to notify.
-        const tokens = Object.keys(tokensSnapshot.val());
+      // Listing all device tokens of the user to notify.
+      const tokens = Object.keys(tokensSnapshot.val());
 
-        // Saves the flag that this notification has been sent.
-        const setNotificationsSentTask = followedUserRef.child(`/notificationsSent/${followerUid}`)
+      // Saves the flag that this notification has been sent.
+      const setNotificationsSentTask = followedUserRef.child(`/notificationsSent/${followerUid}`)
           .set(admin.database.ServerValue.TIMESTAMP).then(() => {
             console.log('Marked notification as sent.');
           });
 
-        // Send notifications to all tokens.
-        const notificationPromise = admin.messaging().sendToDevice(tokens, payload).then((response) => {
-          // For each message check if there was an error.
-          const tokensToRemove = {};
-          response.results.forEach((result, index) => {
-            const error = result.error;
-            if (error) {
-              // Cleanup the tokens who are not registered anymore.
-              if (error.code === 'messaging/invalid-registration-token' ||
-                  error.code === 'messaging/registration-token-not-registered') {
-                console.log('The following token is not registered anymore', tokens[index]);
-                tokensToRemove[`/people/${followedUid}/notificationTokens/${tokens[index]}`] = null;
-              } else {
-                console.error('Failure sending notification to', tokens[index], error);
-              }
-            }
-          });
-          // If there are tokens to cleanup.
-          const nbTokensToCleanup = Object.keys(tokensToRemove).length;
-          if (nbTokensToCleanup > 0) {
-            return admin.database().ref('/').update(tokensToRemove).then(() => {
-              console.log(`Removed ${nbTokensToCleanup} unregistered tokens.`);
-            });
-          }
-          console.log(`Successfully sent ${tokens.length - nbTokensToCleanup} notifications.`);
-        });
+      // Send notifications to all tokens.
+      const notificationPromise = admin.messaging().sendToDevice(tokens, payload).then(
+          (response) => removeBadTokens(response, tokens));
 
-        return Promise.all([notificationPromise, setNotificationsSentTask]);
-      });
+      return Promise.all([notificationPromise, setNotificationsSentTask]);
     });
+
+// Given a response object from the FCM API, remove all invalid tokens.
+async function removeBadTokens(response, tokens) {
+  // For each message check if there was an error.
+  const tokensToRemove = {};
+  response.results.forEach((result, index) => {
+    const error = result.error;
+    if (error) {
+      // Cleanup the tokens who are not registered anymore.
+      if (error.code === 'messaging/invalid-registration-token' ||
+          error.code === 'messaging/registration-token-not-registered') {
+        console.log('The following token is not registered anymore', tokens[index]);
+        tokensToRemove[`/people/${followedUid}/notificationTokens/${tokens[index]}`] = null;
+      } else {
+        console.error('Failure sending notification to', tokens[index], error);
+      }
+    }
   });
-});
+  // If there are tokens to cleanup.
+  const nbTokensToCleanup = Object.keys(tokensToRemove).length;
+  if (nbTokensToCleanup > 0) {
+    await admin.database().ref().update(tokensToRemove);
+    console.log(`Removed ${nbTokensToCleanup} unregistered tokens.`);
+  }
+  console.log(`Successfully sent ${tokens.length - nbTokensToCleanup} notifications.`);
+}
