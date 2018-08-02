@@ -68,7 +68,7 @@ exports.byId = functions.database.ref('/admins/{index}/uid').onCreate(async (sna
 /**
  * Mark the hardcoded list of users as admins.
  */
-exports.removeAdmins = functions.database.ref('/admins/{index}').onDelete((snap) => {
+exports.removeAdmins = functions.database.ref('/admins/{index}').onDelete(async (snap) => {
   const adminEmail = snap.val().email;
   try {
     const user = await admin.auth().getUserByEmail(adminEmail);
