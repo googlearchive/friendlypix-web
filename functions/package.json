@@ -3,7 +3,7 @@
   "description": "Server-side micro services for FriendlyPix. Offensive Image blurring and New follower Notifications.",
   "dependencies": {
     "@google-cloud/vision": "^0.12.0",
-    "bad-words": "^1.3.1",
+    "bad-words": "^1.6.2",
     "capitalize-sentence": "^0.1.2",
     "child-process-promise": "^2.2.0",
     "es6-promise-pool": "^2.5.0",
