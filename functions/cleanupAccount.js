@@ -182,11 +182,10 @@ exports.deleteInactiveAccounts = functions.runWith({memory: '2GB', timeoutSecond
     return null;
   }
 
-  let nbAccounts = 0;
   // Fetch all user details.
   const inactiveUsers = await getInactiveUsers();
-  console.log('Number of inactive users to delete:', inactiveUsers.length);
-  nbAccounts = inactiveUsers.length;
+  const nbAccounts = inactiveUsers.length;
+  console.log('Number of inactive users to delete:', nbAccounts);
 
   // Use a pool so that we delete maximum `MAX_CONCURRENT` users in parallel.
   const promisePool = new PromisePool(() => deleteInactiveUser(inactiveUsers), MAX_CONCURRENT);
@@ -198,16 +197,17 @@ exports.deleteInactiveAccounts = functions.runWith({memory: '2GB', timeoutSecond
 /**
  * Deletes one inactive user from the list.
  */
-async function deleteInactiveUser(inactiveUsers) {
+function deleteInactiveUser(inactiveUsers) {
   if (inactiveUsers.length > 0) {
     const userToDelete = inactiveUsers.pop();
 
-    try {
-      await admin.auth().deleteUser(userToDelete.uid);
-      console.log('Deleted user account', userToDelete.uid, 'because of inactivity');
-    } catch(error) {
-      console.error('Deletion of inactive user account', userToDelete.uid, 'failed:', error);
-    }
+      return admin.auth().deleteUser(userToDelete.uid).then(() => {
+        console.log('Deleted user account', userToDelete.uid, 'because of inactivity');
+      }).catch((error) => {
+        console.error('Deletion of inactive user account', userToDelete.uid, 'failed:', error);
+      });
+  } else {
+    return null;
   }
 }
 
