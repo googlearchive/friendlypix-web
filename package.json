@@ -19,7 +19,7 @@
     "cssnano": "^4.0.0-rc.2",
     "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
-    "firebase-tools": "^4.1.1",
+    "firebase-tools": "^4.1.2",
     "glob-all": "^3.1.0",
     "html-critical-webpack-plugin": "^2.0.0",
     "html-loader": "^0.5.5",
