@@ -23,6 +23,21 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendFollowerNot
   exports.sendFollowerNotification = require('./sendFollowerNotification').default;
 }
 
+
+/**
+ * Triggers when a new post is added, it will add search indexes if the post's descrition contains hashtags.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addHashtagsIndex') {
+  exports.addHashtagsIndex = require('./hashtagsIndexer').addHashtagsIndex;
+}
+
+/**
+ * Triggers when a post is deleted, it will remove search indexes if the post's descrition contained hashtags.
+ */
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeHashtagsIndex') {
+  exports.removeHashtagsIndex = require('./hashtagsIndexer').removeHashtagsIndex;
+}
+
 /**
  * When an image is uploaded we check if it is flagged as Adult or Violence by the Cloud Vision
  * API and if it is we blur it using ImageMagick.
