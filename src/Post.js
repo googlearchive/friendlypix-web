@@ -504,11 +504,17 @@ export default class Post {
    */
   createComment(author = {}, text, postId, commentId, isOwner = false) {
     const escapedId = Utils.escapeHtml(commentId || postId);
+    const hashtags = Utils.getHashtags(text);
+    let textHtml = $('<div>').text(text).html();
+    hashtags.forEach((hashtag) => {
+      textHtml = textHtml.replace(new RegExp(`#${hashtag.replace(/\-/g, '\\-')}`,'i'), `<a href="/search/${hashtag}">#${hashtag}</a>`);
+    });
+
     try {
       const element = $(`
         <div id="comment-${escapedId}" class="fp-comment${isOwner ? ' fp-comment-owned' : ''}">
           <a class="fp-author" href="/user/${author.uid}">${$('<div>').text(author.full_name || 'Anonymous').html()}</a>:
-          <span class="fp-text">${$('<div>').text(text).html()}</span>
+          <span class="fp-text">${textHtml}</span>
           <!-- Drop Down Menu -->
           <button class="fp-edit-delete-comment-container fp-signed-in-only mdl-button mdl-js-button mdl-button--icon" id="fp-comment-menu-${escapedId}">
             <i class="material-icons">more_vert</i>

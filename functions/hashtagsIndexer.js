@@ -28,12 +28,7 @@ exports.addHashtagsIndex = functions.database.ref('/posts/{postId}/text').onCrea
   const postText = snap.val();
 
   // Find all hashtags in the post's text.
-  const hashtags = [];
-  postText.split(' ').forEach((word) => {
-    if (word.startsWith('#')) {
-      hashtags.push(word.substring(1).toLowerCase());
-    }
-  });
+  const hashtags = getHashtags(postText);
 
   if (hashtags.length > 0) {
     // Adds the post to all the hashtags indexes.
@@ -53,12 +48,7 @@ exports.removeHashtagsIndex = functions.database.ref('/posts/{postId}/text').onD
   const postText = snap.val();
 
   // Find all hashtags in the post's text.
-  const hashtags = [];
-  postText.split(' ').forEach((word) => {
-    if (word.startsWith('#')) {
-      hashtags.push(word.substring(1).toLowerCase());
-    }
-  });
+  const hashtags = getHashtags(postText);
 
   if (hashtags.length > 0) {
     // Adds the post to all the hashtags indexes.
@@ -70,3 +60,14 @@ exports.removeHashtagsIndex = functions.database.ref('/posts/{postId}/text').onD
     return admin.database().ref().update(updates);
   }
 });
+
+// Returns an array of all the hashtags in the given string.
+function getHashtags(text) {
+  const hashtags = [];
+  text.replace(/#/g, ' #').split(/[^a-z0-9#_-]+/i).forEach((word) => {
+    if (word.startsWith('#')) {
+      hashtags.push(word.substring(1).toLowerCase());
+    }
+  });
+  return hashtags; 
+}

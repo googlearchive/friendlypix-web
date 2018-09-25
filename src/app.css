@@ -584,6 +584,9 @@ a {
   margin-left: auto;
   margin-right: auto;
 }
+.fp-post a {
+  font-weight: 200;
+}
 .fp-post .mdl-card {
   height: 100%;
   top: 0;

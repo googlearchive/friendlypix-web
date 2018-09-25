@@ -123,4 +123,15 @@ export class Utils {
     return unsafe.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
+
+  // Returns an array of all the hashtags in the given string.
+  static getHashtags(text) {
+    const hashtags = [];
+    text.replace(/#/g, ' #').split(/[^a-z0-9#_-]+/i).forEach((word) => {
+      if (word.startsWith('#')) {
+        hashtags.push(word.substring(1).toLowerCase());
+      }
+    });
+    return hashtags; 
+  }
 }
