@@ -33,8 +33,16 @@ export default class Search {
    * The maximum number of search results to be displayed.
    * @return {number}
    */
-  static get NB_RESULTS_LIMIT() {
+  static get NB_PEOPLE_RESULTS_LIMIT() {
     return 10;
+  }
+
+  /**
+   * The maximum number of search results to be displayed.
+   * @return {number}
+   */
+  static get NB_HASHTAGS_RESULTS_LIMIT() {
+    return 5;
   }
 
   /**
@@ -59,21 +67,38 @@ export default class Search {
   displaySearchResults() {
     const searchString = this.searchField.val().toLowerCase().trim();
     if (searchString.length >= Search.MIN_CHARACTERS) {
-      this.firebaseHelper.searchUsers(searchString, Search.NB_RESULTS_LIMIT).then(
+      const promises = [
+          this.firebaseHelper.searchUsers(searchString, Search.NB_PEOPLE_RESULTS_LIMIT),
+          this.firebaseHelper.searchHashtags(searchString, Search.NB_HASHTAGS_RESULTS_LIMIT)];
+      // Search for People and hashtags.
+      Promise.all(promises).then(
           (results) => {
+            const peopleResults = results[0];
+            const hashtagsResults = results[1];
             this.searchResults.empty();
-            const peopleIds = Object.keys(results);
-            if (peopleIds.length > 0) {
+            const peopleIds = Object.keys(peopleResults);
+            const hashtags = Object.keys(hashtagsResults);
+            if (peopleIds.length + hashtags.length > 0) {
               this.searchResults.fadeIn();
               $('html').click(() => {
                 $('html').unbind('click');
                 this.searchResults.fadeOut();
               });
-              peopleIds.forEach((peopleId) => {
-                const profile = results[peopleId];
-                this.searchResults.append(
-                    Search.createSearchResultHtml(peopleId, profile));
-              });
+              // Display people.
+              if (peopleIds.length > 0) {
+                peopleIds.forEach((peopleId) => {
+                  const profile = peopleResults[peopleId];
+                  this.searchResults.append(
+                      Search.createPersonSearchResultHtml(peopleId, profile));
+                });
+              }
+              // Display hashtags.
+              if (hashtags.length > 0) {
+                hashtags.forEach((hashtag) => {
+                  this.searchResults.append(
+                      Search.createHashtagSearchResultHtml(hashtag, Object.keys(hashtagsResults[hashtag]).length));
+                });
+              }
             } else {
               this.searchResults.fadeOut();
             }
@@ -85,14 +110,25 @@ export default class Search {
   }
 
   /**
-   * Returns the HTML for a single search result
+   * Returns the HTML for a single search result for a person.
    */
-  static createSearchResultHtml(peopleId, peopleProfile) {
+  static createPersonSearchResultHtml(peopleId, peopleProfile) {
     return `
-        <a class="fp-searchResultItem fp-usernamelink mdl-button mdl-js-button" href="/user/${peopleId}">
+        <a class="fp-searchResultItem fp-usernamelink fp-hashtagresult mdl-button mdl-js-button" href="/user/${peopleId}">
             <div class="fp-avatar"style="background-image: url(${peopleProfile.profile_picture ||
                 '/images/silhouette.jpg'})"></div>
             <div class="fp-username mdl-color-text--black">${peopleProfile.full_name}</div>
+        </a>`;
+  }
+
+  /**
+   * Returns the HTML for a single search result for a hashtag.
+   */
+  static createHashtagSearchResultHtml(hashtag, nbPosts) {
+    return `
+        <a class="fp-searchResultItem fp-usernamelink mdl-button mdl-js-button" href="/search/${hashtag}">
+            <div class="fp-avatar"style="background-image: url('/images/hashtag.png')"></div>
+            <div class="fp-username mdl-color-text--black">#${hashtag} - <i>${nbPosts} posts</i></div>
         </a>`;
   }
 };

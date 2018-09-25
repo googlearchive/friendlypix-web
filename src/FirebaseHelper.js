@@ -355,6 +355,30 @@ export default class FirebaseHelper {
   }
 
   /**
+   * Returns the hashtags which name match the given search query as a Promise.
+   */
+  searchHashtags(searchString, maxResults) {
+    searchString = latinize(searchString).toLowerCase();
+    return this.database.ref('/hashtags').orderByKey().startAt(searchString)
+        .limitToFirst(maxResults).once('value').then((result) => {
+          const hashtagsData = {};
+          // construct people from the two search queries results.
+          result.forEach((data) => {
+            hashtagsData[data.key] = data.val();
+          });
+
+          // Remove results that do not start with the search query.
+          const hashtags = Object.keys(hashtagsData);
+          hashtags.forEach((hashtag) => {
+            if (!hashtag.startsWith(searchString)) {
+              delete hashtagsData[hashtag];
+            }
+          });
+          return hashtagsData;
+        });
+      }
+
+  /**
    * Returns the users which name match the given search query as a Promise.
    */
   searchUsers(searchString, maxResults) {
@@ -375,8 +399,8 @@ export default class FirebaseHelper {
       // Remove results that do not start with the search query.
       const userIds = Object.keys(people);
       userIds.forEach((userId) => {
-        const name = people[userId]._search_index.full_name;
-        const reversedName = people[userId]._search_index.reversed_full_name;
+        const name = latinize(people[userId]._search_index.full_name).toLowerCase();
+        const reversedName = latinize(people[userId]._search_index.reversed_full_name).toLowerCase();
         if (!name.startsWith(searchString) && !reversedName.startsWith(searchString)) {
           delete people[userId];
         }
