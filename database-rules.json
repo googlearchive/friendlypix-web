@@ -98,6 +98,11 @@
         }
       }
     },
+    // Hashtag index.
+    "hashtags": {
+      ".read": true,
+      ".write": false
+    },
     // List of post's likes.
     "likes": {
       ".read": true,
