@@ -697,7 +697,8 @@ a {
   border-radius: 4px;
   color: black;
 }
-.fp-post .fp-comments .fp-text {
+.fp-post .fp-comments .fp-text,
+.fp-post .fp-first-comment .fp-text {
   margin-left: 5px;
   color: #444;
   transition: all 0.2s;
