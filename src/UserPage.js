@@ -54,7 +54,7 @@ export default class UserPage {
     this.nbFollowing = $('.fp-user-nbfollowing', this.userPage);
     this.nbFollowingContainer = $('.fp-user-nbfollowing-container', this.userPage);
     this.followingContainer = $('.fp-user-following', this.userPage);
-    this.nextPageButton = $('.fp-next-page-button button');
+    this.nextPageButton = $('.fp-next-page-button button', this.userPage);
     this.closeFollowingButton = $('.fp-close-following', this.userPage);
     this.userInfoPageImageContainer = $('.fp-image-container', this.userPage);
 

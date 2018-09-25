@@ -382,11 +382,13 @@ a {
   flex-direction: column;
   text-align: left;
 }
-#page-user-info .fp-image .likes {
+#page-user-info .fp-image .likes,
+#page-search .fp-image .likes {
   margin-left: 3px;
   margin-right: 20px;
 }
-#page-user-info .fp-image .comments {
+#page-user-info .fp-image .comments,
+#page-search .fp-image .comments {
   margin-left: 3px;
 }
 #page-user-info .fp-user-detail-container {
@@ -494,15 +496,18 @@ a {
 
 /* User Info photo cards */
 
-#page-user-info .fp-image {
+#page-user-info .fp-image,
+#page-search .fp-image {
   position: relative;
   cursor: pointer;
 }
-#page-user-info .fp-image img {
+#page-user-info .fp-image img,
+#page-search .fp-image img {
   height: 100%;
   width: 100%;
 }
 #page-user-info .fp-overlay,
+#page-search .fp-overlay,
 #page-add .fp-overlay {
   opacity: 0;
   background-color: black;
@@ -515,10 +520,12 @@ a {
   align-items: center;
   color: white;
 }
-#page-user-info .fp-overlay:HOVER {
+#page-user-info .fp-overlay:HOVER,
+#page-search .fp-overlay:HOVER {
   opacity: 0.6;
 }
-#page-user-info .fp-image .mdl-card {
+#page-user-info .fp-image .mdl-card,
+#page-search .fp-image .mdl-card {
   max-height: 150px;
   background-repeat: no-repeat;
   background-size: contain;
@@ -964,4 +971,10 @@ a {
 
 .fp-non-eu, .fp-eu {
   display: none !important;
+}
+
+/* Hashtag Search page */
+
+.fp-hashtag {
+  font-size: 30px;
 }

@@ -42,6 +42,14 @@ export default class FirebaseHelper {
   }
 
   /**
+   * Number of posts loaded initially and per page for the hashtag search page.
+   * @return {number}
+   */
+  static get HASHTAG_PAGE_POSTS_PAGE_SIZE() {
+    return 9;
+  }
+
+  /**
    * Number of posts comments loaded initially and per page.
    * @return {number}
    */
@@ -141,13 +149,24 @@ export default class FirebaseHelper {
   }
 
   /**
-   * Subscribes to receive updates to the home feed. The given `callback` function gets called for
-   * each new post to the general post feed.
+   * Subscribes to receive updates to a user feed. The given `callback` function gets called for
+   * each new post to a user page post feed.
    *
    * If provided we'll only listen to posts that were posted after `latestPostId`.
    */
   subscribeToUserFeed(uid, callback, latestPostId) {
     return this._subscribeToFeed(`/people/${uid}/posts`, callback,
+        latestPostId, true);
+  }
+
+  /**
+   * Subscribes to receive updates to a hastag feed. The given `callback` function gets called for
+   * each new post to a hashtag search posts feed.
+   *
+   * If provided we'll only listen to posts that were posted after `latestPostId`.
+   */
+  subscribeToHashtagFeed(hashtag, callback, latestPostId) {
+    return this._subscribeToFeed(`/hashtags/${hashtag}`, callback,
         latestPostId, true);
   }
 
@@ -162,6 +181,19 @@ export default class FirebaseHelper {
   getUserFeedPosts(uid) {
     return this._getPaginatedFeed(`/people/${uid}/posts`,
         FirebaseHelper.USER_PAGE_POSTS_PAGE_SIZE, null, true);
+  }
+
+  /**
+   * Paginates posts containting the given hashtag in the description.
+   *
+   * Fetches a page of `HASHTAG_PAGE_POSTS_PAGE_SIZE` posts from the hashtag's posts feed.
+   *
+   * We return a `Promise` which resolves with an Map of posts and a function to the next page or
+   * `null` if there is no next page.
+   */
+  getHastagsPosts(hashtag) {
+    return this._getPaginatedFeed(`/hashtags/${hashtag}`,
+        FirebaseHelper.HASHTAG_PAGE_POSTS_PAGE_SIZE, null, true);
   }
 
   /**

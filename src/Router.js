@@ -45,6 +45,7 @@ export default class Router {
     const pipe = Router.pipe;
     const displayPage = this.displayPage.bind(this);
     const loadUser = (userId) => loadApp().then(({userPage}) => userPage.loadUser(userId));
+    const searchHashtag = (hashtag) => loadApp().then(({searchPage}) => searchPage.loadHashtag(hashtag));
     const showHomeFeed = () => loadApp().then(({feed}) => feed.showHomeFeed());
     const showGeneralFeed = () => loadApp().then(({feed}) => feed.showGeneralFeed());
     const clearFeed = () => loadApp().then(({feed}) => feed.clear());
@@ -54,6 +55,7 @@ export default class Router {
     page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
     page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
     page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
+    page('/search/:hashtag', pipe(searchHashtag, null, true), pipe(displayPage, {pageId: 'search'}));
     page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
     page('/terms', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'terms'}));
     page('/add', pipe(displayPage, {pageId: 'add', onlyAuthed: true}));
