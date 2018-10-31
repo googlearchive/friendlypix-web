@@ -46,7 +46,7 @@ exports.default = functions.database.ref('/followers/{followedUid}/{followerUid}
       console.log('User has notifications enabled.');
 
       // Check if we already sent that notification.
-      const snap = followedUserRef.child(`/notificationsSent/${followerUid}`).once('value');
+      const snap = await followedUserRef.child(`/notificationsSent/${followerUid}`).once('value');
       if (snap.val()) {
         return console.log('Already sent a notification to', followedUid, 'for this follower.');
       }
