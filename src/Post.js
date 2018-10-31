@@ -104,7 +104,7 @@ export default class Post {
    */
   displayComment(comment, postId, commentId, prepend = true) {
     const newElement = this.createComment(comment.author, comment.text, postId,
-        commentId, this.auth.currentUser && comment.author.uid === this.auth.currentUser.userId);
+        commentId, this.auth.currentUser && comment.author.uid === this.auth.currentUser.uid);
     if (prepend) {
       $('.fp-comments', this.postElement).prepend(newElement);
     } else {
@@ -118,7 +118,7 @@ export default class Post {
       if (updatedComment) {
         const updatedElement = this.createComment(updatedComment.author,
           updatedComment.text, postId, commentId,
-          this.auth.currentUser && updatedComment.author.uid === this.auth.currentUser.userId);
+          this.auth.currentUser && updatedComment.author.uid === this.auth.currentUser.uid);
         const element = $('#comment-' + commentId);
         element.replaceWith(updatedElement);
       } else {
