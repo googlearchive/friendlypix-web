@@ -27,3 +27,4 @@ public/js
 public/index.html
 public/workbox
 public/workbox-sw.js
+hosting.*.cache
