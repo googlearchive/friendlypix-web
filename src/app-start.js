@@ -37,6 +37,7 @@ import './app.css';
  *  - CSS styling.
  *  - Auth to know if the user is signed-in.
  *  - The App's router which can display the Splash page.
+ *  - Enable Offline.
  * 
  * The rest of the app is loaded asynchroneously and passed to the router.
  * Google Analytics is asynchroneously loaded.
@@ -51,7 +52,7 @@ IpFilter.filterEuCountries();
 
 // Load the app.
 $(document).ready(() => {
-  // Now we'll load the rest of the app which is split to speed up initial load.
+  // Load the rest of the app - which is split - asynchroneously to speed up initial load.
   const loadApp = () => import(/* webpackPrefetch: true */ './app');
   const auth = new Auth();
   // Starts the router.
