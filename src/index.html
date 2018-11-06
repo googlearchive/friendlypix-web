@@ -68,7 +68,7 @@
   <div class="fp-caption">The friendliest way to share your pics</div>
   <div class="fp-signed-out-only fp-initially-hidden">
     <div id="firebaseui-auth-container" class="fp-non-eu fp-signed-out-only fp-initially-hidden"></div>
-    <a class="fp-non-eu fp-skip" href="/feed">skip sign in</a>
+    <a class="fp-non-eu fp-skip" href="/recent">skip sign in</a>
   </div>
   <div class="fp-non-eu fp-note fp-signed-out-only fp-initially-hidden">
     <label class="mdl-checkbox mdl-js-checkbox" for="fp-pre-consent">
@@ -76,7 +76,7 @@
       <span class="mdl-checkbox__label">I understand <a href="https://github.com/firebase/friendlypix-web">FriendlyPix</a> is an application aimed at showcasing the <a href="https://firebase.google.com/docs">Firebase</a> platform capabilities, and should not be used with private or sensitive information. All FriendlyPix data and inactive accounts are regularly removed. I agree to the <a href="/terms">Terms of Service</a> and <a href="https://www.google.com/policies/privacy/">Privacy Policy</a>.</span>
     </label>
   </div>
-  <a class="fp-eu fp-initially-hidden" href="/feed">
+  <a class="fp-eu fp-initially-hidden" href="/recent">
     <button class="fp-view-posts-button mdl-button mdl-js-button mdl-button--raised mdl-color--green-800 mdl-color-text--white">
       View posts
     </button>
@@ -96,7 +96,7 @@
     <div class="mdl-layout__header-row fp-titlebar">
 
       <!-- Logo -->
-      <h3 class="fp-logo"><a href="/feed"><img src="../public/images/icon-128x128.png" alt="Friendly Pix Logo"> Friendly Pix</a></h3>
+      <h3 class="fp-logo"><a href="/recent"><img src="../public/images/icon-128x128.png" alt="Friendly Pix Logo"> Friendly Pix</a></h3>
       <div class="mdl-layout-spacer"></div>
 
       <!-- Search bar -->
@@ -142,8 +142,8 @@
     <!-- Navigation Bar -->
     <div class="fp-tab mdl-layout__header-row mdl-cell--hide-phone mdl-color--light-blue-700">
       <div class="mdl-tab">
-        <a href="/" id="fp-menu-home" class="mdl-layout__tab fp-signed-in-only is-active mdl-button mdl-js-button"><i class="material-icons">home</i> Home</a>
-        <a href="/feed" id="fp-menu-feed" class="mdl-layout__tab mdl-button mdl-js-button"><i class="material-icons">trending_up</i> Feed</a>
+        <a href="/home" id="fp-menu-home" class="mdl-layout__tab fp-signed-in-only is-active mdl-button mdl-js-button"><i class="material-icons">home</i> Home</a>
+        <a href="/recent" id="fp-menu-feed" class="mdl-layout__tab mdl-button mdl-js-button"><i class="material-icons">trending_up</i> Recent</a>
         <input id="fp-mediacapture" type="file" accept="image/*" capture="camera">
         <label id="fp-mediacapture-label" for="fp-mediacapture">Upload an image</label>
         <button class="fp-signed-in-only mdl-button mdl-js-button mdl-button--fab mdl-cell--hide-tablet mdl-color--amber-400 mdl-shadow--4dp" id="add" disabled>
@@ -166,8 +166,8 @@
       </a>
     </div>
     <nav class="mdl-navigation">
-      <a class="mdl-navigation__link is-active fp-signed-in-only" href="/"><i class="material-icons">home</i> Home</a>
-      <a class="mdl-navigation__link" href="/feed"><i class="material-icons">trending_up</i> Feed</a>
+      <a class="mdl-navigation__link is-active fp-signed-in-only" href="/home"><i class="material-icons">home</i> Home</a>
+      <a class="mdl-navigation__link" href="/recent"><i class="material-icons">trending_up</i> Recent</a>
       <hr />
       <a class="mdl-navigation__link" href="/about"><i class="material-icons">perm_contact_calendar</i> About - Help - Contact</a>
       <hr />
@@ -210,7 +210,7 @@
           <input type="checkbox" name="allow-social" id="allow-social"/>
           <label for="allow-social">
             Do you want us to save users you follow, comments you make, and your
-            likes? Without this enabled, you can view the public feed in
+            likes? Without this enabled, you can view the feed of public posts in
             read-only mode.
           </label>
         </p>
@@ -238,7 +238,8 @@
                <p>Start following people to see their posts!</p>
                <p>
                  Use the <strong><i class="material-icons">search</i> search bar</strong> to find people you know and have
-                 a look at the <a href="/feed"><i class="material-icons">trending_up</i> feed</a> to discover interesting people.
+                 a look at the feed of <a href="/recent"><i class="material-icons">trending_up</i> Recent</a> posts to discover
+                 interesting people.
                </p>
                <p>Then <i class="material-icons">favorite</i> like and comment their posts!</p>
                </div>
@@ -277,7 +278,8 @@
             <p>Start following people to see their posts in your <a href="/"><i class="material-icons">home</i>home</a>!</p>
             <p>
               Use the <strong><i class="material-icons">search</i>search bar</strong> to find people you know and have
-              a look at the <a href="/feed"><i class="material-icons">trending_up</i>feed</a> to discover interesting people.
+              a look at the feed of <a href="/recent"><i class="material-icons">trending_up</i>Recent</a> posts to discover
+              interesting people.
             </p>
             <p>Then <i class="material-icons">favorite</i>like and comment their posts!</p>
             <p>

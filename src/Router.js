@@ -44,6 +44,7 @@ export default class Router {
     // Configuring routes.
     const pipe = Router.pipe;
     const displayPage = this.displayPage.bind(this);
+    const displaySplashIfSignedOut = () => this.displaySplashIfSignedOut();
     const loadUser = (userId) => loadApp().then(({userPage}) => userPage.loadUser(userId));
     const searchHashtag = (hashtag) => loadApp().then(({searchPage}) => searchPage.loadHashtag(hashtag));
     const showHomeFeed = () => loadApp().then(({feed}) => feed.showHomeFeed());
@@ -51,8 +52,9 @@ export default class Router {
     const clearFeed = () => loadApp().then(({feed}) => feed.clear());
     const showPost = (postId) => loadApp().then(({post}) => post.loadPost(postId));
 
-    page('/', pipe(showHomeFeed, null, true), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
-    page('/feed', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
+    page('/', pipe(displaySplashIfSignedOut, null, true), pipe(displayPage, {pageId: 'splash'}));
+    page('/home', pipe(showHomeFeed, null, true), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
+    page('/recent', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
     page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
     page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
     page('/search/:hashtag', pipe(searchHashtag, null, true), pipe(displayPage, {pageId: 'search'}));
@@ -88,8 +90,7 @@ export default class Router {
     let pageId = attributes.pageId;
 
     if (onlyAuthed && !firebase.auth().currentUser) {
-      pageId = 'splash';
-      this.splashLogin.show();
+      return page('/');
     }
     Router.setLinkAsActive(context.canonicalPath);
     this.pagesElements.each(function(index, element) {
@@ -103,6 +104,14 @@ export default class Router {
     });
     MaterialUtils.closeDrawer();
     Router.scrollToTop();
+  }
+
+  displaySplashIfSignedOut() {
+    if (!firebase.auth().currentUser) {
+      this.splashLogin.show();
+    } else {
+      page('/home');
+    }
   }
 
   /**
