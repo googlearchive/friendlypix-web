@@ -112,7 +112,7 @@
 
       <!-- Signed-in User Info -->
       <div class="mdl-cell--hide-phone">
-        <a class="fp-non-eu" href="/"><button class="fp-sign-in-button fp-signed-out-only mdl-button mdl-js-button"><i class="material-icons">account_circle</i> Sign in</button></a>
+        <a class="fp-non-eu" href="/"><button class="fp-disabled-when-offline fp-sign-in-button fp-signed-out-only mdl-button mdl-js-button"><i class="material-icons">account_circle</i> Sign in</button></a>
         <div class="fp-signed-in-user-container mdl-cell--hide-phone fp-signed-in-only">
           <a class="fp-usernamelink mdl-button mdl-js-button">
             <div class="fp-avatar"></div>
@@ -133,7 +133,7 @@
           <li class="mdl-menu__item"><i class="material-icons">format_list_numbered</i> Terms of Services</li>
         </a>
         <li class="fp-sign-out mdl-menu__item fp-signed-in-only"><i class="material-icons">exit_to_app</i> Sign out</li>
-        <li class="fp-delete-account mdl-menu__item fp-signed-in-only"><i class="material-icons">cancel</i> Delete account</li>
+        <li class="fp-disabled-when-offline fp-delete-account mdl-menu__item fp-signed-in-only"><i class="material-icons">cancel</i> Delete account</li>
 
         <li class="fp-update-privacy mdl-menu__item fp-signed-in-only privacy-dialog-link"><i class="material-icons">https</i> Privacy settings<li>
       </ul>
@@ -146,19 +146,19 @@
         <a href="/recent" id="fp-menu-feed" class="mdl-layout__tab mdl-button mdl-js-button"><i class="material-icons">trending_up</i> Recent</a>
         <input id="fp-mediacapture" type="file" accept="image/*" capture="camera">
         <label id="fp-mediacapture-label" for="fp-mediacapture">Upload an image</label>
-        <button class="fp-signed-in-only mdl-button mdl-js-button mdl-button--fab mdl-cell--hide-tablet mdl-color--amber-400 mdl-shadow--4dp" id="add" disabled>
+        <button class="fp-disabled-when-offline fp-signed-in-only mdl-button mdl-js-button mdl-button--fab mdl-cell--hide-tablet mdl-color--amber-400 mdl-shadow--4dp" id="add" disabled>
           <i class="material-icons">file_upload</i>
         </button>
       </div>
     </div>
-    <button class="fp-signed-in-only mdl-cell--hide-desktop mdl-button mdl-js-button mdl-button--fab mdl-color--amber-400 mdl-shadow--4dp" id="add-floating" disabled>
+    <button class="fp-disabled-when-offline fp-signed-in-only mdl-cell--hide-desktop mdl-button mdl-js-button mdl-button--fab mdl-color--amber-400 mdl-shadow--4dp" id="add-floating" disabled>
       <i class="material-icons">photo_camera</i>
     </button>
   </header>
 
   <!-- Drawer menu -->
   <div class="mdl-cell--hide-desktop mdl-cell--hide-tablet mdl-layout__drawer">
-    <a href="/" class="fp-non-eu fp-signed-out-only"><button class="fp-sign-in-button mdl-button mdl-js-button"><i class="material-icons">account_circle</i> Sign in</button></a>
+    <a href="/" class="fp-non-eu fp-signed-out-only"><button class="fp-disabled-when-offline fp-sign-in-button mdl-button mdl-js-button"><i class="material-icons">account_circle</i> Sign in</button></a>
     <div class="fp-signed-in-user-container mdl-color--light-blue-700 fp-signed-in-only">
       <a class="fp-usernamelink">
         <div class="fp-avatar"></div>
@@ -174,7 +174,7 @@
       <a class="mdl-navigation__link" href="/terms"><i class="material-icons">format_list_numbered</i> Terms of Services</a>
       <hr class="fp-signed-in-only"/>
       <a class="fp-sign-out mdl-navigation__link fp-signed-in-only"><i class="material-icons">exit_to_app</i> Sign out</a>
-      <a class="fp-delete-account mdl-navigation__link fp-signed-in-only"><i class="material-icons">cancel</i> Delete account</a>
+      <a class="fp-disabled-when-offline fp-delete-account mdl-navigation__link fp-signed-in-only"><i class="material-icons">cancel</i> Delete account</a>
       <a class="fp-update-privacy mdl-navigation__link fp-signed-in-only privacy-dialog-link"><i class="material-icons">https</i> Privacy settings<a>
     </nav>
   </div>

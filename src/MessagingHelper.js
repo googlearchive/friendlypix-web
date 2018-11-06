@@ -97,7 +97,7 @@ export default class Messaging {
         actionText: 'Profile',
         timeout: 10000,
       };
-      this.toast[0].MaterialSnackbar.showSnackbar(data);
+      MaterialUtils.showSnackbar(this.toast, data);
     }
   }
 

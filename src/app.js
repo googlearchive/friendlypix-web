@@ -25,6 +25,7 @@ import Uploader from './Uploader';
 import FirebaseHelper from './FirebaseHelper';
 import PrivacySettings from './PrivacySettings';
 import UserPage from './UserPage';
+import {Utils} from './Utils';
 
 // Load the core of the app.
 const firebaseHelper = new FirebaseHelper();
@@ -37,3 +38,5 @@ export const searchPage = new SearchPage(firebaseHelper);
 new AuthData(firebaseHelper, privacySettings);
 new Uploader(firebaseHelper);
 new Search(firebaseHelper);
+
+Utils.startOfflineListener();

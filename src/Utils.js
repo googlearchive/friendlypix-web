@@ -100,9 +100,56 @@ export class MaterialUtils {
     const mdlLayoutElement = $('.mdl-layout');
     mdlLayoutElement.unbind('scroll');
   }
+
+  /**
+   * Shows the Snackbar.
+   */
+  static showSnackbar(element, data) {
+    if (!element.MaterialSnackbar) {
+      element = element[0];
+    }
+    element.MaterialSnackbar.showSnackbar(data);
+  }
+
+  /**
+   * Hides the Snackbar.
+   */
+  static hideSnackbar(element) {
+    if (!element.MaterialSnackbar) {
+      element = element[0];
+    }
+    element.MaterialSnackbar.cleanup_();
+  }
 };
 
 export class Utils {
+  /**
+   * Listen for the Offline
+   */
+  static startOfflineListener() {
+    console.log('Starting Offline status tracker!');
+
+    const updateOnlineStatus = () => {
+      if (!navigator.onLine) {
+        console.log('User is now Offline!');
+        const data = {
+          message: '⚡ You are offline',
+          timeout: 100000000,
+        };
+        MaterialUtils.showSnackbar($('.mdl-js-snackbar'), data);
+        $('.fp-disabled-when-offline').attr('disabled', 'disabled');
+      } else{
+        console.log('User is now Online!');
+        MaterialUtils.hideSnackbar($('.mdl-js-snackbar'));
+        $('.fp-disabled-when-offline').removeAttr('disabled');
+      }
+    };
+
+    window.addEventListener('online',  updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+  }
+
+
   /**
    * Adds a size URL query parameter to the Google profile pic URL.
    */
