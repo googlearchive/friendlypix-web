@@ -904,6 +904,12 @@ a {
 /* Misc */
 .mdl-snackbar {
   z-index: 101;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  margin-left: -1px;
 }
 
 /* Firebase UI styling */
