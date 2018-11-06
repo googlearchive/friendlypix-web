@@ -52,14 +52,14 @@ export default class Router {
     const clearFeed = () => loadApp().then(({feed}) => feed.clear());
     const showPost = (postId) => loadApp().then(({post}) => post.loadPost(postId));
 
-    page('/', pipe(displaySplashIfSignedOut, null, true), pipe(displayPage, {pageId: 'splash'}));
-    page('/home', pipe(showHomeFeed, null, true), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
-    page('/recent', pipe(showGeneralFeed, null, true), pipe(displayPage, {pageId: 'feed'}));
-    page('/post/:postId', pipe(showPost, null, true), pipe(displayPage, {pageId: 'post'}));
-    page('/user/:userId', pipe(loadUser, null, true), pipe(displayPage, {pageId: 'user-info'}));
-    page('/search/:hashtag', pipe(searchHashtag, null, true), pipe(displayPage, {pageId: 'search'}));
-    page('/about', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'about'}));
-    page('/terms', pipe(clearFeed, null, true), pipe(displayPage, {pageId: 'terms'}));
+    page('/', pipe(displaySplashIfSignedOut, {continue: true}), pipe(displayPage, {pageId: 'splash'}));
+    page('/home', pipe(showHomeFeed, {continue: true}), pipe(displayPage, {pageId: 'feed', onlyAuthed: true}));
+    page('/recent', pipe(showGeneralFeed, {continue: true}), pipe(displayPage, {pageId: 'feed'}));
+    page('/post/:postId', pipe(showPost, {continue: true}), pipe(displayPage, {pageId: 'post'}));
+    page('/user/:userId', pipe(loadUser, {continue: true}), pipe(displayPage, {pageId: 'user-info'}));
+    page('/search/:hashtag', pipe(searchHashtag, {continue: true}), pipe(displayPage, {pageId: 'search'}));
+    page('/about', pipe(clearFeed, {continue: true}), pipe(displayPage, {pageId: 'about'}));
+    page('/terms', pipe(clearFeed, {continue: true}), pipe(displayPage, {pageId: 'terms'}));
     page('/add', pipe(displayPage, {pageId: 'add', onlyAuthed: true}));
     page('*', () => page('/'));
 
@@ -89,10 +89,15 @@ export default class Router {
     const onlyAuthed = attributes.onlyAuthed;
     let pageId = attributes.pageId;
 
+    // If the page is restricted to signed-in users and the user is not signedin, redirect to the Splasbh page.
     if (onlyAuthed && !firebase.auth().currentUser) {
       return page('/');
     }
+
+    // Displaying the current link as active.
     Router.setLinkAsActive(context.canonicalPath);
+
+    // Display the right page and hide the other ones.
     this.pagesElements.each(function(index, element) {
       if (element.id === 'page-' + pageId) {
         $(element).show();
@@ -102,10 +107,18 @@ export default class Router {
         $(element).hide();
       }
     });
+
+    // Force close the Drawer if opened.
     MaterialUtils.closeDrawer();
+
+    // Scroll to top.
     Router.scrollToTop();
   }
 
+  /**
+   * Display the Splash-page if the user is signed-out.
+   * Otherwise redirect to the home feed.
+   */
   displaySplashIfSignedOut() {
     if (!firebase.auth().currentUser) {
       this.splashLogin.show();
@@ -134,9 +147,10 @@ export default class Router {
 
   /**
    * Pipes the given function and passes the given attribute and Page.js context.
-   * Set 'optContinue' to true if there are further functions to call.
+   * A special attribute 'continue' can be set to true if there are further functions to call.
    */
-  static pipe(funct, attribute, optContinue) {
+  static pipe(funct, attribute) {
+    const optContinue =  attribute ? attribute.continue : false;
     return (context, next) => {
       if (funct) {
         const params = Object.keys(context.params);
