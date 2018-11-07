@@ -70,6 +70,7 @@ export default class Router {
    * Displays the given page and hides the other ones.
    * if `onlyAuthed` is set to true then the splash page will be displayed instead of the page if
    * the user is not signed-in.
+   * A "page" is the element with ID "page-<id>" in the DOM.
    */
   displayPage(pageId, onlyAuthed) {
     if (onlyAuthed) {
