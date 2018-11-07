@@ -36,24 +36,24 @@ export default class IpFilter {
   /**
    * Starts the Filter.
    */
-  static filterEuCountries() {
+  static async filterEuCountries() {
     // Bypass the IP filter if the special hash fragment is used or if serving on localhost.
     if (window.location.hash === '#noipfilter' || window.location.hostname === 'localhost') {
       $('.fp-non-eu').removeClass('fp-non-eu');
       return;
     }
 
-    IpFilter.findLatLonFromIP().then((latlng) => {
-      IpFilter.getCountryCodeFromLatLng(latlng.lat, latlng.lng).then((countryCode) => {
-        if (IpFilter.privacyShieldCountries.includes(countryCode)) {
-          $('.fp-eu').removeClass('fp-eu');
-        } else {
-          $('.fp-non-eu').removeClass('fp-non-eu');
-        }
-      });
-    }).catch(() => {
+    try {
+      const latlng = await IpFilter.findLatLonFromIP();
+      const countryCode = await IpFilter.getCountryCodeFromLatLng(latlng.lat, latlng.lng);
+      if (IpFilter.privacyShieldCountries.includes(countryCode)) {
+        $('.fp-eu').removeClass('fp-eu');
+      } else {
+        $('.fp-non-eu').removeClass('fp-non-eu');
+      }
+    } catch(e) {
       $('.fp-non-eu').removeClass('fp-non-eu');
-    });
+    }
   }
 
   static findLatLonFromIP() {

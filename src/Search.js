@@ -64,45 +64,43 @@ export default class Search {
   /**
    * Display search results.
    */
-  displaySearchResults() {
+  async displaySearchResults() {
     const searchString = this.searchField.val().toLowerCase().trim();
     if (searchString.length >= Search.MIN_CHARACTERS) {
       const promises = [
           this.firebaseHelper.searchUsers(searchString, Search.NB_PEOPLE_RESULTS_LIMIT),
           this.firebaseHelper.searchHashtags(searchString, Search.NB_HASHTAGS_RESULTS_LIMIT)];
       // Search for People and hashtags.
-      Promise.all(promises).then(
-          (results) => {
-            const peopleResults = results[0];
-            const hashtagsResults = results[1];
-            this.searchResults.empty();
-            const peopleIds = Object.keys(peopleResults);
-            const hashtags = Object.keys(hashtagsResults);
-            if (peopleIds.length + hashtags.length > 0) {
-              this.searchResults.fadeIn();
-              $('html').click(() => {
-                $('html').unbind('click');
-                this.searchResults.fadeOut();
-              });
-              // Display people.
-              if (peopleIds.length > 0) {
-                peopleIds.forEach((peopleId) => {
-                  const profile = peopleResults[peopleId];
-                  this.searchResults.append(
-                      Search.createPersonSearchResultHtml(peopleId, profile));
-                });
-              }
-              // Display hashtags.
-              if (hashtags.length > 0) {
-                hashtags.forEach((hashtag) => {
-                  this.searchResults.append(
-                      Search.createHashtagSearchResultHtml(hashtag, Object.keys(hashtagsResults[hashtag]).length));
-                });
-              }
-            } else {
-              this.searchResults.fadeOut();
-            }
+      const results = await Promise.all(promises);
+      const peopleResults = results[0];
+      const hashtagsResults = results[1];
+      this.searchResults.empty();
+      const peopleIds = Object.keys(peopleResults);
+      const hashtags = Object.keys(hashtagsResults);
+      if (peopleIds.length + hashtags.length > 0) {
+        this.searchResults.fadeIn();
+        $('html').click(() => {
+          $('html').unbind('click');
+          this.searchResults.fadeOut();
+        });
+        // Display people.
+        if (peopleIds.length > 0) {
+          peopleIds.forEach((peopleId) => {
+            const profile = peopleResults[peopleId];
+            this.searchResults.append(
+                Search.createPersonSearchResultHtml(peopleId, profile));
           });
+        }
+        // Display hashtags.
+        if (hashtags.length > 0) {
+          hashtags.forEach((hashtag) => {
+            this.searchResults.append(
+                Search.createHashtagSearchResultHtml(hashtag, Object.keys(hashtagsResults[hashtag]).length));
+          });
+        }
+      } else {
+        this.searchResults.fadeOut();
+      }
     } else {
       this.searchResults.empty();
       this.searchResults.fadeOut();

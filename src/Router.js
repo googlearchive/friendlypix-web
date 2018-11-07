@@ -34,24 +34,23 @@ export default class Router {
 
     // Dom elements.
     this.pagesElements = $('[id^=page-]');
-    this.splashLogin = $('#login', '#page-splash');
 
     // Load the rest of the app - which is split - asynchroneously to speed up initial load.
     const loadComponents = import(/* webpackPrefetch: true */ './async-loaded-components');
 
     // Shortcuts to async loaded components.
-    const loadUser = (userId) => loadComponents.then(({userPage}) => userPage.loadUser(userId));
-    const searchHashtag = (hashtag) => loadComponents.then(({searchPage}) => searchPage.loadHashtag(hashtag));
-    const showHomeFeed = () => loadComponents.then(({feed}) => feed.showHomeFeed());
-    const showGeneralFeed = () => loadComponents.then(({feed}) => feed.showGeneralFeed());
-    const clearFeed = () => loadComponents.then(({feed}) => feed.clear());
-    const showPost = (postId) => loadComponents.then(({post}) => post.loadPost(postId));
+    const loadUser = async (userId) => (await loadComponents).userPage.loadUser(userId);
+    const searchHashtag = async (hashtag) => (await loadComponents).searchPage.loadHashtag(hashtag);
+    const showHomeFeed = async () => (await loadComponents).feed.showHomeFeed();
+    const showGeneralFeed = async () => (await loadComponents).feed.showGeneralFeed();
+    const clearFeed = async () => (await loadComponents).feed.clear();
+    const showPost = async (postId) => (await loadComponents).post.loadPost(postId);
 
     // Configuring middlwares.
     page(Router.setLinkAsActive);
 
     // Configuring routes.
-    page('/', () => {this.displaySplashIfSignedOut(); this.displayPage('splash');});
+    page('/', () => {this.redirectHomeIfSignedIn(); this.displayPage('splash');});
     page('/home', () => {showHomeFeed(); this.displayPage('feed', true);});
     page('/recent', () => {showGeneralFeed(); this.displayPage('feed');});
     page('/post/:postId', (context) => {showPost(context.params.postId); this.displayPage('post');});
@@ -72,27 +71,17 @@ export default class Router {
    * the user is not signed-in.
    * A "page" is the element with ID "page-<id>" in the DOM.
    */
-  displayPage(pageId, onlyAuthed) {
+  async displayPage(pageId, onlyAuthed) {
     if (onlyAuthed) {
       // If the page can only be displayed if the user is authenticated then we wait or the auth state.
-      this.auth.waitForAuth.then(() => {
-        this._displayPage(pageId, onlyAuthed);
-      });
-    } else {
-      this._displayPage(pageId, onlyAuthed);
-    }
-  }
-
-  _displayPage(pageId, onlyAuthed) {
-    // If the page is restricted to signed-in users and the user is not signedin, redirect to the Splasbh page.
-    if (onlyAuthed && !firebase.auth().currentUser) {
-      return this.auth.waitForAuth.then(() => {
+      await this.auth.waitForAuth;
+      if (!firebase.auth().currentUser) {
         return page('/');
-      });
+      }
     }
 
     // Display the right page and hide the other ones.
-    this.pagesElements.each(function(index, element) {
+    this.pagesElements.each((index, element) => {
       if (element.id === 'page-' + pageId) {
         $(element).show();
       } else if (element.id === 'page-splash' && onlyAuthed) {
@@ -110,13 +99,10 @@ export default class Router {
   }
 
   /**
-   * Display the Splash-page if the user is signed-out.
-   * Otherwise redirect to the home feed.
+   * Redirect to the home feed if the user is already signed in.
    */
-  displaySplashIfSignedOut() {
-    if (!firebase.auth().currentUser) {
-      this.splashLogin.show();
-    } else {
+  redirectHomeIfSignedIn() {
+    if (firebase.auth().currentUser) {
       page('/home');
     }
   }

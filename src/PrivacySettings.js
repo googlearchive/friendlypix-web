@@ -75,26 +75,25 @@ export default class PrivacySettings {
    * Fetches previously saved privacy settings if they exist and
    * enables the Submit button if user has consented to data processing.
    */
-  initializePrivacySettings() {
+  async initializePrivacySettings() {
     const uid = firebase.auth().currentUser.uid;
     if (this.savedPrivacySettings === undefined) {
-      this.firebaseHelper.getPrivacySettings(uid).then((snapshot) => {
-        this.savedPrivacySettings = snapshot.val();
-        if (this.savedPrivacySettings) {
-          if (this.savedPrivacySettings.data_processing) {
-            this.allowDataProcessing.prop('checked', true);
-            this.privacyDialogSave.removeAttr('disabled');
-          }
-          if (this.savedPrivacySettings.content) {
-            this.allowContent.prop('checked', true);
-            this.uploadButton.removeAttr('disabled');
-            this.mobileUploadButton.removeAttr('disabled');
-          }
-          if (this.savedPrivacySettings.social) {
-            this.allowSocial.prop('checked', true);
-          }
+      const snapshot = await this.firebaseHelper.getPrivacySettings(uid);
+      this.savedPrivacySettings = snapshot.val();
+      if (this.savedPrivacySettings) {
+        if (this.savedPrivacySettings.data_processing) {
+          this.allowDataProcessing.prop('checked', true);
+          this.privacyDialogSave.removeAttr('disabled');
         }
-      });
+        if (this.savedPrivacySettings.content) {
+          this.allowContent.prop('checked', true);
+          this.uploadButton.removeAttr('disabled');
+          this.mobileUploadButton.removeAttr('disabled');
+        }
+        if (this.savedPrivacySettings.social) {
+          this.allowSocial.prop('checked', true);
+        }
+      }
     }
   }
 
@@ -128,4 +127,4 @@ export default class PrivacySettings {
       this.mobileUploadButton.prop('disabled', true);
     }
   }
-};
+}

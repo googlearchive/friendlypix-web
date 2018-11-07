@@ -139,18 +139,22 @@ export default class Auth {
     }
   }
 
-  toggleAdminMode() {
-    this.auth.currentUser.getIdToken().then((idToken) => {
+  /**
+   * Displays the Admin features if the user has the "admin=true" custom claim in its ID token. 
+   */
+  async toggleAdminMode() {
+    try {
+      const idToken = await this.auth.currentUser.getIdToken();
       const isAdmin = JSON.parse(window.atob(idToken.split('.')[1])).admin;
       if (isAdmin) {
         Auth.enableAdminMode();
       } else {
         Auth.disableAdminMode();
       }
-    }).catch((e) => {
+    } catch (e) {
       console.error('Error while checking for Admin priviledges', e);
       Auth.disableAdminMode();
-    });
+    }
   }
 
   /**
@@ -167,16 +171,17 @@ export default class Auth {
     document.body.classList.remove('fp-admin');
   }
 
-  deleteAccount() {
-    this.auth.currentUser.delete().then(() => {
+  async deleteAccount() {
+    try {
+      await this.auth.currentUser.delete();
       window.alert('Account deleted');
-    }).catch((error) => {
+    } catch (error) {
       if (error.code === 'auth/requires-recent-login') {
         window.alert('You need to have recently signed-in to delete your account.\n' +
             'Please sign-in and try again.');
         this.auth.signOut();
         page('/');
       }
-    });
+    }
   }
 };

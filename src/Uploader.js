@@ -168,14 +168,14 @@ export default class Uploader {
       thumbCanvas.height = image.height;
     }
     thumbCanvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height,
-      0, 0, thumbCanvas.width, thumbCanvas.height);
+        0, 0, thumbCanvas.width, thumbCanvas.height);
     return thumbCanvas;
   }
 
   /**
    * Generates the full size image and image thumb using canvas and returns them in a promise.
    */
-  generateImages() {
+  async generateImages() {
     const fullDeferred = new $.Deferred();
     const thumbDeferred = new $.Deferred();
 
@@ -201,45 +201,43 @@ export default class Uploader {
     reader.onload = (e) => displayPicture(e.target.result);
     reader.readAsDataURL(this.currentFile);
 
-    return Promise.all([fullDeferred.promise(), thumbDeferred.promise()]).then((results) => {
-      return {
-        full: results[0],
-        thumb: results[1],
-      };
-    });
+    const results = await Promise.all([fullDeferred.promise(), thumbDeferred.promise()]);
+    return {
+      full: results[0],
+      thumb: results[1],
+    };
   }
 
   /**
    * Uploads the pic to Cloud Storage and add a new post into the Firebase Database.
    */
-  uploadPic(e) {
+  async uploadPic(e) {
     e.preventDefault();
     this.disableUploadUi(true);
     const imageCaption = this.imageCaptionInput.val();
 
-    this.generateImages().then((pics) => {
-      // Upload the File upload to Cloud Storage and create new post.
-      this.firebaseHelper.uploadNewPic(pics.full, pics.thumb, this.currentFile.name, imageCaption)
-          .then((postId) => {
-            page(`/user/${this.auth.currentUser.uid}`);
-            const data = {
-              message: 'New pic has been posted!',
-              actionHandler: () => page(`/post/${postId}`),
-              actionText: 'View',
-              timeout: 10000,
-            };
-            this.toast[0].MaterialSnackbar.showSnackbar(data);
-            this.disableUploadUi(false);
-          }, (error) => {
-            console.error(error);
-            const data = {
-              message: `There was an error while posting your pic. Sorry!`,
-              timeout: 5000,
-            };
-            this.toast[0].MaterialSnackbar.showSnackbar(data);
-            this.disableUploadUi(false);
-          });
-        });
+    const pics = await this.generateImages();
+    // Upload the File upload to Cloud Storage and create new post.
+    try {
+      const postId = await this.firebaseHelper.uploadNewPic(pics.full, pics.thumb, this.currentFile.name, imageCaption);
+      page(`/user/${this.auth.currentUser.uid}`);
+      const data = {
+        message: 'New pic has been posted!',
+        actionHandler: () => page(`/post/${postId}`),
+        actionText: 'View',
+        timeout: 10000,
+      };
+      MaterialUtils.showSnackbar(this.toast, data);
+      this.disableUploadUi(false);
+    } catch (error) {
+      console.error(error);
+      const data = {
+        message: `There was an error while posting your pic. Sorry!`,
+        timeout: 5000,
+      };
+      MaterialUtils.showSnackbar(this.toast, data);
+      this.disableUploadUi(false);
+    }
   }
 
   /**

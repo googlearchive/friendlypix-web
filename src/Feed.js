@@ -71,8 +71,8 @@ export default class Feed {
         this.feedImageContainer.append(postElement.addClass(`fp-post-${postIds[i]}`));
       }
       post.fillPostData(postIds[i], postData.thumb_url || postData.url,
-        postData.text, postData.author, postData.timestamp, postData.thumb_storage_uri,
-        postData.full_storage_uri, postData.full_url);
+          postData.text, postData.author, postData.timestamp, postData.thumb_storage_uri,
+          postData.full_storage_uri, postData.full_url);
     }
   }
 
@@ -83,13 +83,12 @@ export default class Feed {
   toggleNextPageButton(nextPage) {
     this.nextPageButton.unbind('click');
     if (nextPage) {
-      const loadMorePosts = () => {
+      const loadMorePosts = async () => {
         this.nextPageButton.prop('disabled', true);
         console.log('Loading next page of posts.');
-        nextPage().then((data) => {
-          this.addPosts(data.entries);
-          this.toggleNextPageButton(data.nextPage);
-        });
+        const data = await nextPage();
+        this.addPosts(data.entries);
+        this.toggleNextPageButton(data.nextPage);
       };
       this.nextPageButton.show();
       // Enable infinite Scroll.
@@ -125,60 +124,58 @@ export default class Feed {
   /**
    * Displays the general posts feed.
    */
-  showGeneralFeed() {
+  async showGeneralFeed() {
     // Clear previously displayed posts if any.
     this.clear();
 
-    // Load initial batch of posts.
-    this.firebaseHelper.getPosts().then((data) => {
-      // Listen for new posts.
-      const latestPostId = Object.keys(data.entries)[Object.keys(data.entries).length - 1];
-      this.firebaseHelper.subscribeToGeneralFeed(
-          (postId, postValue) => this.addNewPost(postId, postValue), latestPostId);
-
-      // Adds fetched posts and next page button if necessary.
-      this.addPosts(data.entries);
-      this.toggleNextPageButton(data.nextPage);
-    });
-
     // Listen for posts deletions.
     this.firebaseHelper.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
+
+    // Load initial batch of posts.
+    const data = await this.firebaseHelper.getPosts();
+    // Listen for new posts.
+    const latestPostId = Object.keys(data.entries)[Object.keys(data.entries).length - 1];
+    this.firebaseHelper.subscribeToGeneralFeed(
+        (postId, postValue) => this.addNewPost(postId, postValue), latestPostId);
+
+    // Adds fetched posts and next page button if necessary.
+    this.addPosts(data.entries);
+    this.toggleNextPageButton(data.nextPage);
   }
 
   /**
    * Shows the feed showing all followed users.
    */
-  showHomeFeed() {
+  async showHomeFeed() {
     // Clear previously displayed posts if any.
     this.clear();
 
     if (this.auth.currentUser) {
       // Make sure the home feed is updated with followed users's new posts.
-      this.firebaseHelper.updateHomeFeeds().then(() => {
-        // Load initial batch of posts.
-        this.firebaseHelper.getHomeFeedPosts().then((data) => {
-          const postIds = Object.keys(data.entries);
-          if (postIds.length === 0) {
-            this.noPostsMessage.fadeIn();
-          }
-          // Listen for new posts.
-          const latestPostId = postIds[postIds.length - 1];
-          this.firebaseHelper.subscribeToHomeFeed(
-              (postId, postValue) => {
-                this.addNewPost(postId, postValue);
-              }, latestPostId);
+      await this.firebaseHelper.updateHomeFeeds();
 
-          // Adds fetched posts and next page button if necessary.
-          this.addPosts(data.entries);
-          this.toggleNextPageButton(data.nextPage);
-        });
+      // Add new posts from followers live.
+      this.firebaseHelper.startHomeFeedLiveUpdaters();
 
-        // Add new posts from followers live.
-        this.firebaseHelper.startHomeFeedLiveUpdaters();
+      // Listen for posts deletions.
+      this.firebaseHelper.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
 
-        // Listen for posts deletions.
-        this.firebaseHelper.registerForPostsDeletion((postId) => this.onPostDeleted(postId));
-      });
+      // Load initial batch of posts.
+      const data = await this.firebaseHelper.getHomeFeedPosts();
+      const postIds = Object.keys(data.entries);
+      if (postIds.length === 0) {
+        this.noPostsMessage.fadeIn();
+      }
+      
+      // Listen for new posts.
+      const latestPostId = postIds[postIds.length - 1];
+      this.firebaseHelper.subscribeToHomeFeed((postId, postValue) => {
+        this.addNewPost(postId, postValue);
+      }, latestPostId);
+
+      // Adds fetched posts and next page button if necessary.
+      this.addPosts(data.entries);
+      this.toggleNextPageButton(data.nextPage);
     }
   }
 

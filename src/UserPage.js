@@ -241,20 +241,19 @@ export default class UserPage {
   /**
    * Displays the list of followed people.
    */
-  displayFollowing() {
-    this.firebaseHelper.getFollowingProfiles(this.userId).then((profiles) => {
-      // Clear previous following list.
-      $('.fp-usernamelink', this.followingContainer).remove();
-      // Display all following profile cards.
-      Object.keys(profiles).forEach((uid) => this.followingContainer.prepend(
-          UserPage.createProfileCardHtml(
-              uid, profiles[uid].profile_picture, profiles[uid].full_name)));
-      if (Object.keys(profiles).length > 0) {
-        this.followingContainer.show();
-        // Mark submenu as active.
-        this.nbFollowingContainer.addClass('is-active');
-      }
-    });
+  async displayFollowing() {
+    const profiles = await this.firebaseHelper.getFollowingProfiles(this.userId);
+    // Clear previous following list.
+    $('.fp-usernamelink', this.followingContainer).remove();
+    // Display all following profile cards.
+    Object.keys(profiles).forEach((uid) => this.followingContainer.prepend(
+        UserPage.createProfileCardHtml(
+            uid, profiles[uid].profile_picture, profiles[uid].full_name)));
+    if (Object.keys(profiles).length > 0) {
+      this.followingContainer.show();
+      // Mark submenu as active.
+      this.nbFollowingContainer.addClass('is-active');
+    }
   }
 
   /**

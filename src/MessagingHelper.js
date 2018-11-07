@@ -54,33 +54,34 @@ export default class Messaging {
   /**
    * Saves the token to the database if available. If not request permissions.
    */
-  saveToken() {
-    this.messaging.getToken().then((currentToken) => {
+  async saveToken() {
+    try {
+      const currentToken = await this.messaging.getToken();
       if (currentToken) {
-        return this.firebaseHelper.saveNotificationToken(currentToken).then(() => {
-          console.log('Notification Token saved to database');
-        });
+        await this.firebaseHelper.saveNotificationToken(currentToken);
+        console.log('Notification Token saved to database');
       } else {
         this.requestPermission();
       }
-    }).catch((err) => {
+    } catch(err) {
       console.error('Unable to get messaging token.', err);
-    });
+    }
   }
 
   /**
    * Requests permission to send notifications on this browser.
    */
-  requestPermission() {
+  async requestPermission() {
     console.log('Requesting permission...');
     // TODO: Blackout the entire screen and show a message saying why we need the permissions.
     //       e.g. "If you would like to receive notifications on this device, grant permission above."
-    this.messaging.requestPermission().then(() => {
+    try {
+      await this.messaging.requestPermission();
       console.log('Notification permission granted.');
       this.saveToken();
-    }).catch((err) => {
+    } catch(err) {
       console.error('Unable to get permission to notify.', err);
-    });
+    }
   }
 
   /**
@@ -130,4 +131,4 @@ export default class Messaging {
       });
     }
   }
-};
+}

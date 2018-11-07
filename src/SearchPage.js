@@ -39,33 +39,31 @@ export default class SearchPage {
   /**
    * Displays the posts containing the given hashtag.
    */
-  loadHashtag(hashtag) {
+  async loadHashtag(hashtag) {
     this.hashtag.text('#' + hashtag);
-
-    // Display hashtags posts.
-    this.firebaseHelper.getHastagsPosts(hashtag).then((data) => {
-      // Reset the UI.
-      this.clear();
-      
-      const postIds = Object.keys(data.entries);
-      if (postIds.length === 0) {
-        this.noPosts.show();
-      }
-      this.firebaseHelper.subscribeToHashtagFeed(hashtag,
-        (postId, postValue) => {
-          this.searchPageImageContainer.prepend(
-              this.createImageCard(postId, postValue.thumb_url, postValue.text));
-          this.noPosts.hide();
-        }, postIds[postIds.length - 1]);
-
-      // Adds fetched posts and next page button if necessary.
-      this.addPosts(data.entries);
-      this.toggleNextPageButton(data.nextPage);
-    });
 
     // Listen for posts deletions.
     this.firebaseHelper.registerForPostsDeletion((postId) =>
         $(`.fp-post-${postId}`, this.searchPage).remove());
+
+    // Display hashtags posts.
+    const data = await this.firebaseHelper.getHastagsPosts(hashtag);
+    // Reset the UI.
+    this.clear();
+    
+    const postIds = Object.keys(data.entries);
+    if (postIds.length === 0) {
+      this.noPosts.show();
+    }
+    this.firebaseHelper.subscribeToHashtagFeed(hashtag, (postId, postValue) => {
+      this.searchPageImageContainer.prepend(
+          this.createImageCard(postId, postValue.thumb_url, postValue.text));
+      this.noPosts.hide();
+    }, postIds[postIds.length - 1]);
+
+    // Adds fetched posts and next page button if necessary.
+    this.addPosts(data.entries);
+    this.toggleNextPageButton(data.nextPage);
   }
 
   /**
@@ -90,12 +88,11 @@ export default class SearchPage {
       this.nextPageButton.show();
       this.nextPageButton.unbind('click');
       this.nextPageButton.prop('disabled', false);
-      this.nextPageButton.click(() => {
+      this.nextPageButton.click(async () => {
         this.nextPageButton.prop('disabled', true);
-        nextPage().then((data) => {
-          this.addPosts(data.entries);
-          this.toggleNextPageButton(data.nextPage);
-        });
+        const data = await nextPage();
+        this.addPosts(data.entries);
+        this.toggleNextPageButton(data.nextPage);
       });
     } else {
       this.nextPageButton.hide();

@@ -46,22 +46,19 @@ export default class AuthData {
    * Displays the signed-in user information in the UI or hides it and displays the
    * "Sign-In" button if the user isn't signed-in.
    */
-  onAuthStateChanged(user) {
+  async onAuthStateChanged(user) {
     if (user) {
-      this.firebaseHelper.getPrivacySettings(user.uid).then((snapshot) => {
-        const settings = snapshot.val();
-        // display privacy modal if there are no privacy preferences
-        if (!settings) {
-          this.privacySettings.showPrivacyDialog();
-        } else {
-          if (settings.content === true) {
-            // enable upload buttons
-            this.uploadButton.prop('disabled', false);
-            this.mobileUploadButton.prop('disabled', false);
-          }
-        }
-      });
       this.firebaseHelper.updatePublicProfile();
+      const snapshot = await this.firebaseHelper.getPrivacySettings(user.uid);
+      const settings = snapshot.val();
+      // display privacy modal if there are no privacy preferences
+      if (!settings) {
+        this.privacySettings.showPrivacyDialog();
+      } else if (settings.content === true) {
+        // enable upload buttons
+        this.uploadButton.prop('disabled', false);
+        this.mobileUploadButton.prop('disabled', false);
+      }
     }
   }
 };
