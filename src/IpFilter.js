@@ -37,8 +37,8 @@ export default class IpFilter {
    * Starts the Filter.
    */
   static filterEuCountries() {
-    // Bypass the IP filter if the special has fragment is used.
-    if (window.location.hash === '#noipfilter') {
+    // Bypass the IP filter if the special hash fragment is used or if serving on localhost.
+    if (window.location.hash === '#noipfilter' || window.location.hostname === 'localhost') {
       $('.fp-non-eu').removeClass('fp-non-eu');
       return;
     }
