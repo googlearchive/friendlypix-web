@@ -37,15 +37,15 @@ export default class Router {
     this.splashLogin = $('#login', '#page-splash');
 
     // Load the rest of the app - which is split - asynchroneously to speed up initial load.
-    const loadComponents = () => import(/* webpackPrefetch: true */ './async-loaded-components');
+    const loadComponents = import(/* webpackPrefetch: true */ './async-loaded-components');
 
     // Shortcuts to async loaded components.
-    const loadUser = (userId) => loadComponents().then(({userPage}) => userPage.loadUser(userId));
-    const searchHashtag = (hashtag) => loadComponents().then(({searchPage}) => searchPage.loadHashtag(hashtag));
-    const showHomeFeed = () => loadComponents().then(({feed}) => feed.showHomeFeed());
-    const showGeneralFeed = () => loadComponents().then(({feed}) => feed.showGeneralFeed());
-    const clearFeed = () => loadComponents().then(({feed}) => feed.clear());
-    const showPost = (postId) => loadComponents().then(({post}) => post.loadPost(postId));
+    const loadUser = (userId) => loadComponents.then(({userPage}) => userPage.loadUser(userId));
+    const searchHashtag = (hashtag) => loadComponents.then(({searchPage}) => searchPage.loadHashtag(hashtag));
+    const showHomeFeed = () => loadComponents.then(({feed}) => feed.showHomeFeed());
+    const showGeneralFeed = () => loadComponents.then(({feed}) => feed.showGeneralFeed());
+    const clearFeed = () => loadComponents.then(({feed}) => feed.clear());
+    const showPost = (postId) => loadComponents.then(({post}) => post.loadPost(postId));
 
     // Configuring middlwares.
     page(Router.setLinkAsActive);
