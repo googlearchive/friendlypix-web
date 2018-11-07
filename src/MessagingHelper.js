@@ -73,6 +73,8 @@ export default class Messaging {
    */
   requestPermission() {
     console.log('Requesting permission...');
+    // TODO: Blackout the entire screen and show a message saying why we need the permissions.
+    //       e.g. "If you would like to receive notifications on this device, grant permission above."
     this.messaging.requestPermission().then(() => {
       console.log('Notification permission granted.');
       this.saveToken();
