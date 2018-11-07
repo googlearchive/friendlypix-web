@@ -894,11 +894,14 @@ a {
   padding-right:0;
   display: block;
 }
-#fp-searchResults .fp-searchResultItem .fp-username{
+#fp-searchResults .fp-searchResultItem .fp-username {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: calc(100% - 50px);
   overflow: hidden;
+}
+.fp-searchcontainer .mdl-textfield__input {
+  border-bottom-color: #FFFFFFAA
 }
 
 /* Misc */

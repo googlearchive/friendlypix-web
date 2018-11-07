@@ -68,7 +68,7 @@ export default class Post {
         if (this.auth.currentUser) {
           page(`/user/${this.auth.currentUser.uid}`);
         } else {
-          page(`/feed`);
+          page(`/home`);
         }
       } else {
         this.fillPostData(snapshot.key, post.thumb_url || post.url, post.text, post.author,

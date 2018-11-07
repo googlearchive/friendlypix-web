@@ -198,7 +198,7 @@ export default class UserPage {
           timeout: 5000,
         };
         this.toast[0].MaterialSnackbar.showSnackbar(data);
-        page(`/feed`);
+        page(`/home`);
       }
     });
 

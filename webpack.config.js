@@ -30,7 +30,7 @@ module.exports = (env, argv) => {
 
   return {
     entry: {
-      app: './src/app-start.js',
+      app: './src/app.js',
       sw: './src/firebase-messaging-sw.js',
     },
     output: {

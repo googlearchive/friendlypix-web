@@ -15,28 +15,63 @@
  */
 'use strict';
 
-import MessagingHelper from './MessagingHelper';
-import AuthData from './AuthData';
-import Feed from './Feed';
-import Post from './Post';
-import Search from './Search';
-import SearchPage from './SearchPage';
-import Uploader from './Uploader';
-import FirebaseHelper from './FirebaseHelper';
-import PrivacySettings from './PrivacySettings';
-import UserPage from './UserPage';
+import $ from 'jquery';
+import firebase from 'firebase/app';
+import firebaseConfig from './firebase-config.json';
+import Auth from './Auth';
+import IpFilter from './IpFilter';
+import Router from './Router';
+import 'material-design-lite';
 import {Utils} from './Utils';
 
-// Load the core of the app.
-const firebaseHelper = new FirebaseHelper();
-const privacySettings = new PrivacySettings(firebaseHelper);
-const messagingHelper = new MessagingHelper(firebaseHelper);
-export const post = new Post(firebaseHelper);
-export const userPage = new UserPage(firebaseHelper, messagingHelper);
-export const feed = new Feed(firebaseHelper);
-export const searchPage = new SearchPage(firebaseHelper);
-new AuthData(firebaseHelper, privacySettings);
-new Uploader(firebaseHelper);
-new Search(firebaseHelper);
+// Styling
+import 'material-design-icons/iconfont/material-icons.css';
+import 'typeface-amaranth/index.css';
+import 'material-design-lite/material.min.css';
+import 'firebaseui/dist/firebaseui.css';
+import './app.css';
 
+/**
+ * This loads the critical path of the app to speed up first draw.
+ * The following components are initially loaded:
+ *  - IP Filter for EU countries features.
+ *  - CSS styling.
+ *  - Auth to know if the user is signed-in.
+ *  - The App's router which can display the Splash page.
+ *  - Enable Offline.
+ * 
+ * The rest of the app is loaded asynchroneously and passed to the router.
+ * Google Analytics is asynchroneously loaded.
+ */
+
+// Configure Firebase.
+firebase.initializeApp(firebaseConfig.result);
+// Make firebase reachable through the console.
+window.firebase = firebase;
+
+// Starts the IP Filter.
+IpFilter.filterEuCountries();
+
+// Load the app.
+$(document).ready(() => {
+  const auth = new Auth();
+  // Starts the router.
+  window.fpRouter = new Router(auth);
+});
+
+// Register the Service Worker that enables offline.
+if ('serviceWorker' in navigator) {
+  // Use the window load event to keep the page load performant
+  $(window).on('load', () => {
+    window.navigator.serviceWorker.register('/workbox-sw.js');
+  });
+}
+
+// Initialize Google Analytics.
+import(/* webpackPrefetch: true */ 'universal-ga').then((analytics) => {
+  analytics.initialize('UA-25993200-10');
+  analytics.pageview('/');
+});
+
+// Start the offline indicator listener.
 Utils.startOfflineListener();
