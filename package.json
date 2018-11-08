@@ -19,7 +19,7 @@
     "cssnano": "^4.0.0-rc.2",
     "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
-    "firebase-tools": "^5.1.1",
+    "firebase-tools": "^6.0.1",
     "glob-all": "^3.1.0",
     "html-critical-webpack-plugin": "^2.0.0",
     "html-loader": "^0.5.5",
@@ -41,7 +41,7 @@
   "dependencies": {
     "dialog-polyfill": "^0.4.9",
     "file-loader": "^1.1.11",
-    "firebase": "^5.5.5",
+    "firebase": "^5.5.7",
     "firebaseui": "^3.4.1",
     "jquery": "^3.3.1",
     "latinize": "^0.4.0",
