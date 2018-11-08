@@ -39,7 +39,7 @@ export default class Messaging {
       this.messaging = firebase.messaging();
     } catch(e) {
       if (e.code === 'messaging/unsupported-browser') {
-        console.warn('This BRowser does not suport FCM. Notifications won\'t be available.', e);
+        console.warn('This Browser does not suport FCM. Notifications won\'t be available.', e);
       } else {
         throw e;
       }
