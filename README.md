@@ -7,9 +7,17 @@ Friendly Pix is a place where you can share photos, follow friends, comment on p
 To see it in action, have a look at [friendly-pix.com](https://friendly-pix.com)
 
 
-## Few words on dependencies
+## Few words on technology used
 
-Friendly Pix is built using JavaScript, [Firebase](https://firebase.google.com/docs/web/setup) and jQuery. The Auth flow is using [Firebase-UI](https://github.com/firebase/firebaseui-web). Javascript Runtime dependencies as well as Build and deploy dependecies are managed using [npm](http://npmjs.com/). Also Friendly Pix is written in ES2015 using Modules so for wide browser support we pack and transpile the code to ES5 using [Webpack](https://webpack.js.org/). Additionally server-side micro-services are built on [Cloud Functions for Firebase](https://firebase.google.com/docs/functions).
+The Friendly Pix frontend is built using JavaScript, [Firebase](https://firebase.google.com/docs/web/setup) and jQuery.
+
+Friendly Pix is written in ES2017 using Modules so for wide browser support the code is packed and transpiled to ES5 using [Webpack](https://webpack.js.org/). 
+
+The Auth flow is using [Firebase-UI](https://github.com/firebase/firebaseui-web).
+
+Javascript Runtime dependencies as well as Build and deploy dependecies are managed using [npm](http://npmjs.com/). 
+
+Server-side micro-services are built on [Cloud Functions for Firebase](https://firebase.google.com/docs/functions).
 
 
 ## Create and configure your Firebase Project
@@ -20,11 +28,11 @@ Friendly Pix is built using JavaScript, [Firebase](https://firebase.google.com/d
 1. Enable **Google** as a Sign in provider in **Firebase Console > Authentication > Sign in Method** tab.
 1. In a console run `firebase use --add` and, when prompted, select the Firebase Project you have just created. This will make sure the Firebase CLI is configured to use your particular project.
 1. [Optional] To enable the automatic inapropriate image blurring, [Enable the Cloud Vision API](https://console.cloud.google.com/apis/api/vision.googleapis.com/overview?project=_) on your project and enable Billing.
-1. [Optional] To enable email notifications for flagged content, set the mailgun credentials using:
+1. [Optional] To enable email notifications for flagged content, set your Mailgun API credentials using:
     ```bash
     firebase functions:config:set mailgun.domain=friendly-pix.com mailgun.key=key-XXXXXXXXXXXXXXXX
     ```
-1. [Optional] To enable IP-based geolocation filters, [Enable the Geolocation API](https://console.cloud.google.com/apis/library/geolocation.googleapis.com/?project=_) and the [Geocoding API](https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com/?project=_)
+1. [Optional] To enable IP-based geolocation filters, [Enable the Geolocation API](https://console.cloud.google.com/apis/library/geolocation.googleapis.com/?project=_) and the [Geocoding API](https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com/?project=_) on your project.
 
 
 ## Start a local development server
@@ -41,7 +49,7 @@ Then open [http://localhost:5000](http://localhost:5000)
 
 > Note 1: On new projects, the Realtime Database and Cloud Storage come with default Security rules that prevent all read and writes. You'll need to deploy the security rules and Cloud Functions once first. For this run: `firebase deploy --only database,storage`
 
-> Note 2: Cloud Functions cannot yet be ran locally. Deploy them once first if you want these features active (such as image and text moderation). For this run: `firebase deploy --only functions`
+> Note 2: All Cloud Functions cannot yet be ran locally. Deploy them once first if you want these features active (such as image and text moderation). For this run: `firebase deploy --only functions`
 
 
 ## Deploy the app
