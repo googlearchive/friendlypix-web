@@ -35,7 +35,15 @@ export default class Messaging {
 
     // Firebase SDK
     this.auth = firebase.auth();
-    this.messaging = firebase.messaging();
+    try {
+      this.messaging = firebase.messaging();
+    } catch(e) {
+      if (e.code === 'messaging/unsupported-browser') {
+        console.warn('This BRowser does not suport FCM. Notifications won\'t be available.', e);
+      } else {
+        throw e;
+      }
+    }
 
     // DOM Elements
     this.enableNotificationsContainer = $('.fp-notifications');
@@ -47,8 +55,10 @@ export default class Messaging {
     // Event bindings
     this.enableNotificationsCheckbox.change(() => this.onEnableNotificationsChange());
     this.auth.onAuthStateChanged(() => this.trackNotificationsEnabledStatus());
-    this.messaging.onTokenRefresh(() => this.saveToken());
-    this.messaging.onMessage((payload) => this.onMessage(payload));
+    if (this.messaging) {
+      this.messaging.onTokenRefresh(() => this.saveToken());
+      this.messaging.onMessage((payload) => this.onMessage(payload));
+    }
   }
 
   /**
@@ -125,7 +135,7 @@ export default class Messaging {
         this.enableNotificationsLabel.text(data.val() ? 'Notifications Enabled' : 'Enable Notifications');
         MaterialUtils.refreshSwitchState(this.enableNotificationsContainer);
 
-        if (data.val()) {
+        if (data.val() && this.messaging) {
           this.saveToken();
         }
       });
