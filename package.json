@@ -41,7 +41,7 @@
   "dependencies": {
     "dialog-polyfill": "^0.4.9",
     "file-loader": "^1.1.11",
-    "firebase": "^5.5.7",
+    "firebase": "^5.5.8",
     "firebaseui": "^3.4.1",
     "jquery": "^3.3.1",
     "latinize": "^0.4.0",
