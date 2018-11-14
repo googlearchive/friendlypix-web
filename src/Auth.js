@@ -116,7 +116,10 @@ export default class Auth {
    * "Sign-In" button if the user isn't signed-in.
    */
   onAuthStateChanged(user) {
-    Router.reloadPage();
+    // Reload the page unless this is the first time being loaded and no signed-in user.
+    if (this._waitForAuthPromiseResolver.state() !== 'pending' || user) {
+      Router.reloadPage();
+    }
 
     this._waitForAuthPromiseResolver.resolve();
     document.body.classList.remove('fp-auth-state-unknown');
