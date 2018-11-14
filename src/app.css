@@ -982,6 +982,13 @@ a {
   max-width: 500px;
 }
 
+dialog::backdrop { /* native */
+  background-color: rgba(0,0,0,.5);;
+}
+dialog + .backdrop { /* polyfill */
+  background-color: rgba(0,0,0,.5);;
+}
+
 .fp-non-eu, .fp-eu {
   display: none !important;
 }
