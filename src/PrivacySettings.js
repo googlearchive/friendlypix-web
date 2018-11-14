@@ -56,7 +56,7 @@ export default class PrivacySettings {
    */
   showPrivacyDialog() {
     this.initializePrivacySettings();
-    if (window.dialogPolyfill) {
+    if (window.dialogPolyfill && !this.privacyDialog.get(0).showModal) {
       window.dialogPolyfill.registerDialog(this.privacyDialog.get(0));
     }
     this.privacyDialog.get(0).showModal();
