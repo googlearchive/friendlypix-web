@@ -102,6 +102,9 @@ export default class Post {
    * Displays a single comment or replace the existing one with new content.
    */
   displayComment(comment, postId, commentId, prepend = true) {
+    if ($(`#comment-${commentId}`, this.postElement).length) {
+      return;
+    }
     const newElement = this.createComment(comment.author, comment.text, postId,
         commentId, this.auth.currentUser && comment.author.uid === this.auth.currentUser.uid);
     if (prepend) {
