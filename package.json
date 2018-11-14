@@ -1,9 +1,9 @@
 {
   "scripts": {
     "clean": "rm -rf public/js public/css public/fonts public/workbox public/workbox-sw.js public/index.html src/firebase-config.json public/firebase-messaging-sw.js public/firebase-messaging-sw.js.map",
-    "build": "npm run clean; npm run createfirebaseconf && npm install && webpack -p && echo 'Done. Ready to deploy.'",
-    "serve-wds": "npm run clean; npm run createfirebaseconf && webpack-dev-server --inline",
-    "serve": "npm run clean; npm run createfirebaseconf; concurrently \"firebase serve --only hosting\" \"webpack -d --watch\"",
+    "build": "npm run clean && npm run createfirebaseconf && npm install && webpack -p && echo 'Done. Ready to deploy.'",
+    "serve-wds": "npm run clean && npm run createfirebaseconf && webpack-dev-server --inline",
+    "serve": "npm run clean && npm run createfirebaseconf && concurrently \"firebase serve --only hosting\" \"webpack -d --watch\"",
     "createfirebaseconf": "firebase setup:web --json > ./src/firebase-config.json"
   },
   "devDependencies": {
