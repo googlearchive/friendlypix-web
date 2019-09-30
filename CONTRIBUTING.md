@@ -101,7 +101,7 @@ Before you submit your pull request consider the following guidelines:
 
 * Create your patch, **including appropriate test cases**.
 * Follow our [Coding Rules](#rules).
-* Avoid checking in files that shouldn't be tracked (e.g `node_modules`, `gulp-cache`, `.tmp`, `.idea`). We recommend using a [global](#global-gitignore) gitignore for this.
+* Avoid checking in files that shouldn't be tracked (e.g `node_modules`, `.tmp`, `.idea`). We recommend using a [global](#global-gitignore) gitignore for this.
 * Make sure **not** to include a recompiled version of the files as part of your PR. We will generate these automatically.
 * Commit your changes using a descriptive commit message.
 
@@ -113,7 +113,7 @@ Before you submit your pull request consider the following guidelines:
 * Build your changes locally to ensure all the tests pass:
 
     ```shell
-   gulp
+   npm run build
     ```
 
 * Push your branch to GitHub:
