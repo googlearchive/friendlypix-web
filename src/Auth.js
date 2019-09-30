@@ -18,7 +18,7 @@
 import $ from 'jquery';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import firebaseui from 'firebaseui';
+import * as firebaseui from "firebaseui";
 import Router from './Router';
 import page from 'page';
 import {Utils} from './Utils';
